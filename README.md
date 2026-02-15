@@ -11,6 +11,7 @@ Click the preview to open the full `Demo.mp4`.
 
 ## Features
 
+- Mobile-style bottom navigation tabs: **Single**, **Playlist**, **About**
 - Dynamic format loading before download
 - Download modes:
   - Video (MP4 remux)
@@ -24,8 +25,9 @@ Click the preview to open the full `Demo.mp4`.
   - Progress bar
   - Speed and ETA
   - Current downloading playlist file name
+- Completion and error result modals after downloads
 - Download history panel
-- Single-column responsive app layout
+- Professional card-based responsive UI layout
 
 ## Requirements
 
@@ -105,13 +107,19 @@ Outputs are written to `dist/`:
 
 ### Playlist download
 
-1. Click **Open Playlist Window**.
+1. Open the **Playlist** bottom tab.
 2. Paste playlist URL.
 3. Optional: enter range (`1-5`, `1,3,7-10`).
 4. Click **Load Playlist**.
 5. Select items.
 6. Choose quality and save folder.
 7. Click **Download Selected**.
+
+### About tab
+
+1. Open the **About** bottom tab.
+2. View developer and project information.
+3. Use **Open GitHub** to open the developer profile.
 
 ## Fully Structured Folder Structure
 
@@ -128,7 +136,7 @@ StreamNest/
 │   └── app_state.py            # Shared UI state model
 ├── ui/
 │   ├── components.py           # Reusable UI components/helpers
-│   └── home_view.py            # Main screen + playlist dialog logic
+│   └── home_view.py            # Single/Playlist/About tab UI and interaction logic
 └── utils/
     ├── file_manager.py         # Directory helpers and size/speed/eta formatters
     └── validators.py           # URL and input validation helpers
@@ -153,6 +161,7 @@ StreamNest/
 
 ## Developer
 
+- Name: Sarwar Hossain
 - GitHub: [Sarwarhridoy4](https://github.com/Sarwarhridoy4)
 
 ## License

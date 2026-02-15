@@ -57,6 +57,7 @@ class HomeView:
         self.playlist_eta = ""
         self.playlist_live_status = "Idle"
         self.playlist_current_file = "-"
+        self.bottom_tab_index = 0
 
         self._build_controls()
         self._apply_theme_palette()
@@ -74,7 +75,7 @@ class HomeView:
         )
 
         self.load_formats_btn = secondary_button("Load Formats", self._on_load_formats)
-        self.open_playlist_btn = secondary_button("Open Playlist Window", self._on_open_playlist_dialog)
+        self.open_playlist_btn = secondary_button("Open Playlist Tab", self._on_open_playlist_dialog)
 
         self.quality_dropdown = ft.Dropdown(
             label="Quality",
@@ -112,7 +113,7 @@ class HomeView:
 
         self.download_btn = primary_button("Download", self._on_download)
         self.cancel_btn = secondary_button("Cancel", self._on_cancel, disabled=True)
-        self.developer_info_btn = secondary_button("Developer Info", self._on_open_developer_dialog)
+        self.developer_info_btn = secondary_button("About Developer", self._on_open_developer_dialog)
 
         self.theme_switch = ft.Switch(label="Dark theme", value=False, on_change=self._on_theme_toggle)
 
@@ -127,11 +128,16 @@ class HomeView:
 
         self.history_list = ft.ListView(spacing=6, auto_scroll=False, expand=True)
 
-        # Playlist dialog controls
-        self.playlist_url_field = ft.TextField(label="Playlist URL", hint_text="Paste playlist URL")
+        # Playlist controls
+        self.playlist_url_field = ft.TextField(
+            label="Playlist URL",
+            hint_text="Paste playlist URL",
+            expand=True,
+        )
         self.playlist_range_field = ft.TextField(
             label="Range",
             hint_text="Examples: 1-5 or 1,3,7-10 (leave empty for all)",
+            expand=True,
         )
 
         self.playlist_quality_dropdown = ft.Dropdown(
@@ -161,87 +167,14 @@ class HomeView:
         self.playlist_download_btn = primary_button("Download Selected", self._on_playlist_download)
         self.playlist_select_all_btn = ft.TextButton(content="Select all", on_click=self._on_playlist_select_all)
         self.playlist_clear_btn = ft.TextButton(content="Clear", on_click=self._on_playlist_clear)
-
-        self.playlist_dialog = ft.AlertDialog(
+        self.result_dialog = ft.AlertDialog(
             modal=True,
-            title=ft.Text("Playlist Downloader"),
-            content=ft.Container(
-                width=720,
-                content=ft.Column(
-                    controls=[
-                        self.playlist_url_field,
-                        self.playlist_range_field,
-                        ft.ResponsiveRow(
-                            controls=[
-                                ft.Container(col={"xs": 12, "sm": 6}, content=self.playlist_load_btn),
-                                ft.Container(col={"xs": 12, "sm": 6}, content=self.playlist_download_btn),
-                            ],
-                            spacing=8,
-                            run_spacing=8,
-                        ),
-                        ft.ResponsiveRow(
-                            controls=[
-                                ft.Container(col={"xs": 12, "sm": 6}, content=self.playlist_quality_dropdown),
-                                ft.Container(
-                                    col={"xs": 12, "sm": 6},
-                                    content=ft.Column(
-                                        controls=[
-                                            self.playlist_pick_dir_btn,
-                                            self.playlist_open_dir_btn,
-                                            self.playlist_save_dir_text,
-                                        ],
-                                        spacing=8,
-                                    ),
-                                ),
-                            ],
-                            spacing=8,
-                            run_spacing=8,
-                        ),
-                        self.playlist_progress_bar,
-                        self.playlist_live_status_text,
-                        status_chip("Current file", self.playlist_current_file_text),
-                        ft.ResponsiveRow(
-                            controls=[
-                                ft.Container(col={"xs": 12, "sm": 6}, content=status_chip("Speed", self.playlist_speed_text)),
-                                ft.Container(col={"xs": 12, "sm": 6}, content=status_chip("ETA", self.playlist_eta_text)),
-                            ],
-                            spacing=8,
-                            run_spacing=8,
-                        ),
-                        ft.Row(controls=[self.playlist_select_all_btn, self.playlist_clear_btn], spacing=6),
-                        ft.Text("Playlist Items", weight=ft.FontWeight.W_500),
-                        self.playlist_items_list,
-                        self.playlist_status_text,
-                    ],
-                    spacing=10,
-                    tight=True,
-                    scroll=ft.ScrollMode.AUTO,
-                ),
-            ),
-            actions=[ft.TextButton(content="Close", on_click=self._on_close_playlist_dialog)],
+            title=ft.Text("Download Status"),
+            content=ft.Text(""),
+            actions=[ft.TextButton(content="OK", on_click=self._on_close_result_dialog)],
             actions_alignment=ft.MainAxisAlignment.END,
         )
 
-        self.developer_dialog = ft.AlertDialog(
-            modal=True,
-            title=ft.Text("Developer"),
-            content=ft.Container(
-                width=460,
-                content=ft.Column(
-                    controls=[
-                        ft.Text("Name: Sarwar Hossain"),
-                        ft.Text("GitHub: https://github.com/Sarwarhridoy4", selectable=True),
-                    ],
-                    spacing=8,
-                    tight=True,
-                ),
-            ),
-            actions=[
-                ft.TextButton(content="Open GitHub", url="https://github.com/Sarwarhridoy4"),
-                ft.TextButton(content="Close", on_click=self._on_close_developer_dialog),
-            ],
-            actions_alignment=ft.MainAxisAlignment.END,
-        )
         self._apply_input_styles()
 
     def build(self) -> ft.Control:
@@ -254,6 +187,13 @@ class HomeView:
             padding=16,
             bgcolor=ft.Colors.SURFACE,
             border_radius=12,
+            border=ft.border.all(1, ft.Colors.with_opacity(0.12, ft.Colors.ON_SURFACE)),
+            shadow=ft.BoxShadow(
+                spread_radius=0,
+                blur_radius=12,
+                color=ft.Colors.with_opacity(0.08, ft.Colors.BLACK),
+                offset=ft.Offset(0, 4),
+            ),
             expand=True,
             content=ft.Column(
                 controls=[
@@ -312,6 +252,13 @@ class HomeView:
             padding=16,
             border_radius=12,
             bgcolor=ft.Colors.SURFACE_CONTAINER,
+            border=ft.border.all(1, ft.Colors.with_opacity(0.1, ft.Colors.ON_SURFACE)),
+            shadow=ft.BoxShadow(
+                spread_radius=0,
+                blur_radius=10,
+                color=ft.Colors.with_opacity(0.07, ft.Colors.BLACK),
+                offset=ft.Offset(0, 3),
+            ),
             expand=True,
             content=ft.Column(
                 controls=[
@@ -341,11 +288,132 @@ class HomeView:
             ),
         )
         self.root_container = self._build_root_container()
+        self.playlist_tab_panel = ft.Container(
+            expand=True,
+            padding=12,
+            content=ft.Column(
+                controls=[
+                    ft.Container(
+                        padding=16,
+                        border_radius=14,
+                        bgcolor=ft.Colors.SURFACE,
+                        border=ft.border.all(1, ft.Colors.with_opacity(0.12, ft.Colors.ON_SURFACE)),
+                        content=ft.Column(
+                            controls=[
+                                ft.Text("Playlist Downloader", theme_style=ft.TextThemeStyle.HEADLINE_SMALL, weight=ft.FontWeight.BOLD),
+                                ft.Text(
+                                    "Load playlist metadata, choose entries, and download selected items.",
+                                    color=ft.Colors.ON_SURFACE_VARIANT,
+                                ),
+                                self.playlist_url_field,
+                                self.playlist_range_field,
+                                ft.ResponsiveRow(
+                                    controls=[
+                                        ft.Container(col={"xs": 12, "sm": 6}, content=self.playlist_load_btn),
+                                        ft.Container(col={"xs": 12, "sm": 6}, content=self.playlist_download_btn),
+                                    ],
+                                    spacing=8,
+                                    run_spacing=8,
+                                ),
+                                ft.ResponsiveRow(
+                                    controls=[
+                                        ft.Container(col={"xs": 12, "sm": 6}, content=self.playlist_quality_dropdown),
+                                        ft.Container(
+                                            col={"xs": 12, "sm": 6},
+                                            content=ft.Column(
+                                                controls=[
+                                                    self.playlist_pick_dir_btn,
+                                                    self.playlist_open_dir_btn,
+                                                    self.playlist_save_dir_text,
+                                                ],
+                                                spacing=8,
+                                            ),
+                                        ),
+                                    ],
+                                    spacing=8,
+                                    run_spacing=8,
+                                ),
+                                self.playlist_progress_bar,
+                                self.playlist_live_status_text,
+                                status_chip("Current file", self.playlist_current_file_text),
+                                ft.ResponsiveRow(
+                                    controls=[
+                                        ft.Container(col={"xs": 12, "sm": 6}, content=status_chip("Speed", self.playlist_speed_text)),
+                                        ft.Container(col={"xs": 12, "sm": 6}, content=status_chip("ETA", self.playlist_eta_text)),
+                                    ],
+                                    spacing=8,
+                                    run_spacing=8,
+                                ),
+                                ft.Row(controls=[self.playlist_select_all_btn, self.playlist_clear_btn], spacing=6),
+                                ft.Text("Playlist Items", weight=ft.FontWeight.W_500),
+                                self.playlist_items_list,
+                                self.playlist_status_text,
+                            ],
+                            spacing=12,
+                        ),
+                    ),
+                ],
+                spacing=10,
+                expand=True,
+                scroll=ft.ScrollMode.AUTO,
+            ),
+        )
+        self.about_tab_panel = ft.Container(
+            expand=True,
+            padding=12,
+            content=ft.Column(
+                controls=[
+                    ft.Container(
+                        padding=16,
+                        border_radius=14,
+                        bgcolor=ft.Colors.SURFACE,
+                        border=ft.border.all(1, ft.Colors.with_opacity(0.12, ft.Colors.ON_SURFACE)),
+                        content=ft.Column(
+                            controls=[
+                                ft.Text("About StreamNest", theme_style=ft.TextThemeStyle.HEADLINE_SMALL, weight=ft.FontWeight.BOLD),
+                                ft.Text(
+                                    "Desktop media downloader powered by Flet and yt-dlp with single and playlist workflows.",
+                                    color=ft.Colors.ON_SURFACE_VARIANT,
+                                ),
+                                ft.Divider(height=18),
+                                ft.Text("Developer", theme_style=ft.TextThemeStyle.TITLE_MEDIUM),
+                                ft.Text("Sarwar Hossain", weight=ft.FontWeight.W_500),
+                                ft.Text("https://github.com/Sarwarhridoy4", selectable=True),
+                                ft.TextButton(content="Open GitHub", url="https://github.com/Sarwarhridoy4"),
+                                ft.Divider(height=18),
+                                ft.Text("Highlights", theme_style=ft.TextThemeStyle.TITLE_MEDIUM),
+                                ft.Text("• Single video/audio download workflow"),
+                                ft.Text("• Playlist item selection and range support"),
+                                ft.Text("• Live progress, speed, ETA, and history"),
+                            ],
+                            spacing=8,
+                        ),
+                    ),
+                ],
+                spacing=10,
+                expand=True,
+                alignment=ft.MainAxisAlignment.START,
+                scroll=ft.ScrollMode.AUTO,
+            ),
+        )
+        self.tab_host = ft.Container(expand=True, content=self.root_container)
+        self.bottom_nav = ft.NavigationBar(
+            selected_index=self.bottom_tab_index,
+            on_change=self._on_bottom_tab_change,
+            elevation=8,
+            height=72,
+            destinations=[
+                ft.NavigationBarDestination(icon=ft.Icons.DOWNLOAD, label="Single"),
+                ft.NavigationBarDestination(icon=ft.Icons.PLAYLIST_PLAY, label="Playlist"),
+                ft.NavigationBarDestination(icon=ft.Icons.INFO_OUTLINE, label="About"),
+            ],
+        )
+        self.page.navigation_bar = self.bottom_nav
         self._apply_theme_palette()
 
         return ft.SafeArea(
             expand=True,
-            content=self.root_container,
+            content=self.tab_host,
         )
 
     def _theme_is_dark(self) -> bool:
@@ -540,32 +608,60 @@ class HomeView:
         self._apply_theme_palette()
         self._page_update()
 
+    def _on_bottom_tab_change(self, event: ft.ControlEvent) -> None:
+        self.bottom_tab_index = event.control.selected_index or 0
+        self._apply_bottom_tab_selection()
+        self._page_update()
+
+    def _apply_bottom_tab_selection(self) -> None:
+        if not hasattr(self, "tab_host"):
+            return
+        if self.bottom_tab_index == 1:
+            self.tab_host.content = self.playlist_tab_panel
+        elif self.bottom_tab_index == 2:
+            self.tab_host.content = self.about_tab_panel
+        else:
+            self.tab_host.content = self.root_container
+
     def _on_open_playlist_dialog(self, _: ft.ControlEvent) -> None:
-        try:
-            self.playlist_url_field.value = self.url_field.value or self.state.url
-            self.page.show_dialog(self.playlist_dialog)
-        except Exception as exc:  # noqa: BLE001
-            self._set_status(f"Open playlist window failed: {exc}")
+        self.playlist_url_field.value = self.url_field.value or self.state.url
+        self.bottom_tab_index = 1
+        self.bottom_nav.selected_index = 1
+        self._apply_bottom_tab_selection()
+        self._page_update()
 
     def _on_close_playlist_dialog(self, _: ft.ControlEvent) -> None:
-        try:
-            self.page.pop_dialog()
-        except Exception:  # noqa: BLE001
-            self.playlist_dialog.open = False
-            self._page_update()
+        self.bottom_tab_index = 0
+        self.bottom_nav.selected_index = 0
+        self._apply_bottom_tab_selection()
+        self._page_update()
 
     def _on_open_developer_dialog(self, _: ft.ControlEvent) -> None:
-        try:
-            self.page.show_dialog(self.developer_dialog)
-        except Exception as exc:  # noqa: BLE001
-            self._set_status(f"Open developer info failed: {exc}")
+        self.bottom_tab_index = 2
+        self.bottom_nav.selected_index = 2
+        self._apply_bottom_tab_selection()
+        self._page_update()
 
     def _on_close_developer_dialog(self, _: ft.ControlEvent) -> None:
+        self.bottom_tab_index = 0
+        self.bottom_nav.selected_index = 0
+        self._apply_bottom_tab_selection()
+        self._page_update()
+
+    def _on_close_result_dialog(self, _: ft.ControlEvent) -> None:
         try:
             self.page.pop_dialog()
         except Exception:  # noqa: BLE001
-            self.developer_dialog.open = False
+            self.result_dialog.open = False
             self._page_update()
+
+    def _show_result_dialog(self, title: str, message: str) -> None:
+        self.result_dialog.title = ft.Text(title)
+        self.result_dialog.content = ft.Text(message, selectable=True)
+        try:
+            self.page.show_dialog(self.result_dialog)
+        except Exception:
+            self._show_popup(message, ft.Colors.BLUE_GREY_700)
 
     def _on_load_playlist(self, _: ft.ControlEvent) -> None:
         url = self.playlist_url_field.value.strip() if self.playlist_url_field.value else ""
@@ -808,6 +904,9 @@ class HomeView:
             self.state.append_history(f"{stamp} - {self.state.media_title or self.state.url or 'Playlist download'}")
             self._render_history()
             self._show_popup("Download completed.", ft.Colors.GREEN_700)
+            self._show_result_dialog("Download Completed", result.message)
+        else:
+            self._show_result_dialog("Download Failed", result.message)
 
         self._refresh_view()
 
@@ -823,6 +922,7 @@ class HomeView:
             self.state.status_text = f"Error: {err}"
             self.state.speed_text = ""
             self.state.eta_text = ""
+        self._show_result_dialog("Download Error", err)
         self._refresh_view()
 
     def _render_history(self) -> None:
