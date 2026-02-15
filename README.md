@@ -79,6 +79,20 @@ ffmpeg -version
 python main.py
 ```
 
+## Build Linux Packages (.deb + .AppImage)
+
+If `build/linux` already exists from a prior Flet Linux build, create both Linux deliverables:
+
+```bash
+./scripts/build_linux_packages.sh 1.0.0 amd64
+```
+
+Outputs are written to `dist/`:
+
+- `streamnest_<version>_amd64.deb`
+- `StreamNest-<version>-x86_64.AppImage`
+- `checksums-<version>.sha256`
+
 ## Usage
 
 ### Single download
