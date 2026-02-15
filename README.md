@@ -5,9 +5,9 @@ It supports a wide range of sites/providers supported by `yt-dlp`, including sin
 
 ## Demo
 
-- [Watch demo video](assets/Demo.mp4)
+[![Watch demo video](assets/Demo-preview.gif)](assets/Demo.mp4)
 
-<video src="assets/Demo.mp4" controls width="900"></video>
+Click the preview to open the full `Demo.mp4`.
 
 ## Features
 
