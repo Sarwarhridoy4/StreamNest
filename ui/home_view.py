@@ -112,6 +112,7 @@ class HomeView:
 
         self.download_btn = primary_button("Download", self._on_download)
         self.cancel_btn = secondary_button("Cancel", self._on_cancel, disabled=True)
+        self.developer_info_btn = secondary_button("Developer Info", self._on_open_developer_dialog)
 
         self.theme_switch = ft.Switch(label="Dark theme", value=False, on_change=self._on_theme_toggle)
 
@@ -220,6 +221,27 @@ class HomeView:
             actions=[ft.TextButton(content="Close", on_click=self._on_close_playlist_dialog)],
             actions_alignment=ft.MainAxisAlignment.END,
         )
+
+        self.developer_dialog = ft.AlertDialog(
+            modal=True,
+            title=ft.Text("Developer"),
+            content=ft.Container(
+                width=460,
+                content=ft.Column(
+                    controls=[
+                        ft.Text("Name: Sarwar Hossain"),
+                        ft.Text("GitHub: https://github.com/Sarwarhridoy4", selectable=True),
+                    ],
+                    spacing=8,
+                    tight=True,
+                ),
+            ),
+            actions=[
+                ft.TextButton(content="Open GitHub", url="https://github.com/Sarwarhridoy4"),
+                ft.TextButton(content="Close", on_click=self._on_close_developer_dialog),
+            ],
+            actions_alignment=ft.MainAxisAlignment.END,
+        )
         self._apply_input_styles()
 
     def build(self) -> ft.Control:
@@ -278,6 +300,7 @@ class HomeView:
                         run_spacing=8,
                     ),
                     self.theme_switch,
+                    self.developer_info_btn,
                 ],
                 spacing=14,
                 expand=True,
@@ -529,6 +552,19 @@ class HomeView:
             self.page.pop_dialog()
         except Exception:  # noqa: BLE001
             self.playlist_dialog.open = False
+            self._page_update()
+
+    def _on_open_developer_dialog(self, _: ft.ControlEvent) -> None:
+        try:
+            self.page.show_dialog(self.developer_dialog)
+        except Exception as exc:  # noqa: BLE001
+            self._set_status(f"Open developer info failed: {exc}")
+
+    def _on_close_developer_dialog(self, _: ft.ControlEvent) -> None:
+        try:
+            self.page.pop_dialog()
+        except Exception:  # noqa: BLE001
+            self.developer_dialog.open = False
             self._page_update()
 
     def _on_load_playlist(self, _: ft.ControlEvent) -> None:

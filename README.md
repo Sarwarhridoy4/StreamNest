@@ -151,6 +151,10 @@ StreamNest/
 - Confirm `ffmpeg` is available in `PATH`.
 - Verify using `ffmpeg -version`.
 
+## Developer
+
+- GitHub: [Sarwarhridoy4](https://github.com/Sarwarhridoy4)
+
 ## License
 
 This project is licensed under the MIT License. See `LICENSE`.
