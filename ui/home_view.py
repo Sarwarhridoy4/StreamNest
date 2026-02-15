@@ -600,8 +600,11 @@ class HomeView:
         except Exception as exc:  # noqa: BLE001
             self._run_ui(lambda: self._set_status(f"Format extraction failed: {exc}"))
         finally:
-            self.state.is_fetching_formats = False
-            self._run_ui(self._refresh_view)
+            def _finalize() -> None:
+                self.state.is_fetching_formats = False
+                self._refresh_view()
+
+            self._run_ui(_finalize)
 
     def _apply_quality_options(self) -> None:
         self.quality_dropdown.options = [
@@ -612,6 +615,10 @@ class HomeView:
         if self.state.selected_quality not in available_values:
             self.state.selected_quality = "best"
         self.quality_dropdown.value = self.state.selected_quality
+        try:
+            self.quality_dropdown.update()
+        except Exception:
+            self._page_update()
 
     def _apply_playlist_quality_options(self) -> None:
         self.playlist_quality_dropdown.options = [
@@ -622,6 +629,10 @@ class HomeView:
         if self.playlist_selected_quality not in available_values:
             self.playlist_selected_quality = "best"
         self.playlist_quality_dropdown.value = self.playlist_selected_quality
+        try:
+            self.playlist_quality_dropdown.update()
+        except Exception:
+            self._page_update()
 
     def _render_playlist_entries(self) -> None:
         self.playlist_items_list.controls = [
