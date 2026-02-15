@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 import os
+from pathlib import Path
 import platform
 import subprocess
 from typing import Callable
@@ -54,6 +55,7 @@ class HomeView:
         self.playlist_speed = ""
         self.playlist_eta = ""
         self.playlist_live_status = "Idle"
+        self.playlist_current_file = "-"
 
         self._build_controls()
         self._apply_quality_options()
@@ -147,6 +149,7 @@ class HomeView:
         self.playlist_status_text = ft.Text(self.playlist_status_message)
         self.playlist_progress_bar = ft.ProgressBar(value=0.0)
         self.playlist_live_status_text = ft.Text(self.playlist_live_status)
+        self.playlist_current_file_text = ft.Text(self.playlist_current_file, max_lines=1, overflow=ft.TextOverflow.ELLIPSIS)
         self.playlist_speed_text = ft.Text("-", selectable=False)
         self.playlist_eta_text = ft.Text("-", selectable=False)
         self.playlist_items_list = ft.ListView(spacing=4, auto_scroll=True, height=220)
@@ -193,6 +196,7 @@ class HomeView:
                         ),
                         self.playlist_progress_bar,
                         self.playlist_live_status_text,
+                        status_chip("Current file", self.playlist_current_file_text),
                         ft.ResponsiveRow(
                             controls=[
                                 ft.Container(col={"xs": 12, "sm": 6}, content=status_chip("Speed", self.playlist_speed_text)),
@@ -554,6 +558,7 @@ class HomeView:
         self.playlist_speed = ""
         self.playlist_eta = ""
         self.playlist_live_status = "Starting playlist download..."
+        self.playlist_current_file = "-"
 
         request = DownloadRequest(
             url=url,
@@ -665,6 +670,8 @@ class HomeView:
 
     def _handle_progress(self, info: ProgressInfo) -> None:
         if self.active_download_context == "playlist":
+            if info.filename:
+                self.playlist_current_file = Path(info.filename).name or info.filename
             self.playlist_progress = info.percent
             if info.status == "postprocessing":
                 self.playlist_live_status = "Post-processing with FFmpeg..."
@@ -695,6 +702,7 @@ class HomeView:
             self.playlist_speed = ""
             self.playlist_eta = ""
             self.playlist_live_status = result.message
+            self.playlist_current_file = "-"
             self._set_playlist_status(result.message)
         else:
             self.state.progress = 1.0 if result.success else self.state.progress
@@ -716,6 +724,7 @@ class HomeView:
             self.playlist_live_status = f"Error: {err}"
             self.playlist_speed = ""
             self.playlist_eta = ""
+            self.playlist_current_file = "-"
             self._set_playlist_status(f"Error: {err}")
         else:
             self.state.status_text = f"Error: {err}"
@@ -779,6 +788,7 @@ class HomeView:
         self.playlist_status_text.value = self.playlist_status_message
         self.playlist_progress_bar.value = self.playlist_progress
         self.playlist_live_status_text.value = self.playlist_live_status
+        self.playlist_current_file_text.value = self.playlist_current_file or "-"
         self.playlist_speed_text.value = self.playlist_speed or "-"
         self.playlist_eta_text.value = self.playlist_eta or "-"
 
