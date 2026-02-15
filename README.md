@@ -1,65 +1,54 @@
 # StreamNest
 
-A desktop media downloader built with **Flet** and **yt-dlp**.
-
-StreamNest provides a clean UI for:
-- single video/audio downloads
-- dynamic format loading
-- playlist loading with range support and item selection
-- live progress updates (progress, speed, ETA) with automatic UI refresh
+StreamNest is a desktop media downloader built with **Flet** and **yt-dlp**.
+It supports a wide range of sites/providers supported by `yt-dlp`, including single media downloads and playlist workflows.
 
 ## Features
 
-- Dynamic format loading (`Load Formats`) before download with immediate dropdown update
-- Single download modes:
-  - `Video (MP4)`
-  - `Audio (MP3)`
-- Dedicated playlist window:
-  - playlist URL input
-  - range input (examples: `1-5`, `1,3,7-10`)
-  - selectable playlist item list
-  - playlist-specific quality selector
-  - playlist-specific save folder
-- Separate progress UX:
-  - single download progress on main screen
-  - playlist download progress inside playlist window
-- Folder actions:
-  - choose save folder
-  - open selected folder directly
-- FFmpeg-aware post-processing hooks
+- Dynamic format loading before download
+- Download modes:
+  - Video (MP4 remux)
+  - Audio (MP3 extract)
+- Playlist workflow:
+  - Load playlist entries
+  - Select specific items
+  - Range input support (`1-5`, `1,3,7-10`)
+  - Playlist-specific quality and save folder
+- Live progress updates:
+  - Progress bar
+  - Speed and ETA
+  - Current downloading playlist file name
 - Download history panel
-- Single-column responsive layout for desktop and mobile
+- Single-column responsive app layout
 
-## Tech Stack
+## Requirements
 
 - Python 3.11+
-- [Flet](https://flet.dev/)
-- [yt-dlp](https://github.com/yt-dlp/yt-dlp)
-- FFmpeg (recommended/required for best post-processing)
+- FFmpeg (recommended for merge/remux/extract quality)
 
-## Project Structure
+## Installation
 
-```text
-StreamNest/
-├── main.py
-├── requirements.txt
-├── services/
-│   ├── downloader.py
-│   └── format_extractor.py
-├── state/
-│   └── app_state.py
-├── ui/
-│   ├── components.py
-│   └── home_view.py
-└── utils/
-    ├── file_manager.py
-    └── validators.py
+1. Clone the repository:
+
+```bash
+git clone git@github.com:Sarwarhridoy4/StreamNest.git
+cd StreamNest
 ```
 
-## Setup
+2. Create and activate a virtual environment:
 
-1. Clone the repository and open the project folder.
-2. Create and activate a virtual environment.
+```bash
+python -m venv .venv
+source .venv/bin/activate
+```
+
+Windows (PowerShell):
+
+```powershell
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+```
+
 3. Install dependencies:
 
 ```bash
@@ -68,11 +57,9 @@ pip install -r requirements.txt
 
 ## FFmpeg Setup
 
-FFmpeg is strongly recommended.
-
-- **Linux**: install via your package manager (`ffmpeg` package)
-- **macOS**: `brew install ffmpeg`
-- **Windows**: install FFmpeg and add it to `PATH`
+- Linux: install `ffmpeg` via your package manager
+- macOS: `brew install ffmpeg`
+- Windows: install FFmpeg and add it to `PATH`
 
 Verify:
 
@@ -80,7 +67,7 @@ Verify:
 ffmpeg -version
 ```
 
-## Run
+## How To Run
 
 ```bash
 python main.py
@@ -88,49 +75,66 @@ python main.py
 
 ## Usage
 
-### Single Video/Audio
+### Single download
 
-1. Paste a supported media URL.
+1. Paste a supported media URL (`http://` or `https://`).
 2. Click **Load Formats**.
-3. Choose mode (`Video` or `Audio`) and quality.
-4. Select save folder (optional: **Open Folder**).
+3. Select mode and quality.
+4. Choose save folder (optional).
 5. Click **Download**.
 
-### Playlist
+### Playlist download
 
 1. Click **Open Playlist Window**.
 2. Paste playlist URL.
 3. Optional: enter range (`1-5`, `1,3,7-10`).
 4. Click **Load Playlist**.
-5. Select items to download.
+5. Select items.
 6. Choose quality and save folder.
 7. Click **Download Selected**.
 
-## Notes
+## Fully Structured Folder Structure
 
-- Enter any valid `http://` or `https://` URL supported by `yt-dlp`.
-- Progress, history, speed, and ETA update automatically during downloads (no manual UI interaction needed).
-- Live speed/ETA depend on metrics provided by source/yt-dlp; fallback estimations are used when possible.
-- FFmpeg improves merge/remux/post-processing behavior and quality.
+```text
+StreamNest/
+├── main.py                     # App entry point and page bootstrapping
+├── requirements.txt            # Python dependencies
+├── README.md                   # Project documentation
+├── LICENSE                     # MIT license
+├── services/
+│   ├── downloader.py           # yt-dlp download orchestration, hooks, progress
+│   └── format_extractor.py     # Format and playlist metadata extraction
+├── state/
+│   └── app_state.py            # Shared UI state model
+├── ui/
+│   ├── components.py           # Reusable UI components/helpers
+│   └── home_view.py            # Main screen + playlist dialog logic
+└── utils/
+    ├── file_manager.py         # Directory helpers and size/speed/eta formatters
+    └── validators.py           # URL and input validation helpers
+```
 
 ## Troubleshooting
 
-### UI opens but actions do nothing
-- Ensure dependencies are installed in the active venv.
-- Check terminal logs for runtime errors.
+### Progress updates seem delayed
 
-### Speed/ETA not visible for some media
-- Some sources/streams do not expose stable throughput metrics.
-- Keep FFmpeg installed and updated.
+- Ensure dependencies are installed in the active virtual environment.
+- Check terminal logs for runtime exceptions.
 
-### Progress seems to jump near completion
-- For some formats, post-processing starts after download and can move progress quickly from high 90s to complete.
-- This is expected when FFmpeg remux/extract steps are short.
+### Speed/ETA not visible on some media
+
+- Some providers/streams do not expose stable throughput metrics.
+- Keep `yt-dlp` and FFmpeg updated.
 
 ### Post-processing errors
+
 - Confirm `ffmpeg` is available in `PATH`.
-- Verify with `ffmpeg -version`.
+- Verify using `ffmpeg -version`.
+
+## License
+
+This project is licensed under the MIT License. See `LICENSE`.
 
 ## Disclaimer
 
-This tool is for lawful use only. You are responsible for complying with platform terms of service, copyright, and local laws.
+Use this software lawfully and in compliance with platform terms, copyright, and local regulations.
