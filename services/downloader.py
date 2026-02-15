@@ -186,6 +186,13 @@ class DownloaderService:
                 eta = data.get("eta")
                 percent_hint = data.get("_percent_str")
 
+                if not isinstance(downloaded, (int, float)):
+                    downloaded = self._parse_bytes_str(data.get("_downloaded_bytes_str"))
+                if not isinstance(total, (int, float)):
+                    total = self._parse_bytes_str(
+                        data.get("_total_bytes_str") or data.get("_total_bytes_estimate_str")
+                    )
+
                 percent = 0.0
                 if isinstance(downloaded, (int, float)) and isinstance(total, (int, float)) and total > 0:
                     percent = min(max(float(downloaded) / float(total), 0.0), 1.0)
@@ -253,7 +260,7 @@ class DownloaderService:
                 on_progress(
                     ProgressInfo(
                         status="postprocessing",
-                        percent=1.0,
+                        percent=0.99,
                     )
                 )
 
@@ -261,7 +268,7 @@ class DownloaderService:
 
     @staticmethod
     def _parse_percent_str(value: str) -> float | None:
-        match = re.search(r"([0-9]+(?:\\.[0-9]+)?)\\s*%", value)
+        match = re.search(r"([0-9]+(?:\.[0-9]+)?)\s*%", value)
         if not match:
             return None
         return min(max(float(match.group(1)) / 100.0, 0.0), 1.0)
@@ -286,9 +293,37 @@ class DownloaderService:
     @staticmethod
     def _parse_speed_str(value: str) -> float | None:
         cleaned = value.strip().replace("iB", "B")
-        match = re.search(r"([0-9]+(?:\\.[0-9]+)?)\\s*([KMGTP]?B)/s", cleaned, re.IGNORECASE)
+        match = re.search(r"([0-9]+(?:\.[0-9]+)?)\s*([KMGTP]?B)/s", cleaned, re.IGNORECASE)
         if not match:
             return None
+        magnitude = float(match.group(1))
+        unit = match.group(2).upper()
+        multipliers = {
+            "B": 1.0,
+            "KB": 1024.0,
+            "MB": 1024.0**2,
+            "GB": 1024.0**3,
+            "TB": 1024.0**4,
+            "PB": 1024.0**5,
+        }
+        factor = multipliers.get(unit)
+        if factor is None:
+            return None
+        return magnitude * factor
+
+    @staticmethod
+    def _parse_bytes_str(value: Any) -> float | None:
+        if not isinstance(value, str):
+            return None
+
+        cleaned = value.strip().replace("iB", "B")
+        if not cleaned or cleaned == "N/A":
+            return None
+
+        match = re.search(r"([0-9]+(?:\.[0-9]+)?)\s*([KMGTP]?B)", cleaned, re.IGNORECASE)
+        if not match:
+            return None
+
         magnitude = float(match.group(1))
         unit = match.group(2).upper()
         multipliers = {

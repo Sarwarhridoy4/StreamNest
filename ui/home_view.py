@@ -803,7 +803,4 @@ class HomeView:
         self.page.run_task(_apply)
 
     def _page_update(self) -> None:
-        if hasattr(self.page, "schedule_update"):
-            self.page.schedule_update()
-        else:
-            self.page.update()
+        self.page.update()
