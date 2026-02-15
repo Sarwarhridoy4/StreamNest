@@ -83,11 +83,26 @@ python main.py
 
 ## Build Linux Packages (.deb + .AppImage)
 
-If `build/linux` already exists from a prior Flet Linux build, create both Linux deliverables:
+Install Linux build prerequisites first (Ubuntu/Debian):
+
+```bash
+sudo apt update
+sudo apt install clang lld-20 cmake ninja-build pkg-config libgtk-3-dev desktop-file-utils dpkg-dev
+```
+
+Also ensure `appimagetool` is installed and available in `PATH`.
+
+Then run the packaging script:
 
 ```bash
 ./scripts/build_linux_packages.sh 1.0.0 amd64
 ```
+
+What the script does:
+
+- Runs the official Flet command `flet build --yes linux` (with one automatic retry using `--clear-cache`)
+- Uses the generated Linux bundle to produce `.deb` and `.AppImage`
+- Writes package checksums
 
 Outputs are written to `dist/`:
 
@@ -158,6 +173,12 @@ StreamNest/
 
 - Confirm `ffmpeg` is available in `PATH`.
 - Verify using `ffmpeg -version`.
+
+### Linux build fails with `Failed to find any of [ld.lld, ld]`
+
+- Install the linker toolchain for LLVM 20: `sudo apt install lld-20`
+- Verify the binary exists: `/usr/lib/llvm-20/bin/ld.lld`
+- Re-run: `./scripts/build_linux_packages.sh 1.0.0 amd64`
 
 ## Developer
 

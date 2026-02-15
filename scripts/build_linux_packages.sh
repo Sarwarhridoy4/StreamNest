@@ -10,15 +10,91 @@ MAINTAINER="${MAINTAINER:-StreamNest Team <support@streamnest.app>}"
 VERSION="${1:-1.0.0}"
 ARCH="${2:-amd64}"
 
-BUILD_DIR="$ROOT_DIR/build/linux"
 ICON_BASE="$ROOT_DIR/assets/icon"
 OUT_DIR="$ROOT_DIR/dist"
+DEFAULT_LINUX_OUT="$ROOT_DIR/build/linux"
+FLET_FLUTTER_BUNDLE="$ROOT_DIR/build/flutter/build/linux/x64/release/bundle"
+FLET_BIN=""
 
-if [[ ! -x "$BUILD_DIR/$EXECUTABLE" ]]; then
-  echo "Error: $BUILD_DIR/$EXECUTABLE was not found or is not executable." >&2
-  echo "Build your Linux binary first (e.g. flet build linux)." >&2
+require_command() {
+  local cmd="$1"
+  if ! command -v "$cmd" >/dev/null 2>&1; then
+    echo "Error: required command '$cmd' is not installed or not in PATH." >&2
+    exit 1
+  fi
+}
+
+ensure_linux_linker() {
+  local llvm_bin="/usr/lib/llvm-20/bin"
+  if [[ -d "$llvm_bin" ]]; then
+    export PATH="$llvm_bin:$PATH"
+    if [[ ! -x "$llvm_bin/ld.lld" && ! -x "$llvm_bin/ld" ]]; then
+      echo "Error: Flutter Linux build requires ld.lld or ld in $llvm_bin." >&2
+      echo "Install linker tools first (Ubuntu example): sudo apt install lld-20" >&2
+      exit 1
+    fi
+  fi
+
+  if ! command -v ld.lld >/dev/null 2>&1 && ! command -v ld >/dev/null 2>&1; then
+    echo "Error: no usable linker found (ld.lld or ld)." >&2
+    exit 1
+  fi
+}
+
+run_flet_linux_build() {
+  echo "Running official build command: $FLET_BIN build --yes linux"
+  if "$FLET_BIN" build --yes --no-rich-output linux "$ROOT_DIR"; then
+    return
+  fi
+
+  echo "Initial build failed. Retrying once with --clear-cache..."
+  "$FLET_BIN" build --yes --no-rich-output --clear-cache linux "$ROOT_DIR"
+}
+
+resolve_bundle_dir() {
+  if [[ -x "$DEFAULT_LINUX_OUT/$EXECUTABLE" ]]; then
+    echo "$DEFAULT_LINUX_OUT"
+    return 0
+  fi
+
+  if [[ -x "$FLET_FLUTTER_BUNDLE/$EXECUTABLE" ]]; then
+    echo "$FLET_FLUTTER_BUNDLE"
+    return 0
+  fi
+
+  local match
+  match="$(find "$ROOT_DIR/build" -type f -name "$EXECUTABLE" -perm -111 2>/dev/null | head -n1 || true)"
+  if [[ -n "$match" ]]; then
+    dirname "$match"
+    return 0
+  fi
+
+  return 1
+}
+
+require_command dpkg-deb
+require_command desktop-file-validate
+require_command appimagetool
+
+if command -v flet >/dev/null 2>&1; then
+  FLET_BIN="flet"
+elif [[ -x "$ROOT_DIR/.venv/bin/flet" ]]; then
+  FLET_BIN="$ROOT_DIR/.venv/bin/flet"
+else
+  echo "Error: 'flet' not found in PATH and '$ROOT_DIR/.venv/bin/flet' does not exist." >&2
   exit 1
 fi
+
+ensure_linux_linker
+run_flet_linux_build
+
+if ! BUILD_DIR="$(resolve_bundle_dir)"; then
+  echo "Error: built Linux bundle not found after 'flet build --yes linux'." >&2
+  echo "Looked for executable '$EXECUTABLE' under '$ROOT_DIR/build'." >&2
+  exit 1
+fi
+
+echo "Using Linux bundle: $BUILD_DIR"
 
 if [[ ! -f "${ICON_BASE}.png" ]]; then
   echo "Error: ${ICON_BASE}.png was not found." >&2
