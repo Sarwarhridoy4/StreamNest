@@ -1,24 +1,28 @@
 <svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="bg" x1="128" y1="96" x2="896" y2="928" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#0E7490"/>
-      <stop offset="1" stop-color="#155EEF"/>
+    <linearGradient id="bg" x1="160" y1="120" x2="864" y2="904" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FF4D4D"/>
+      <stop offset="1" stop-color="#C50000"/>
     </linearGradient>
-    <linearGradient id="arrow" x1="512" y1="304" x2="512" y2="760" gradientUnits="userSpaceOnUse">
+    <linearGradient id="plate" x1="300" y1="324" x2="724" y2="700" gradientUnits="userSpaceOnUse">
       <stop stop-color="#FFFFFF"/>
-      <stop offset="1" stop-color="#D7EEFF"/>
+      <stop offset="1" stop-color="#F3F4F6"/>
     </linearGradient>
-    <filter id="shadow" x="0" y="0" width="1024" height="1024" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-      <feDropShadow dx="0" dy="24" stdDeviation="22" flood-opacity="0.25"/>
+    <filter id="softShadow" x="170" y="170" width="684" height="684" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="28" stdDeviation="24" flood-color="#3A0000" flood-opacity="0.25"/>
     </filter>
   </defs>
 
-  <rect x="72" y="72" width="880" height="880" rx="216" fill="url(#bg)"/>
-  <rect x="72" y="72" width="880" height="880" rx="216" stroke="rgba(255,255,255,0.2)" stroke-width="10"/>
+  <rect x="72" y="72" width="880" height="880" rx="220" fill="url(#bg)"/>
+  <rect x="72" y="72" width="880" height="880" rx="220" stroke="#FFFFFF" stroke-opacity="0.18" stroke-width="10"/>
 
-  <g filter="url(#shadow)">
-    <path d="M332 398C332 378 348 362 368 362H656C676 362 692 378 692 398V450H644V410H380V450H332V398Z" fill="#BAE6FD" fill-opacity="0.72"/>
-    <path d="M512 290C529 290 544 305 544 322V566L628 482C640 470 658 470 670 482C682 494 682 512 670 524L534 660C522 672 502 672 490 660L354 524C342 512 342 494 354 482C366 470 384 470 396 482L480 566V322C480 305 495 290 512 290Z" fill="url(#arrow)"/>
-    <path d="M270 668C270 642 291 621 317 621H707C733 621 754 642 754 668V718C754 744 733 765 707 765H317C291 765 270 744 270 718V668ZM332 683V703H692V683H332Z" fill="#E0F2FE"/>
+  <g filter="url(#softShadow)">
+    <rect x="248" y="248" width="528" height="528" rx="132" fill="#8E0000" fill-opacity="0.22"/>
+    <rect x="272" y="272" width="480" height="480" rx="120" fill="url(#plate)"/>
+
+    <path d="M438 436C438 414 456 396 478 396H546C568 396 586 414 586 436V520H634C651 520 665 533 665 550C665 558 662 565 656 571L533 694C521 706 502 706 490 694L367 571C355 559 355 541 367 529C373 523 381 520 389 520H438V436Z" fill="#E10600"/>
+    <rect x="352" y="706" width="320" height="56" rx="28" fill="#E10600"/>
+
+    <path d="M338 372C342 354 358 340 376 340H648C671 340 690 359 690 382V418H640V388H390V418H338V372Z" fill="#FFC8C8"/>
   </g>
 </svg>
