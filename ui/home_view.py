@@ -4,6 +4,7 @@ from datetime import datetime
 import os
 from pathlib import Path
 import platform
+import shutil
 import subprocess
 from typing import Callable
 
@@ -58,6 +59,21 @@ class HomeView:
         self.playlist_live_status = "Idle"
         self.playlist_current_file = "-"
         self.bottom_tab_index = 0
+        self.show_welcome = True
+        self._platform_theme_listener_enabled = False
+        self.ffmpeg_notice_shown = False
+        self.ffmpeg_missing = self._is_ffmpeg_missing()
+        self.ffmpeg_install_hint = self._build_ffmpeg_install_hint()
+
+        if self.ffmpeg_missing:
+            self.state.status_text = "FFmpeg not found. Install it to ensure merge/extract features work."
+            self.playlist_status_message = "FFmpeg not found. Install it for reliable playlist post-processing."
+
+        try:
+            self.page.on_platform_brightness_change = self._on_platform_brightness_change
+            self._platform_theme_listener_enabled = True
+        except Exception:
+            self._platform_theme_listener_enabled = False
 
         self._build_controls()
         self._apply_theme_palette()
@@ -110,12 +126,36 @@ class HomeView:
         self.speed_text = ft.Text("", selectable=False)
         self.eta_text = ft.Text("", selectable=False)
         self.size_text = ft.Text("", selectable=False)
+        self.ffmpeg_warning_text = ft.Text(
+            self.ffmpeg_install_hint,
+            color=ft.Colors.RED_700,
+            selectable=True,
+            visible=self.ffmpeg_missing,
+        )
+        self.welcome_ffmpeg_warning_text = ft.Text(
+            self.ffmpeg_install_hint,
+            color=ft.Colors.RED_700,
+            selectable=True,
+            text_align=ft.TextAlign.CENTER,
+            visible=self.ffmpeg_missing,
+        )
 
         self.download_btn = primary_button("Download", self._on_download)
         self.cancel_btn = secondary_button("Cancel", self._on_cancel, disabled=True)
         self.developer_info_btn = secondary_button("About Developer", self._on_open_developer_dialog)
-
-        self.theme_switch = ft.Switch(label="Dark theme", value=False, on_change=self._on_theme_toggle)
+        self.back_to_welcome_btn = ft.TextButton(
+            content="Back to Welcome",
+            on_click=self._on_back_to_welcome,
+        )
+        self.playlist_back_btn = ft.TextButton(
+            content="Back to Welcome",
+            on_click=self._on_back_to_welcome,
+        )
+        self.about_back_btn = ft.TextButton(
+            content="Back to Welcome",
+            on_click=self._on_back_to_welcome,
+        )
+        self.theme_switch = ft.Switch(label="Force dark theme", value=False, on_change=self._on_theme_toggle)
 
         self.thumbnail = ft.Image(
             src="",
@@ -184,20 +224,27 @@ class HomeView:
         )
 
         self.left_panel = ft.Container(
-            padding=16,
+            padding=22,
             bgcolor=ft.Colors.SURFACE,
-            border_radius=12,
-            border=ft.border.all(1, ft.Colors.with_opacity(0.12, ft.Colors.ON_SURFACE)),
+            border_radius=20,
+            border=ft.border.all(1, ft.Colors.with_opacity(0.24, YT_RED)),
             shadow=ft.BoxShadow(
                 spread_radius=0,
-                blur_radius=12,
-                color=ft.Colors.with_opacity(0.08, ft.Colors.BLACK),
-                offset=ft.Offset(0, 4),
+                blur_radius=24,
+                color=ft.Colors.with_opacity(0.12, ft.Colors.BLACK),
+                offset=ft.Offset(0, 10),
             ),
-            expand=True,
+            expand=False,
             content=ft.Column(
                 controls=[
+                    self.back_to_welcome_btn,
+                    ft.Row(
+                        controls=[self._brand_logo(36), ft.Text("StreamNest", weight=ft.FontWeight.BOLD, size=20)],
+                        spacing=10,
+                        vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                    ),
                     header,
+                    self.ffmpeg_warning_text,
                     labeled_control("URL", self.url_field),
                     ft.ResponsiveRow(
                         controls=[
@@ -249,17 +296,17 @@ class HomeView:
         )
 
         self.right_panel = ft.Container(
-            padding=16,
-            border_radius=12,
+            padding=22,
+            border_radius=20,
             bgcolor=ft.Colors.SURFACE_CONTAINER,
-            border=ft.border.all(1, ft.Colors.with_opacity(0.1, ft.Colors.ON_SURFACE)),
+            border=ft.border.all(1, ft.Colors.with_opacity(0.2, YT_RED)),
             shadow=ft.BoxShadow(
                 spread_radius=0,
-                blur_radius=10,
-                color=ft.Colors.with_opacity(0.07, ft.Colors.BLACK),
-                offset=ft.Offset(0, 3),
+                blur_radius=22,
+                color=ft.Colors.with_opacity(0.1, ft.Colors.BLACK),
+                offset=ft.Offset(0, 8),
             ),
-            expand=True,
+            expand=False,
             content=ft.Column(
                 controls=[
                     ft.Text("Preview", theme_style=ft.TextThemeStyle.TITLE_MEDIUM),
@@ -288,118 +335,208 @@ class HomeView:
             ),
         )
         self.root_container = self._build_root_container()
-        self.playlist_tab_panel = ft.Container(
-            expand=True,
-            padding=12,
+        self.welcome_card = ft.Container(
+            padding=36,
+            border_radius=28,
+            bgcolor=ft.Colors.SURFACE,
+            border=ft.border.all(1, ft.Colors.with_opacity(0.26, YT_RED)),
+            shadow=ft.BoxShadow(
+                spread_radius=0,
+                blur_radius=30,
+                color=ft.Colors.with_opacity(0.14, ft.Colors.BLACK),
+                offset=ft.Offset(0, 12),
+            ),
             content=ft.Column(
                 controls=[
+                    self._brand_logo(76),
+                    ft.Text(
+                        "Welcome to StreamNest",
+                        theme_style=ft.TextThemeStyle.HEADLINE_LARGE,
+                        weight=ft.FontWeight.BOLD,
+                        text_align=ft.TextAlign.CENTER,
+                    ),
+                    ft.Text(
+                        "Download videos, audio, and playlist items with a clean tabbed workflow.",
+                        color=ft.Colors.ON_SURFACE_VARIANT,
+                        text_align=ft.TextAlign.CENTER,
+                    ),
+                    self.welcome_ffmpeg_warning_text,
+                    ft.Container(height=12),
+                    primary_button("Open StreamNest", self._on_open_app_ui),
+                ],
+                spacing=12,
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+            ),
+        )
+        self.welcome_panel = ft.Container(
+            expand=True,
+            padding=28,
+            alignment=ft.Alignment(0, 0),
+            content=ft.ResponsiveRow(
+                controls=[
                     ft.Container(
-                        padding=16,
-                        border_radius=14,
-                        bgcolor=ft.Colors.SURFACE,
-                        border=ft.border.all(1, ft.Colors.with_opacity(0.12, ft.Colors.ON_SURFACE)),
-                        content=ft.Column(
-                            controls=[
-                                ft.Text("Playlist Downloader", theme_style=ft.TextThemeStyle.HEADLINE_SMALL, weight=ft.FontWeight.BOLD),
-                                ft.Text(
-                                    "Load playlist metadata, choose entries, and download selected items.",
-                                    color=ft.Colors.ON_SURFACE_VARIANT,
-                                ),
-                                self.playlist_url_field,
-                                self.playlist_range_field,
-                                ft.ResponsiveRow(
+                        col={"xs": 12, "sm": 12, "md": 11, "lg": 10, "xl": 9},
+                        content=self.welcome_card,
+                    )
+                ],
+                alignment=ft.MainAxisAlignment.CENTER,
+            ),
+        )
+        self.playlist_card = ft.Container(
+            padding=20,
+            border_radius=20,
+            bgcolor=ft.Colors.SURFACE,
+            border=ft.border.all(1, ft.Colors.with_opacity(0.2, YT_RED)),
+            shadow=ft.BoxShadow(
+                spread_radius=0,
+                blur_radius=24,
+                color=ft.Colors.with_opacity(0.1, ft.Colors.BLACK),
+                offset=ft.Offset(0, 10),
+            ),
+            content=ft.Column(
+                controls=[
+                    self.playlist_back_btn,
+                    ft.Row(
+                        controls=[self._brand_logo(34), ft.Text("StreamNest", weight=ft.FontWeight.BOLD, size=18)],
+                        spacing=10,
+                        vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                    ),
+                    ft.Text("Playlist Downloader", theme_style=ft.TextThemeStyle.HEADLINE_SMALL, weight=ft.FontWeight.BOLD),
+                    ft.Text(
+                        "Load playlist metadata, choose entries, and download selected items.",
+                        color=ft.Colors.ON_SURFACE_VARIANT,
+                    ),
+                    self.playlist_url_field,
+                    self.playlist_range_field,
+                    ft.ResponsiveRow(
+                        controls=[
+                            ft.Container(col={"xs": 12, "sm": 6}, content=self.playlist_load_btn),
+                            ft.Container(col={"xs": 12, "sm": 6}, content=self.playlist_download_btn),
+                        ],
+                        spacing=8,
+                        run_spacing=8,
+                    ),
+                    ft.ResponsiveRow(
+                        controls=[
+                            ft.Container(col={"xs": 12, "sm": 6}, content=self.playlist_quality_dropdown),
+                            ft.Container(
+                                col={"xs": 12, "sm": 6},
+                                content=ft.Column(
                                     controls=[
-                                        ft.Container(col={"xs": 12, "sm": 6}, content=self.playlist_load_btn),
-                                        ft.Container(col={"xs": 12, "sm": 6}, content=self.playlist_download_btn),
+                                        self.playlist_pick_dir_btn,
+                                        self.playlist_open_dir_btn,
+                                        self.playlist_save_dir_text,
                                     ],
                                     spacing=8,
-                                    run_spacing=8,
                                 ),
-                                ft.ResponsiveRow(
-                                    controls=[
-                                        ft.Container(col={"xs": 12, "sm": 6}, content=self.playlist_quality_dropdown),
-                                        ft.Container(
-                                            col={"xs": 12, "sm": 6},
-                                            content=ft.Column(
-                                                controls=[
-                                                    self.playlist_pick_dir_btn,
-                                                    self.playlist_open_dir_btn,
-                                                    self.playlist_save_dir_text,
-                                                ],
-                                                spacing=8,
-                                            ),
-                                        ),
-                                    ],
-                                    spacing=8,
-                                    run_spacing=8,
-                                ),
-                                self.playlist_progress_bar,
-                                self.playlist_live_status_text,
-                                status_chip("Current file", self.playlist_current_file_text),
-                                ft.ResponsiveRow(
-                                    controls=[
-                                        ft.Container(col={"xs": 12, "sm": 6}, content=status_chip("Speed", self.playlist_speed_text)),
-                                        ft.Container(col={"xs": 12, "sm": 6}, content=status_chip("ETA", self.playlist_eta_text)),
-                                    ],
-                                    spacing=8,
-                                    run_spacing=8,
-                                ),
-                                ft.Row(controls=[self.playlist_select_all_btn, self.playlist_clear_btn], spacing=6),
-                                ft.Text("Playlist Items", weight=ft.FontWeight.W_500),
-                                self.playlist_items_list,
-                                self.playlist_status_text,
-                            ],
-                            spacing=12,
-                        ),
+                            ),
+                        ],
+                        spacing=8,
+                        run_spacing=8,
+                    ),
+                    self.playlist_progress_bar,
+                    self.playlist_live_status_text,
+                    status_chip("Current file", self.playlist_current_file_text),
+                    ft.ResponsiveRow(
+                        controls=[
+                            ft.Container(col={"xs": 12, "sm": 6}, content=status_chip("Speed", self.playlist_speed_text)),
+                            ft.Container(col={"xs": 12, "sm": 6}, content=status_chip("ETA", self.playlist_eta_text)),
+                        ],
+                        spacing=8,
+                        run_spacing=8,
+                    ),
+                    ft.Row(controls=[self.playlist_select_all_btn, self.playlist_clear_btn], spacing=6),
+                    ft.Text("Playlist Items", weight=ft.FontWeight.W_500),
+                    self.playlist_items_list,
+                    self.playlist_status_text,
+                ],
+                spacing=12,
+            ),
+        )
+        self.playlist_tab_panel = ft.Container(
+            expand=True,
+            padding=16,
+            content=ft.Column(
+                controls=[
+                    ft.ResponsiveRow(
+                        controls=[
+                            ft.Container(
+                                col={"xs": 12, "sm": 11, "md": 10, "lg": 9, "xl": 8},
+                                content=self.playlist_card,
+                            )
+                        ],
+                        alignment=ft.MainAxisAlignment.CENTER,
                     ),
                 ],
                 spacing=10,
                 expand=True,
                 scroll=ft.ScrollMode.AUTO,
+            ),
+        )
+        self.about_card = ft.Container(
+            padding=20,
+            border_radius=20,
+            bgcolor=ft.Colors.SURFACE,
+            border=ft.border.all(1, ft.Colors.with_opacity(0.2, YT_RED)),
+            shadow=ft.BoxShadow(
+                spread_radius=0,
+                blur_radius=24,
+                color=ft.Colors.with_opacity(0.1, ft.Colors.BLACK),
+                offset=ft.Offset(0, 10),
+            ),
+            content=ft.Column(
+                controls=[
+                    self.about_back_btn,
+                    ft.Row(
+                        controls=[self._brand_logo(34), ft.Text("StreamNest", weight=ft.FontWeight.BOLD, size=18)],
+                        spacing=10,
+                        vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                    ),
+                    ft.Text("About StreamNest", theme_style=ft.TextThemeStyle.HEADLINE_SMALL, weight=ft.FontWeight.BOLD),
+                    ft.Text(
+                        "Desktop media downloader powered by Flet and yt-dlp with single and playlist workflows.",
+                        color=ft.Colors.ON_SURFACE_VARIANT,
+                    ),
+                    ft.Divider(height=18),
+                    ft.Text("Developer", theme_style=ft.TextThemeStyle.TITLE_MEDIUM),
+                    ft.Text("Sarwar Hossain", weight=ft.FontWeight.W_500),
+                    ft.Text("https://github.com/Sarwarhridoy4", selectable=True),
+                    ft.TextButton(content="Open GitHub", url="https://github.com/Sarwarhridoy4"),
+                    ft.Divider(height=18),
+                    ft.Text("Highlights", theme_style=ft.TextThemeStyle.TITLE_MEDIUM),
+                    ft.Text("• Single video/audio download workflow"),
+                    ft.Text("• Playlist item selection and range support"),
+                    ft.Text("• Live progress, speed, ETA, and history"),
+                ],
+                spacing=8,
             ),
         )
         self.about_tab_panel = ft.Container(
             expand=True,
-            padding=12,
+            padding=16,
             content=ft.Column(
                 controls=[
-                    ft.Container(
-                        padding=16,
-                        border_radius=14,
-                        bgcolor=ft.Colors.SURFACE,
-                        border=ft.border.all(1, ft.Colors.with_opacity(0.12, ft.Colors.ON_SURFACE)),
-                        content=ft.Column(
-                            controls=[
-                                ft.Text("About StreamNest", theme_style=ft.TextThemeStyle.HEADLINE_SMALL, weight=ft.FontWeight.BOLD),
-                                ft.Text(
-                                    "Desktop media downloader powered by Flet and yt-dlp with single and playlist workflows.",
-                                    color=ft.Colors.ON_SURFACE_VARIANT,
-                                ),
-                                ft.Divider(height=18),
-                                ft.Text("Developer", theme_style=ft.TextThemeStyle.TITLE_MEDIUM),
-                                ft.Text("Sarwar Hossain", weight=ft.FontWeight.W_500),
-                                ft.Text("https://github.com/Sarwarhridoy4", selectable=True),
-                                ft.TextButton(content="Open GitHub", url="https://github.com/Sarwarhridoy4"),
-                                ft.Divider(height=18),
-                                ft.Text("Highlights", theme_style=ft.TextThemeStyle.TITLE_MEDIUM),
-                                ft.Text("• Single video/audio download workflow"),
-                                ft.Text("• Playlist item selection and range support"),
-                                ft.Text("• Live progress, speed, ETA, and history"),
-                            ],
-                            spacing=8,
-                        ),
+                    ft.ResponsiveRow(
+                        controls=[
+                            ft.Container(
+                                col={"xs": 12, "sm": 11, "md": 10, "lg": 9, "xl": 8},
+                                content=self.about_card,
+                            )
+                        ],
+                        alignment=ft.MainAxisAlignment.CENTER,
                     ),
                 ],
                 spacing=10,
                 expand=True,
-                alignment=ft.MainAxisAlignment.START,
+                alignment=ft.MainAxisAlignment.CENTER,
                 scroll=ft.ScrollMode.AUTO,
             ),
         )
-        self.tab_host = ft.Container(expand=True, content=self.root_container)
+        self.tab_host = ft.Container(expand=True, alignment=ft.Alignment(0, 0), content=self.root_container)
         self.bottom_nav = ft.NavigationBar(
             selected_index=self.bottom_tab_index,
             on_change=self._on_bottom_tab_change,
+            visible=not self.show_welcome,
             elevation=8,
             height=72,
             destinations=[
@@ -409,6 +546,7 @@ class HomeView:
             ],
         )
         self.page.navigation_bar = self.bottom_nav
+        self._set_active_panel()
         self._apply_theme_palette()
 
         return ft.SafeArea(
@@ -417,18 +555,69 @@ class HomeView:
         )
 
     def _theme_is_dark(self) -> bool:
-        return self.page.theme_mode == ft.ThemeMode.DARK
+        if self.page.theme_mode == ft.ThemeMode.DARK:
+            return True
+        if self.page.theme_mode == ft.ThemeMode.LIGHT:
+            return False
+        return self._device_prefers_dark()
+
+    def _brand_logo(self, size: int) -> ft.Image:
+        return ft.Image(
+            src="assets/icon.png",
+            width=size,
+            height=size,
+            fit=ft.BoxFit.CONTAIN,
+        )
+
+    def _is_ffmpeg_missing(self) -> bool:
+        return shutil.which("ffmpeg") is None
+
+    def _build_ffmpeg_install_hint(self) -> str:
+        system = platform.system().lower()
+        base = "FFmpeg not found."
+        if system.startswith("linux"):
+            return f"{base} Install with your package manager, e.g. `sudo apt install ffmpeg`."
+        if system == "darwin":
+            return f"{base} Install with Homebrew: `brew install ffmpeg`."
+        if system.startswith("windows"):
+            return f"{base} Install via Winget: `winget install Gyan.FFmpeg`."
+        if system == "android":
+            return f"{base} Bundle FFmpeg with the app or include a mobile FFmpeg integration."
+        return f"{base} Install FFmpeg and ensure it is available in PATH."
+
+    def _device_prefers_dark(self) -> bool:
+        brightness = getattr(self.page, "platform_brightness", None)
+        if brightness is None:
+            return False
+        brightness_enum = getattr(ft, "Brightness", None)
+        if brightness_enum is not None and brightness == brightness_enum.DARK:
+            return True
+        if isinstance(brightness, str):
+            return brightness.lower() == "dark"
+        return False
+
+    def _on_platform_brightness_change(self, _: ft.ControlEvent) -> None:
+        if self.page.theme_mode != ft.ThemeMode.SYSTEM:
+            return
+        self._apply_theme_palette()
+        self._page_update()
 
     def _apply_theme_palette(self) -> None:
         is_dark = self._theme_is_dark()
-        self.page.bgcolor = "#0F0F0F" if is_dark else "#F9F9F9"
+        self.page.bgcolor = "#0B0B0D" if is_dark else "#FFF7F5"
         self.progress_bar.color = YT_RED
         self.playlist_progress_bar.color = YT_RED
 
         if hasattr(self, "left_panel"):
-            self.left_panel.bgcolor = "#181818" if is_dark else "#FFFFFF"
+            self.left_panel.bgcolor = "#151518" if is_dark else "#FFFFFF"
         if hasattr(self, "right_panel"):
-            self.right_panel.bgcolor = "#212121" if is_dark else "#F1F1F1"
+            self.right_panel.bgcolor = "#1D1D21" if is_dark else "#FFFDFC"
+        if hasattr(self, "welcome_card"):
+            self.welcome_card.bgcolor = "#16161A" if is_dark else "#FFFFFF"
+        if hasattr(self, "playlist_card"):
+            self.playlist_card.bgcolor = "#16161A" if is_dark else "#FFFFFF"
+        if hasattr(self, "about_card"):
+            self.about_card.bgcolor = "#16161A" if is_dark else "#FFFFFF"
         self._apply_input_styles()
 
     def _apply_input_styles(self) -> None:
@@ -467,10 +656,29 @@ class HomeView:
     def _build_root_container(self) -> ft.Container:
         return ft.Container(
             expand=True,
-            padding=12,
+            padding=16,
             content=ft.Column(
-                controls=[self.left_panel, self.right_panel],
-                spacing=10,
+                controls=[
+                    ft.ResponsiveRow(
+                        controls=[
+                            ft.Container(
+                                col={"xs": 12, "sm": 11, "md": 10, "lg": 9, "xl": 8},
+                                content=self.left_panel,
+                            )
+                        ],
+                        alignment=ft.MainAxisAlignment.CENTER,
+                    ),
+                    ft.ResponsiveRow(
+                        controls=[
+                            ft.Container(
+                                col={"xs": 12, "sm": 11, "md": 10, "lg": 9, "xl": 8},
+                                content=self.right_panel,
+                            )
+                        ],
+                        alignment=ft.MainAxisAlignment.CENTER,
+                    ),
+                ],
+                spacing=14,
                 expand=True,
                 scroll=ft.ScrollMode.AUTO,
             ),
@@ -604,13 +812,13 @@ class HomeView:
         self._set_status("Canceling download...")
 
     def _on_theme_toggle(self, _: ft.ControlEvent) -> None:
-        self.page.theme_mode = ft.ThemeMode.DARK if self.theme_switch.value else ft.ThemeMode.LIGHT
+        self.page.theme_mode = ft.ThemeMode.DARK if self.theme_switch.value else ft.ThemeMode.SYSTEM
         self._apply_theme_palette()
         self._page_update()
 
     def _on_bottom_tab_change(self, event: ft.ControlEvent) -> None:
         self.bottom_tab_index = event.control.selected_index or 0
-        self._apply_bottom_tab_selection()
+        self._set_active_panel()
         self._page_update()
 
     def _apply_bottom_tab_selection(self) -> None:
@@ -623,29 +831,56 @@ class HomeView:
         else:
             self.tab_host.content = self.root_container
 
+    def _set_active_panel(self) -> None:
+        if self.show_welcome:
+            self.tab_host.content = self.welcome_panel
+            self.bottom_nav.visible = False
+            self.page.scroll = ft.ScrollMode.HIDDEN
+            return
+        self.bottom_nav.visible = True
+        self.page.scroll = ft.ScrollMode.AUTO
+        self._apply_bottom_tab_selection()
+
+    def _on_open_app_ui(self, _: ft.ControlEvent) -> None:
+        self.show_welcome = False
+        self.bottom_tab_index = 0
+        self.bottom_nav.selected_index = 0
+        self._set_active_panel()
+        if self.ffmpeg_missing and not self.ffmpeg_notice_shown:
+            self._show_popup(self.ffmpeg_install_hint, ft.Colors.RED_700)
+            self.ffmpeg_notice_shown = True
+        self._page_update()
+
+    def _on_back_to_welcome(self, _: ft.ControlEvent) -> None:
+        self.show_welcome = True
+        self.bottom_tab_index = 0
+        self.bottom_nav.selected_index = 0
+        self._set_active_panel()
+        self._page_update()
+
     def _on_open_playlist_dialog(self, _: ft.ControlEvent) -> None:
         self.playlist_url_field.value = self.url_field.value or self.state.url
         self.bottom_tab_index = 1
         self.bottom_nav.selected_index = 1
-        self._apply_bottom_tab_selection()
+        self._set_active_panel()
         self._page_update()
 
     def _on_close_playlist_dialog(self, _: ft.ControlEvent) -> None:
         self.bottom_tab_index = 0
         self.bottom_nav.selected_index = 0
-        self._apply_bottom_tab_selection()
+        self._set_active_panel()
         self._page_update()
 
     def _on_open_developer_dialog(self, _: ft.ControlEvent) -> None:
         self.bottom_tab_index = 2
         self.bottom_nav.selected_index = 2
-        self._apply_bottom_tab_selection()
+        self._set_active_panel()
         self._page_update()
 
     def _on_close_developer_dialog(self, _: ft.ControlEvent) -> None:
         self.bottom_tab_index = 0
         self.bottom_nav.selected_index = 0
-        self._apply_bottom_tab_selection()
+        self._set_active_panel()
         self._page_update()
 
     def _on_close_result_dialog(self, _: ft.ControlEvent) -> None:

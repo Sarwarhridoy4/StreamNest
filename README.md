@@ -11,7 +11,16 @@ Click the preview to open the full `Demo.mp4`.
 
 ## Features
 
+- Welcome screen entry with one-click launch into the tabbed UI
+- Welcome parent card is centered in the viewport
+- `Back to Welcome` action available from Single, Playlist, and About cards
+- Official app icon (Material-style red play-circle) is used across Welcome, Single, Playlist, and About cards
 - Mobile-style bottom navigation tabs: **Single**, **Playlist**, **About**
+- Device-theme aware styling:
+  - Uses your system/device theme by default
+  - Live palette updates when platform brightness changes (when supported)
+  - Optional `Force dark theme` toggle in the Single tab
+- Startup FFmpeg detection with OS-specific install guidance in UI
 - Dynamic format loading before download
 - Download modes:
   - Video (MP4 remux)
@@ -135,6 +144,14 @@ Outputs are written to `dist/`:
 1. Open the **About** bottom tab.
 2. View developer and project information.
 3. Use **Open GitHub** to open the developer profile.
+
+### Welcome and theme behavior
+
+1. App starts on the **Welcome** screen.
+2. Click **Open StreamNest** to enter the tabbed app UI.
+3. Use **Back to Welcome** from app cards to return to the welcome screen.
+4. Theme follows your device/system setting automatically by default.
+5. In Single tab, enable **Force dark theme** to override system theme.
 
 ## Fully Structured Folder Structure
 

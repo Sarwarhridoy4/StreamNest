@@ -12,7 +12,7 @@ def main(page: ft.Page) -> None:
         page.title = "StreamNest Media Downloader"
         page.theme = ft.Theme(color_scheme_seed="#FF0000")
         page.dark_theme = ft.Theme(color_scheme_seed="#FF0000")
-        page.theme_mode = ft.ThemeMode.LIGHT
+        page.theme_mode = ft.ThemeMode.SYSTEM
         page.padding = 0
         page.window.min_width = 360
         page.window.min_height = 640
