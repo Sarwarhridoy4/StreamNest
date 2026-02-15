@@ -18,6 +18,7 @@ from services.format_extractor import (
 )
 from state.app_state import AppState
 from ui.components import (
+    YT_RED,
     build_header,
     labeled_control,
     primary_button,
@@ -58,6 +59,7 @@ class HomeView:
         self.playlist_current_file = "-"
 
         self._build_controls()
+        self._apply_theme_palette()
         self._apply_quality_options()
         self._apply_playlist_quality_options()
         self._refresh_view()
@@ -218,6 +220,7 @@ class HomeView:
             actions=[ft.TextButton(content="Close", on_click=self._on_close_playlist_dialog)],
             actions_alignment=ft.MainAxisAlignment.END,
         )
+        self._apply_input_styles()
 
     def build(self) -> ft.Control:
         header = build_header(
@@ -225,7 +228,7 @@ class HomeView:
             "Load formats dynamically, then download video/audio or selected playlist items.",
         )
 
-        left_panel = ft.Container(
+        self.left_panel = ft.Container(
             padding=16,
             bgcolor=ft.Colors.SURFACE,
             border_radius=12,
@@ -282,7 +285,7 @@ class HomeView:
             ),
         )
 
-        right_panel = ft.Container(
+        self.right_panel = ft.Container(
             padding=16,
             border_radius=12,
             bgcolor=ft.Colors.SURFACE_CONTAINER,
@@ -314,18 +317,71 @@ class HomeView:
                 expand=True,
             ),
         )
+        self.root_container = self._build_root_container()
+        self._apply_theme_palette()
 
         return ft.SafeArea(
             expand=True,
-            content=ft.Container(
+            content=self.root_container,
+        )
+
+    def _theme_is_dark(self) -> bool:
+        return self.page.theme_mode == ft.ThemeMode.DARK
+
+    def _apply_theme_palette(self) -> None:
+        is_dark = self._theme_is_dark()
+        self.page.bgcolor = "#0F0F0F" if is_dark else "#F9F9F9"
+        self.progress_bar.color = YT_RED
+        self.playlist_progress_bar.color = YT_RED
+
+        if hasattr(self, "left_panel"):
+            self.left_panel.bgcolor = "#181818" if is_dark else "#FFFFFF"
+        if hasattr(self, "right_panel"):
+            self.right_panel.bgcolor = "#212121" if is_dark else "#F1F1F1"
+        self._apply_input_styles()
+
+    def _apply_input_styles(self) -> None:
+        is_dark = self._theme_is_dark()
+        fill = "#202020" if is_dark else "#FFFFFF"
+        border = ft.Colors.with_opacity(0.35, YT_RED)
+        focused_border = YT_RED
+        inputs = [
+            self.url_field,
+            self.playlist_url_field,
+            self.playlist_range_field,
+        ]
+        dropdowns = [
+            self.quality_dropdown,
+            self.playlist_quality_dropdown,
+        ]
+
+        for control in inputs:
+            control.filled = True
+            control.fill_color = fill
+            control.border_radius = 14
+            control.content_padding = ft.padding.symmetric(horizontal=14, vertical=12)
+            control.border_color = border
+            control.focused_border_color = focused_border
+            control.focused_border_width = 2
+
+        for control in dropdowns:
+            control.filled = True
+            control.fill_color = fill
+            control.border_radius = 14
+            control.content_padding = ft.padding.symmetric(horizontal=14, vertical=12)
+            control.border_color = border
+            control.focused_border_color = focused_border
+            control.focused_border_width = 2
+
+    def _build_root_container(self) -> ft.Container:
+        return ft.Container(
+            expand=True,
+            padding=12,
+            content=ft.Column(
+                controls=[self.left_panel, self.right_panel],
+                spacing=10,
                 expand=True,
-                padding=12,
-                content=ft.Column(
-                    controls=[left_panel, right_panel],
-                    spacing=10,
-                    expand=True,
-                    scroll=ft.ScrollMode.AUTO,
-                ),
+                scroll=ft.ScrollMode.AUTO,
             ),
         )
 
@@ -458,6 +514,7 @@ class HomeView:
 
     def _on_theme_toggle(self, _: ft.ControlEvent) -> None:
         self.page.theme_mode = ft.ThemeMode.DARK if self.theme_switch.value else ft.ThemeMode.LIGHT
+        self._apply_theme_palette()
         self._page_update()
 
     def _on_open_playlist_dialog(self, _: ft.ControlEvent) -> None:

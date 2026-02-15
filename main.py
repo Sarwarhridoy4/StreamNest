@@ -9,7 +9,9 @@ from ui.home_view import HomeView
 
 def main(page: ft.Page) -> None:
     try:
-        page.title = "StreamNest YouTube Downloader"
+        page.title = "StreamNest Media Downloader"
+        page.theme = ft.Theme(color_scheme_seed="#FF0000")
+        page.dark_theme = ft.Theme(color_scheme_seed="#FF0000")
         page.theme_mode = ft.ThemeMode.LIGHT
         page.padding = 0
         page.window.min_width = 360
