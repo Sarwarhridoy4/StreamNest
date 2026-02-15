@@ -222,10 +222,10 @@ class HomeView:
         )
 
         left_panel = ft.Container(
-            col={"xs": 12, "md": 8},
             padding=16,
             bgcolor=ft.Colors.SURFACE,
             border_radius=12,
+            expand=True,
             content=ft.Column(
                 controls=[
                     header,
@@ -279,18 +279,32 @@ class HomeView:
         )
 
         right_panel = ft.Container(
-            col={"xs": 12, "md": 4},
             padding=16,
             border_radius=12,
             bgcolor=ft.Colors.SURFACE_CONTAINER,
+            expand=True,
             content=ft.Column(
                 controls=[
                     ft.Text("Preview", theme_style=ft.TextThemeStyle.TITLE_MEDIUM),
-                    ft.Container(content=self.thumbnail, height=180, border_radius=12, clip_behavior=ft.ClipBehavior.HARD_EDGE),
+                    ft.Container(
+                        content=self.thumbnail,
+                        height=180,
+                        border_radius=12,
+                        clip_behavior=ft.ClipBehavior.HARD_EDGE,
+                    ),
                     self.title_text,
                     ft.Divider(),
-                    ft.Text("History", theme_style=ft.TextThemeStyle.TITLE_MEDIUM),
-                    self.history_list,
+                    ft.Container(
+                        expand=True,
+                        content=ft.Column(
+                            controls=[
+                                ft.Text("History", theme_style=ft.TextThemeStyle.TITLE_MEDIUM),
+                                self.history_list,
+                            ],
+                            spacing=8,
+                            expand=True,
+                        ),
+                    ),
                 ],
                 spacing=10,
                 expand=True,
@@ -298,12 +312,15 @@ class HomeView:
         )
 
         return ft.SafeArea(
+            expand=True,
             content=ft.Container(
+                expand=True,
                 padding=12,
-                content=ft.ResponsiveRow(
+                content=ft.Column(
                     controls=[left_panel, right_panel],
-                    run_spacing=10,
                     spacing=10,
+                    expand=True,
+                    scroll=ft.ScrollMode.AUTO,
                 ),
             ),
         )
