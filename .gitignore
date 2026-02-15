@@ -44,3 +44,6 @@ Thumbs.db
 
 # Flet runtime/cache
 .flet/
+
+# Local toolchain shims
+.toolchain-bin/
