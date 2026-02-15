@@ -6,11 +6,11 @@ StreamNest provides a clean UI for:
 - single video/audio downloads
 - dynamic format loading
 - playlist loading with range support and item selection
-- live progress updates (progress, speed, ETA)
+- live progress updates (progress, speed, ETA) with automatic UI refresh
 
 ## Features
 
-- Dynamic format loading (`Load Formats`) before download
+- Dynamic format loading (`Load Formats`) before download with immediate dropdown update
 - Single download modes:
   - `Video (MP4)`
   - `Audio (MP3)`
@@ -28,7 +28,7 @@ StreamNest provides a clean UI for:
   - open selected folder directly
 - FFmpeg-aware post-processing hooks
 - Download history panel
-- Mobile-responsive layout within Flet window
+- Single-column responsive layout for desktop and mobile
 
 ## Tech Stack
 
@@ -109,6 +109,7 @@ python main.py
 ## Notes
 
 - Only YouTube URLs are accepted.
+- Progress, history, speed, and ETA update automatically during downloads (no manual UI interaction needed).
 - Live speed/ETA depend on metrics provided by source/yt-dlp; fallback estimations are used when possible.
 - FFmpeg improves merge/remux/post-processing behavior and quality.
 
@@ -121,6 +122,10 @@ python main.py
 ### Speed/ETA not visible for some media
 - Some sources/streams do not expose stable throughput metrics.
 - Keep FFmpeg installed and updated.
+
+### Progress seems to jump near completion
+- For some formats, post-processing starts after download and can move progress quickly from high 90s to complete.
+- This is expected when FFmpeg remux/extract steps are short.
 
 ### Post-processing errors
 - Confirm `ffmpeg` is available in `PATH`.
