@@ -24,7 +24,7 @@ from ui.components import (
     status_chip,
 )
 from utils.file_manager import ensure_download_directory, format_bytes, format_eta, format_speed
-from utils.validators import is_valid_url, is_youtube_url
+from utils.validators import is_valid_url
 
 
 class HomeView:
@@ -62,8 +62,8 @@ class HomeView:
 
     def _build_controls(self) -> None:
         self.url_field = ft.TextField(
-            label="YouTube URL",
-            hint_text="Paste video URL",
+            label="Media URL",
+            hint_text="Paste video/audio URL",
             on_submit=self._on_url_commit,
             on_blur=self._on_url_commit,
             expand=True,
@@ -123,7 +123,7 @@ class HomeView:
         self.history_list = ft.ListView(spacing=6, auto_scroll=False, expand=True)
 
         # Playlist dialog controls
-        self.playlist_url_field = ft.TextField(label="Playlist URL", hint_text="Paste YouTube playlist URL")
+        self.playlist_url_field = ft.TextField(label="Playlist URL", hint_text="Paste playlist URL")
         self.playlist_range_field = ft.TextField(
             label="Range",
             hint_text="Examples: 1-5 or 1,3,7-10 (leave empty for all)",
@@ -334,9 +334,6 @@ class HomeView:
             if not is_valid_url(self.state.url):
                 self._set_status("Invalid URL. Please enter a valid link.")
                 return
-            if not is_youtube_url(self.state.url):
-                self._set_status("Only YouTube URLs are supported.")
-                return
             self._show_popup("Loading formats...", ft.Colors.BLUE_700)
             self._fetch_formats()
         except Exception as exc:  # noqa: BLE001
@@ -416,10 +413,6 @@ class HomeView:
             self._set_status("Invalid URL. Please enter a valid link.")
             return
 
-        if not is_youtube_url(self.state.url):
-            self._set_status("Only YouTube URLs are supported.")
-            return
-
         if self.downloader.is_busy():
             self._set_status("A download is already running.")
             return
@@ -485,10 +478,6 @@ class HomeView:
             self._set_playlist_status("Invalid playlist URL.")
             return
 
-        if not is_youtube_url(url):
-            self._set_playlist_status("Only YouTube URLs are supported.")
-            return
-
         self._set_playlist_status("Loading playlist and formats...")
         self._show_popup("Loading playlist...", ft.Colors.BLUE_700)
         self.page.run_thread(self._load_playlist_worker, url, range_expr)
@@ -544,7 +533,7 @@ class HomeView:
             return
 
         url = self.playlist_url_field.value.strip() if self.playlist_url_field.value else ""
-        if not is_valid_url(url) or not is_youtube_url(url):
+        if not is_valid_url(url):
             self._set_playlist_status("Invalid playlist URL.")
             return
 

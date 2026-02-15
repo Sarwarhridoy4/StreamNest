@@ -1,6 +1,6 @@
 # StreamNest
 
-A desktop YouTube downloader built with **Flet** and **yt-dlp**.
+A desktop media downloader built with **Flet** and **yt-dlp**.
 
 StreamNest provides a clean UI for:
 - single video/audio downloads
@@ -90,7 +90,7 @@ python main.py
 
 ### Single Video/Audio
 
-1. Paste a YouTube URL.
+1. Paste a supported media URL.
 2. Click **Load Formats**.
 3. Choose mode (`Video` or `Audio`) and quality.
 4. Select save folder (optional: **Open Folder**).
@@ -108,7 +108,7 @@ python main.py
 
 ## Notes
 
-- Only YouTube URLs are accepted.
+- Enter any valid `http://` or `https://` URL supported by `yt-dlp`.
 - Progress, history, speed, and ETA update automatically during downloads (no manual UI interaction needed).
 - Live speed/ETA depend on metrics provided by source/yt-dlp; fallback estimations are used when possible.
 - FFmpeg improves merge/remux/post-processing behavior and quality.
@@ -133,4 +133,4 @@ python main.py
 
 ## Disclaimer
 
-This tool is for lawful use only. You are responsible for complying with YouTube terms of service, copyright, and local laws.
+This tool is for lawful use only. You are responsible for complying with platform terms of service, copyright, and local laws.
