@@ -7,20 +7,265 @@ PACKAGE_NAME="streamnest"
 EXECUTABLE="streamnest"
 DESCRIPTION="Desktop media downloader built with Flet and yt-dlp"
 MAINTAINER="${MAINTAINER:-StreamNest Team <support@streamnest.app>}"
-VERSION="${1:-1.0.0}"
-ARCH="${2:-amd64}"
+VERSION="1.0.0"
+ARCH="amd64"
+VERBOSE=0
 
 ICON_BASE="$ROOT_DIR/assets/icon"
 OUT_DIR="$ROOT_DIR/dist"
 DEFAULT_LINUX_OUT="$ROOT_DIR/build/linux"
 FLET_FLUTTER_BUNDLE="$ROOT_DIR/build/flutter/build/linux/x64/release/bundle"
+BUILD_LOG="$ROOT_DIR/build/flet-build.log"
 FLET_BIN=""
+PYTHON_BIN=""
+PIP_BIN=""
+WORK_DIR=""
+ICON_BACKUP=""
+
+C_RESET=""
+C_BOLD=""
+C_DIM=""
+C_CYAN=""
+C_BLUE=""
+C_GREEN=""
+C_YELLOW=""
+C_RED=""
+
+usage() {
+  cat <<USAGE
+Usage: ./scripts/build_linux_packages.sh [version] [arch] [--verbose|-v]
+
+Arguments:
+  version   Package version (default: 1.0.0)
+  arch      Target architecture: amd64 | arm64 (default: amd64)
+  -v, --verbose   Stream full command output instead of compact mode
+USAGE
+}
+
+parse_args() {
+  local positional=()
+  local arg
+  for arg in "$@"; do
+    case "$arg" in
+      -v|--verbose)
+        VERBOSE=1
+        ;;
+      -h|--help)
+        usage
+        exit 0
+        ;;
+      *)
+        positional+=("$arg")
+        ;;
+    esac
+  done
+
+  if [[ "${#positional[@]}" -gt 2 ]]; then
+    log_error "Too many positional arguments."
+    usage
+    exit 1
+  fi
+
+  if [[ "${#positional[@]}" -ge 1 ]]; then
+    VERSION="${positional[0]}"
+  fi
+
+  if [[ "${#positional[@]}" -ge 2 ]]; then
+    ARCH="${positional[1]}"
+  fi
+}
+
+have_command() {
+  command -v "$1" >/dev/null 2>&1
+}
+
+setup_colors() {
+  if [[ -t 1 ]] && have_command tput && [[ "$(tput colors 2>/dev/null || echo 0)" -ge 8 ]]; then
+    C_RESET="$(tput sgr0)"
+    C_BOLD="$(tput bold)"
+    C_DIM="$(tput dim)"
+    C_CYAN="$(tput setaf 6)"
+    C_BLUE="$(tput setaf 4)"
+    C_GREEN="$(tput setaf 2)"
+    C_YELLOW="$(tput setaf 3)"
+    C_RED="$(tput setaf 1)"
+  fi
+}
+
+log_header() {
+  printf "%b\n" "${C_BOLD}${C_CYAN}==> $*${C_RESET}"
+}
+
+log_step() {
+  printf "%b\n" "${C_BLUE}[..]${C_RESET} $*"
+}
+
+log_ok() {
+  printf "%b\n" "${C_GREEN}[OK]${C_RESET} $*"
+}
+
+log_warn() {
+  printf "%b\n" "${C_YELLOW}[!!]${C_RESET} $*"
+}
+
+log_error() {
+  printf "%b\n" "${C_RED}[ER]${C_RESET} $*" >&2
+}
+
+show_banner() {
+  printf "%b\n" "${C_BOLD}${C_CYAN}============================================================${C_RESET}"
+  printf "%b\n" "${C_BOLD}${C_CYAN}  StreamNest Linux Package Builder${C_RESET}"
+  printf "%b\n" "${C_DIM}  version=${VERSION}  arch=${ARCH}  verbose=${VERBOSE}${C_RESET}"
+  printf "%b\n" "${C_BOLD}${C_CYAN}============================================================${C_RESET}"
+}
 
 require_command() {
   local cmd="$1"
   if ! command -v "$cmd" >/dev/null 2>&1; then
-    echo "Error: required command '$cmd' is not installed or not in PATH." >&2
+    log_error "Required command '$cmd' is not installed or not in PATH."
     exit 1
+  fi
+}
+
+cleanup() {
+  if [[ -n "$WORK_DIR" && -d "$WORK_DIR" ]]; then
+    rm -rf "$WORK_DIR"
+  fi
+
+  if [[ -n "$ICON_BACKUP" && -f "$ICON_BACKUP" ]]; then
+    mv -f "$ICON_BACKUP" "${ICON_BASE}.png"
+  fi
+}
+
+run_with_optional_sudo() {
+  if [[ "$(id -u)" -eq 0 ]]; then
+    "$@"
+  elif have_command sudo; then
+    sudo "$@"
+  else
+    log_error "Need root privileges to install system dependencies, but 'sudo' is not available."
+    return 1
+  fi
+}
+
+install_apt_packages() {
+  local packages=("$@")
+  if [[ "${#packages[@]}" -eq 0 ]]; then
+    log_ok "System dependencies already satisfied."
+    return 0
+  fi
+
+  if ! have_command apt-get; then
+    log_error "Missing required system packages and apt-get is unavailable."
+    log_error "Install manually: ${packages[*]}"
+    exit 1
+  fi
+
+  log_header "Installing system dependencies"
+  log_step "Missing packages: ${packages[*]}"
+  if [[ "$VERBOSE" -eq 1 ]]; then
+    run_with_optional_sudo apt-get update
+    run_with_optional_sudo apt-get install -y "${packages[@]}"
+  else
+    run_with_optional_sudo apt-get update -qq
+    run_with_optional_sudo apt-get install -y -qq "${packages[@]}"
+  fi
+  log_ok "System dependencies installed."
+}
+
+ensure_python_tools() {
+  if [[ -x "$ROOT_DIR/.venv/bin/python" ]]; then
+    PYTHON_BIN="$ROOT_DIR/.venv/bin/python"
+  elif have_command python3; then
+    PYTHON_BIN="python3"
+  elif have_command python; then
+    PYTHON_BIN="python"
+  else
+    log_error "Python is required but not found (python3/python)."
+    exit 1
+  fi
+
+  if [[ -x "$ROOT_DIR/.venv/bin/pip" ]]; then
+    PIP_BIN="$ROOT_DIR/.venv/bin/pip"
+  elif "$PYTHON_BIN" -m pip --version >/dev/null 2>&1; then
+    PIP_BIN="$PYTHON_BIN -m pip"
+  else
+    log_error "pip is required but not available for '$PYTHON_BIN'."
+    exit 1
+  fi
+}
+
+ensure_python_requirements() {
+  ensure_python_tools
+
+  if [[ ! -f "$ROOT_DIR/requirements.txt" ]]; then
+    log_warn "requirements.txt not found; skipping Python dependency installation."
+    return 0
+  fi
+
+  log_header "Validating Python dependencies"
+  if [[ "$VERBOSE" -eq 1 ]]; then
+    # shellcheck disable=SC2086
+    $PIP_BIN install --disable-pip-version-check -r "$ROOT_DIR/requirements.txt"
+  else
+    # shellcheck disable=SC2086
+    $PIP_BIN install --quiet --disable-pip-version-check -r "$ROOT_DIR/requirements.txt"
+  fi
+  log_ok "Python dependencies are ready."
+}
+
+ensure_system_requirements() {
+  local missing_packages=()
+
+  have_command clang || missing_packages+=("clang")
+  have_command cmake || missing_packages+=("cmake")
+  have_command ninja || have_command ninja-build || missing_packages+=("ninja-build")
+  have_command pkg-config || missing_packages+=("pkg-config")
+  have_command desktop-file-validate || missing_packages+=("desktop-file-utils")
+  have_command dpkg-deb || missing_packages+=("dpkg-dev")
+  have_command appimagetool || missing_packages+=("appimagetool")
+  have_command convert || missing_packages+=("imagemagick")
+
+  if ! have_command ld.lld && ! have_command ld; then
+    missing_packages+=("lld-20")
+  fi
+
+  # Deduplicate while preserving order.
+  local deduped=()
+  local seen=""
+  local pkg
+  for pkg in "${missing_packages[@]}"; do
+    if [[ " $seen " != *" $pkg "* ]]; then
+      deduped+=("$pkg")
+      seen+=" $pkg"
+    fi
+  done
+
+  install_apt_packages "${deduped[@]}"
+}
+
+prepare_launcher_icon() {
+  local icon_file="${ICON_BASE}.png"
+  if [[ ! -f "$icon_file" ]]; then
+    return 0
+  fi
+
+  if ! have_command convert; then
+    log_warn "ImageMagick 'convert' not found; skipping icon normalization."
+    return 0
+  fi
+
+  local icon_type
+  icon_type="$(identify -format '%[type]' "$icon_file" 2>/dev/null || true)"
+
+  # flutter_launcher_icons can fail on some palette PNGs; force truecolor RGBA.
+  if [[ "$icon_type" == Palette* ]]; then
+    ICON_BACKUP="$(mktemp)"
+    cp "$icon_file" "$ICON_BACKUP"
+    convert "$icon_file" -alpha on -colorspace sRGB PNG32:"$icon_file"
+    log_ok "Normalized launcher icon to PNG32 for stable icon generation."
+  else
+    log_step "Launcher icon format already compatible (${icon_type:-unknown})."
   fi
 }
 
@@ -29,26 +274,57 @@ ensure_linux_linker() {
   if [[ -d "$llvm_bin" ]]; then
     export PATH="$llvm_bin:$PATH"
     if [[ ! -x "$llvm_bin/ld.lld" && ! -x "$llvm_bin/ld" ]]; then
-      echo "Error: Flutter Linux build requires ld.lld or ld in $llvm_bin." >&2
-      echo "Install linker tools first (Ubuntu example): sudo apt install lld-20" >&2
+      log_error "Flutter Linux build requires ld.lld or ld in $llvm_bin."
+      log_error "Install linker tools first (Ubuntu example): sudo apt install lld-20"
       exit 1
     fi
   fi
 
   if ! command -v ld.lld >/dev/null 2>&1 && ! command -v ld >/dev/null 2>&1; then
-    echo "Error: no usable linker found (ld.lld or ld)." >&2
+    log_error "No usable linker found (ld.lld or ld)."
     exit 1
   fi
+
+  log_ok "Linker check passed."
 }
 
 run_flet_linux_build() {
-  echo "Running official build command: $FLET_BIN build --yes linux"
-  if "$FLET_BIN" build --yes --no-rich-output linux "$ROOT_DIR"; then
-    return
-  fi
+  mkdir -p "$(dirname "$BUILD_LOG")"
+  : > "$BUILD_LOG"
 
-  echo "Initial build failed. Retrying once with --clear-cache..."
-  "$FLET_BIN" build --yes --no-rich-output --clear-cache linux "$ROOT_DIR"
+  log_header "Running Flet build"
+  log_step "Command: $FLET_BIN build --yes linux $ROOT_DIR"
+  log_step "Build log: $BUILD_LOG"
+  if [[ "$VERBOSE" -eq 1 ]]; then
+    if "$FLET_BIN" build --yes --no-rich-output linux "$ROOT_DIR" 2>&1 | tee "$BUILD_LOG"; then
+      log_ok "Flet Linux build completed."
+      return
+    fi
+
+    log_warn "Initial build failed. Retrying once with --clear-cache..."
+    {
+      echo "----- retry with --clear-cache -----"
+      "$FLET_BIN" build --yes --no-rich-output --clear-cache linux "$ROOT_DIR"
+    } 2>&1 | tee -a "$BUILD_LOG" || exit 1
+    log_ok "Flet Linux build completed on retry."
+  else
+    if "$FLET_BIN" build --yes --no-rich-output linux "$ROOT_DIR" >"$BUILD_LOG" 2>&1; then
+      log_ok "Flet Linux build completed."
+      return
+    fi
+
+    log_warn "Initial build failed. Retrying once with --clear-cache..."
+    {
+      echo "----- retry with --clear-cache -----"
+      "$FLET_BIN" build --yes --no-rich-output --clear-cache linux "$ROOT_DIR"
+    } >>"$BUILD_LOG" 2>&1 || {
+      log_error "Flet build failed. Last 60 log lines:"
+      tail -n 60 "$BUILD_LOG" | sed 's/^/  | /' >&2
+      exit 1
+    }
+
+    log_ok "Flet Linux build completed on retry."
+  fi
 }
 
 resolve_bundle_dir() {
@@ -72,6 +348,22 @@ resolve_bundle_dir() {
   return 1
 }
 
+parse_args "$@"
+case "$ARCH" in
+  amd64|arm64) ;;
+  *)
+    log_error "Unsupported architecture '$ARCH'. Use amd64 or arm64."
+    usage
+    exit 1
+    ;;
+esac
+
+setup_colors
+trap cleanup EXIT
+show_banner
+
+ensure_system_requirements
+ensure_python_requirements
 require_command dpkg-deb
 require_command desktop-file-validate
 require_command appimagetool
@@ -81,29 +373,30 @@ if command -v flet >/dev/null 2>&1; then
 elif [[ -x "$ROOT_DIR/.venv/bin/flet" ]]; then
   FLET_BIN="$ROOT_DIR/.venv/bin/flet"
 else
-  echo "Error: 'flet' not found in PATH and '$ROOT_DIR/.venv/bin/flet' does not exist." >&2
+  log_error "'flet' not found in PATH and '$ROOT_DIR/.venv/bin/flet' does not exist."
   exit 1
 fi
 
+log_ok "Using Flet binary: $FLET_BIN"
 ensure_linux_linker
+prepare_launcher_icon
 run_flet_linux_build
 
 if ! BUILD_DIR="$(resolve_bundle_dir)"; then
-  echo "Error: built Linux bundle not found after 'flet build --yes linux'." >&2
-  echo "Looked for executable '$EXECUTABLE' under '$ROOT_DIR/build'." >&2
+  log_error "Built Linux bundle not found after 'flet build --yes linux'."
+  log_error "Looked for executable '$EXECUTABLE' under '$ROOT_DIR/build'."
   exit 1
 fi
 
-echo "Using Linux bundle: $BUILD_DIR"
+log_ok "Using Linux bundle: $BUILD_DIR"
 
 if [[ ! -f "${ICON_BASE}.png" ]]; then
-  echo "Error: ${ICON_BASE}.png was not found." >&2
+  log_error "${ICON_BASE}.png was not found."
   exit 1
 fi
 
 mkdir -p "$OUT_DIR"
 WORK_DIR="$(mktemp -d)"
-trap 'rm -rf "$WORK_DIR"' EXIT
 
 create_desktop_file() {
   local target="$1"
@@ -136,6 +429,7 @@ install_icons() {
 # -----------------------------
 # Build .deb package
 # -----------------------------
+log_header "Building .deb package"
 DEB_ROOT="$WORK_DIR/deb"
 mkdir -p "$DEB_ROOT/DEBIAN" "$DEB_ROOT/opt/$PACKAGE_NAME" "$DEB_ROOT/usr/bin" "$DEB_ROOT/usr/share/applications"
 cp -a "$BUILD_DIR/." "$DEB_ROOT/opt/$PACKAGE_NAME/"
@@ -160,10 +454,12 @@ CONTROL
 
 DEB_OUT="$OUT_DIR/${PACKAGE_NAME}_${VERSION}_${ARCH}.deb"
 dpkg-deb --build --root-owner-group "$DEB_ROOT" "$DEB_OUT" >/dev/null
+log_ok "Created .deb package: $DEB_OUT"
 
 # -----------------------------
 # Build .AppImage
 # -----------------------------
+log_header "Building .AppImage package"
 APPDIR="$WORK_DIR/AppDir"
 APP_USR_DIR="$APPDIR/usr"
 APP_LIB_DIR="$APP_USR_DIR/lib/$PACKAGE_NAME"
@@ -195,13 +491,14 @@ esac
 APPIMAGE_OUT="$OUT_DIR/${APP_NAME}-${VERSION}-${APPIMAGE_ARCH}.AppImage"
 APPIMAGE_EXTRACT_AND_RUN=1 ARCH="$APPIMAGE_ARCH" appimagetool --no-appstream "$APPDIR" "$APPIMAGE_OUT" >/dev/null
 chmod +x "$APPIMAGE_OUT"
+log_ok "Created .AppImage package: $APPIMAGE_OUT"
 
 (
   cd "$OUT_DIR"
   sha256sum "$(basename "$DEB_OUT")" "$(basename "$APPIMAGE_OUT")" > "checksums-${VERSION}.sha256"
 )
 
-echo "Created:"
-echo "  $DEB_OUT"
-echo "  $APPIMAGE_OUT"
-echo "  $OUT_DIR/checksums-${VERSION}.sha256"
+log_header "Build complete"
+printf "%b\n" "${C_GREEN}  - $DEB_OUT${C_RESET}"
+printf "%b\n" "${C_GREEN}  - $APPIMAGE_OUT${C_RESET}"
+printf "%b\n" "${C_GREEN}  - $OUT_DIR/checksums-${VERSION}.sha256${C_RESET}"

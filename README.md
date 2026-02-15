@@ -145,11 +145,18 @@ Run packaging:
 ./scripts/build_linux_packages.sh 1.0.0 amd64
 ```
 
+Verbose mode (show full apt/pip/flet output live):
+
+```bash
+./scripts/build_linux_packages.sh 1.0.0 amd64 --verbose
+```
+
 The script:
 
 - Runs `flet build --yes linux` (with one retry using `--clear-cache`)
 - Builds `.deb` and `.AppImage` from the generated Linux bundle
 - Writes package checksums
+- Supports `--verbose` (or `-v`) to stream full command output; default mode is compact and styled
 
 Output files in `dist/`:
 
