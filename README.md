@@ -164,6 +164,34 @@ Output files in `dist/`:
 - `StreamNest-<version>-x86_64.AppImage`
 - `checksums-<version>.sha256`
 
+## Build Android APK
+
+Follow the official guide for environment setup (Java, Android SDK, Android command-line tools):
+
+- https://docs.flet.dev/publish/android/
+
+With this repo on the `android` branch:
+
+1. Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+2. Build APK:
+
+```bash
+flet build apk
+```
+
+3. Optional release build:
+
+```bash
+flet build apk --release
+```
+
+Android packaging metadata is configured in `pyproject.toml` under `[tool.flet]` and `[tool.flet.android]`.
+
 ## Project Structure
 
 ```text

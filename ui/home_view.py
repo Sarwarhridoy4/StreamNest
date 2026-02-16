@@ -60,6 +60,9 @@ class HomeView:
         self.playlist_current_file = "-"
         self.bottom_tab_index = 0
         self.show_welcome = True
+        self.platform_name = self._platform_name()
+        self.is_mobile_platform = self._is_mobile_platform()
+        self.is_android_platform = self._is_android_platform()
         self._platform_theme_listener_enabled = False
         self.ffmpeg_notice_shown = False
         self.ffmpeg_missing = self._is_ffmpeg_missing()
@@ -569,10 +572,27 @@ class HomeView:
             fit=ft.BoxFit.CONTAIN,
         )
 
+    def _platform_name(self) -> str:
+        return str(getattr(self.page, "platform", "")).lower()
+
+    def _is_mobile_platform(self) -> bool:
+        return "android" in self.platform_name or "ios" in self.platform_name
+
+    def _is_android_platform(self) -> bool:
+        return "android" in self.platform_name
+
+    def _supports_directory_picker(self) -> bool:
+        return not ("ios" in self.platform_name)
+
+    def _supports_open_folder(self) -> bool:
+        return not self.is_mobile_platform
+
     def _is_ffmpeg_missing(self) -> bool:
         return shutil.which("ffmpeg") is None
 
     def _build_ffmpeg_install_hint(self) -> str:
+        if self.is_android_platform:
+            return "FFmpeg not found. Android builds should bundle FFmpeg or use media that does not require post-processing."
         system = platform.system().lower()
         base = "FFmpeg not found."
         if system.startswith("linux"):
@@ -724,6 +744,14 @@ class HomeView:
         self._open_folder(self.state.playlist_save_directory, for_playlist=True)
 
     def _open_folder(self, path: str, for_playlist: bool) -> None:
+        if not self._supports_open_folder():
+            status = "Open folder is not available on mobile. Files are saved in app-managed storage."
+            if for_playlist:
+                self._set_playlist_status(status)
+            else:
+                self._set_status(status)
+            return
+
         folder = ensure_download_directory(path)
 
         def _worker() -> None:
@@ -744,6 +772,14 @@ class HomeView:
         self.page.run_thread(_worker)
 
     async def _pick_directory(self, for_playlist: bool) -> None:
+        if not self._supports_directory_picker():
+            status = "Custom folder selection is not available on this mobile platform."
+            if for_playlist:
+                self._set_playlist_status(status)
+            else:
+                self._set_status(status)
+            return
+
         current = self.state.playlist_save_directory if for_playlist else self.state.save_directory
         try:
             selected_path = await self.directory_picker.get_directory_path(
@@ -759,10 +795,15 @@ class HomeView:
             if for_playlist:
                 self.state.playlist_save_directory = normalized
                 self.playlist_save_dir_text.value = normalized
-                self._set_playlist_status("Playlist save folder updated.")
+                if self.is_android_platform:
+                    self._set_playlist_status("Playlist save folder updated. You can select internal or SD-card folders.")
+                else:
+                    self._set_playlist_status("Playlist save folder updated.")
                 self._page_update()
             else:
                 self.state.save_directory = normalized
+                if self.is_android_platform:
+                    self._set_status("Save folder updated. You can select internal or SD-card folders.")
                 self._refresh_view()
 
     def _on_download(self, _: ft.ControlEvent) -> None:
@@ -1204,6 +1245,10 @@ class HomeView:
 
         self.download_btn.disabled = self.state.is_downloading
         self.cancel_btn.disabled = not self.state.is_downloading
+        self.pick_dir_btn.disabled = not self._supports_directory_picker()
+        self.open_dir_btn.disabled = not self._supports_open_folder()
+        self.playlist_pick_dir_btn.disabled = not self._supports_directory_picker()
+        self.playlist_open_dir_btn.disabled = not self._supports_open_folder()
 
         self.mode_group.value = self.state.selected_mode
         self.quality_dropdown.value = self.state.selected_quality
