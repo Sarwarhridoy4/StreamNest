@@ -26,7 +26,7 @@ from ui.components import (
     secondary_button,
     status_chip,
 )
-from utils.file_manager import ensure_download_directory, format_bytes, format_eta, format_speed
+from utils.file_manager import ensure_download_directory, format_bytes, format_eta, format_speed, resolve_download_directory
 from utils.validators import is_valid_url
 
 
@@ -230,7 +230,7 @@ class HomeView:
             padding=22,
             bgcolor=ft.Colors.SURFACE,
             border_radius=20,
-            border=ft.border.all(1, ft.Colors.with_opacity(0.24, YT_RED)),
+            border=ft.Border.all(1, ft.Colors.with_opacity(0.24, YT_RED)),
             shadow=ft.BoxShadow(
                 spread_radius=0,
                 blur_radius=24,
@@ -302,7 +302,7 @@ class HomeView:
             padding=22,
             border_radius=20,
             bgcolor=ft.Colors.SURFACE_CONTAINER,
-            border=ft.border.all(1, ft.Colors.with_opacity(0.2, YT_RED)),
+            border=ft.Border.all(1, ft.Colors.with_opacity(0.2, YT_RED)),
             shadow=ft.BoxShadow(
                 spread_radius=0,
                 blur_radius=22,
@@ -342,7 +342,7 @@ class HomeView:
             padding=36,
             border_radius=28,
             bgcolor=ft.Colors.SURFACE,
-            border=ft.border.all(1, ft.Colors.with_opacity(0.26, YT_RED)),
+            border=ft.Border.all(1, ft.Colors.with_opacity(0.26, YT_RED)),
             shadow=ft.BoxShadow(
                 spread_radius=0,
                 blur_radius=30,
@@ -389,7 +389,7 @@ class HomeView:
             padding=20,
             border_radius=20,
             bgcolor=ft.Colors.SURFACE,
-            border=ft.border.all(1, ft.Colors.with_opacity(0.2, YT_RED)),
+            border=ft.Border.all(1, ft.Colors.with_opacity(0.2, YT_RED)),
             shadow=ft.BoxShadow(
                 spread_radius=0,
                 blur_radius=24,
@@ -480,7 +480,7 @@ class HomeView:
             padding=20,
             border_radius=20,
             bgcolor=ft.Colors.SURFACE,
-            border=ft.border.all(1, ft.Colors.with_opacity(0.2, YT_RED)),
+            border=ft.Border.all(1, ft.Colors.with_opacity(0.2, YT_RED)),
             shadow=ft.BoxShadow(
                 spread_radius=0,
                 blur_radius=24,
@@ -581,11 +581,17 @@ class HomeView:
     def _is_android_platform(self) -> bool:
         return "android" in self.platform_name
 
+    def _is_remote_mobile_web_session(self) -> bool:
+        return self.is_mobile_platform and bool(getattr(self.page, "web", False))
+
     def _supports_directory_picker(self) -> bool:
-        return not ("ios" in self.platform_name)
+        if "ios" in self.platform_name:
+            return False
+        return not self._is_remote_mobile_web_session()
 
     def _supports_open_folder(self) -> bool:
-        return not self.is_mobile_platform
+        system = platform.system().lower()
+        return system.startswith("windows") or system == "darwin" or system.startswith("linux")
 
     def _is_ffmpeg_missing(self) -> bool:
         return shutil.which("ffmpeg") is None
@@ -659,7 +665,7 @@ class HomeView:
             control.filled = True
             control.fill_color = fill
             control.border_radius = 14
-            control.content_padding = ft.padding.symmetric(horizontal=14, vertical=12)
+            control.content_padding = ft.Padding.symmetric(horizontal=14, vertical=12)
             control.border_color = border
             control.focused_border_color = focused_border
             control.focused_border_width = 2
@@ -668,7 +674,7 @@ class HomeView:
             control.filled = True
             control.fill_color = fill
             control.border_radius = 14
-            control.content_padding = ft.padding.symmetric(horizontal=14, vertical=12)
+            control.content_padding = ft.Padding.symmetric(horizontal=14, vertical=12)
             control.border_color = border
             control.focused_border_color = focused_border
             control.focused_border_width = 2
@@ -744,8 +750,19 @@ class HomeView:
         self._open_folder(self.state.playlist_save_directory, for_playlist=True)
 
     def _open_folder(self, path: str, for_playlist: bool) -> None:
+        if self._is_remote_mobile_web_session():
+            status = (
+                "This session runs on Linux host via web. Android storage is not accessible here. "
+                "Use a packaged Android build to access phone folders."
+            )
+            if for_playlist:
+                self._set_playlist_status(status)
+            else:
+                self._set_status(status)
+            return
+
         if not self._supports_open_folder():
-            status = "Open folder is not available on mobile. Files are saved in app-managed storage."
+            status = "Open folder is not available on this host OS."
             if for_playlist:
                 self._set_playlist_status(status)
             else:
@@ -753,6 +770,10 @@ class HomeView:
             return
 
         folder = ensure_download_directory(path)
+        if for_playlist:
+            self._set_playlist_status(f"Opening host folder: {folder}")
+        else:
+            self._set_status(f"Opening host folder: {folder}")
 
         def _worker() -> None:
             try:
@@ -773,7 +794,13 @@ class HomeView:
 
     async def _pick_directory(self, for_playlist: bool) -> None:
         if not self._supports_directory_picker():
-            status = "Custom folder selection is not available on this mobile platform."
+            if self._is_remote_mobile_web_session():
+                status = (
+                    "Cannot pick Android storage in web session (`flet run --android`). "
+                    "Package and run the app on Android to access device folders."
+                )
+            else:
+                status = "Custom folder selection is not available on this platform."
             if for_playlist:
                 self._set_playlist_status(status)
             else:
@@ -791,20 +818,27 @@ class HomeView:
             return
 
         if selected_path:
-            normalized = ensure_download_directory(selected_path)
-            if for_playlist:
-                self.state.playlist_save_directory = normalized
-                self.playlist_save_dir_text.value = normalized
-                if self.is_android_platform:
-                    self._set_playlist_status("Playlist save folder updated. You can select internal or SD-card folders.")
-                else:
-                    self._set_playlist_status("Playlist save folder updated.")
-                self._page_update()
+            self._apply_selected_directory(selected_path, for_playlist=for_playlist)
+
+    def _apply_selected_directory(self, selected_path: str, for_playlist: bool) -> None:
+        normalized, used_fallback = resolve_download_directory(selected_path)
+        if for_playlist:
+            self.state.playlist_save_directory = normalized
+            self.playlist_save_dir_text.value = normalized
+            if used_fallback:
+                self._set_playlist_status(
+                    f"Cannot use '{selected_path}' from this session. Using host folder: {normalized}"
+                )
             else:
-                self.state.save_directory = normalized
-                if self.is_android_platform:
-                    self._set_status("Save folder updated. You can select internal or SD-card folders.")
-                self._refresh_view()
+                self._set_playlist_status("Playlist save folder updated on host.")
+            self._page_update()
+        else:
+            self.state.save_directory = normalized
+            if used_fallback:
+                self._set_status(f"Cannot use '{selected_path}' from this session. Using host folder: {normalized}")
+            else:
+                self._set_status("Save folder updated on host.")
+            self._refresh_view()
 
     def _on_download(self, _: ft.ControlEvent) -> None:
         self.state.url = self.url_field.value.strip() if self.url_field.value else ""
@@ -1245,9 +1279,9 @@ class HomeView:
 
         self.download_btn.disabled = self.state.is_downloading
         self.cancel_btn.disabled = not self.state.is_downloading
-        self.pick_dir_btn.disabled = not self._supports_directory_picker()
+        self.pick_dir_btn.disabled = False
         self.open_dir_btn.disabled = not self._supports_open_folder()
-        self.playlist_pick_dir_btn.disabled = not self._supports_directory_picker()
+        self.playlist_pick_dir_btn.disabled = False
         self.playlist_open_dir_btn.disabled = not self._supports_open_folder()
 
         self.mode_group.value = self.state.selected_mode

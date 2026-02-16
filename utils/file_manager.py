@@ -3,11 +3,23 @@ from __future__ import annotations
 from pathlib import Path
 
 
+def resolve_download_directory(path: str | None) -> tuple[str, bool]:
+    """Returns normalized directory path and whether a fallback path was used."""
+    fallback = (Path.home() / "Downloads").expanduser()
+    target = Path(path).expanduser() if path else fallback
+
+    try:
+        target.mkdir(parents=True, exist_ok=True)
+        return str(target.resolve()), False
+    except OSError:
+        fallback.mkdir(parents=True, exist_ok=True)
+        return str(fallback.resolve()), True
+
+
 def ensure_download_directory(path: str | None) -> str:
     """Ensures download directory exists and returns absolute path."""
-    target = Path(path).expanduser() if path else Path.home() / "Downloads"
-    target.mkdir(parents=True, exist_ok=True)
-    return str(target.resolve())
+    normalized, _ = resolve_download_directory(path)
+    return normalized
 
 
 def format_bytes(num_bytes: int | float | None) -> str:
