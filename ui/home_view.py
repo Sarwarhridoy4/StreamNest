@@ -7,6 +7,8 @@ import platform
 import shutil
 import subprocess
 from typing import Callable
+from urllib.parse import urlparse
+from uuid import uuid4
 
 import flet as ft
 
@@ -17,7 +19,7 @@ from services.format_extractor import (
     PlaylistInfo,
     QualityOption,
 )
-from state.app_state import AppState
+from state.app_state import AppState, HistoryEntry
 from ui.components import (
     YT_RED,
     build_header,
@@ -27,6 +29,7 @@ from ui.components import (
     status_chip,
 )
 from utils.file_manager import ensure_download_directory, format_bytes, format_eta, format_speed, resolve_download_directory
+from utils.history_store import HistoryStore
 from utils.validators import is_valid_url
 
 
@@ -35,6 +38,8 @@ class HomeView:
         self.page = page
         default_dir = ensure_download_directory(None)
         self.state = AppState(save_directory=default_dir, playlist_save_directory=default_dir)
+        self.history_store = HistoryStore()
+        self.state.set_history(self.history_store.load())
 
         self.downloader = DownloaderService()
         self.extractor = FormatExtractor()
@@ -169,7 +174,10 @@ class HomeView:
         )
         self.title_text = ft.Text("", weight=ft.FontWeight.W_500, max_lines=2, overflow=ft.TextOverflow.ELLIPSIS)
 
-        self.history_list = ft.ListView(spacing=6, auto_scroll=False, expand=True)
+        self.recent_history_list = ft.ListView(spacing=6, auto_scroll=False, expand=True)
+        self.history_tab_list = ft.ListView(spacing=10, auto_scroll=False, expand=True)
+        self.history_summary_text = ft.Text("No downloads yet.", color=ft.Colors.ON_SURFACE_VARIANT)
+        self.clear_history_btn = secondary_button("Erase History", self._on_erase_history)
 
         # Playlist controls
         self.playlist_url_field = ft.TextField(
@@ -215,6 +223,23 @@ class HomeView:
             title=ft.Text("Download Status"),
             content=ft.Text(""),
             actions=[ft.TextButton(content="OK", on_click=self._on_close_result_dialog)],
+            actions_alignment=ft.MainAxisAlignment.END,
+        )
+        self.history_details_dialog = ft.AlertDialog(
+            modal=True,
+            title=ft.Text("Download Details"),
+            content=ft.Text(""),
+            actions=[ft.TextButton(content="Close", on_click=self._on_close_result_dialog)],
+            actions_alignment=ft.MainAxisAlignment.END,
+        )
+        self.confirm_clear_history_dialog = ft.AlertDialog(
+            modal=True,
+            title=ft.Text("Erase Download History"),
+            content=ft.Text("This will permanently remove all saved history entries."),
+            actions=[
+                ft.TextButton(content="Cancel", on_click=self._on_close_result_dialog),
+                ft.TextButton(content="Erase", on_click=self._on_confirm_erase_history),
+            ],
             actions_alignment=ft.MainAxisAlignment.END,
         )
 
@@ -325,8 +350,8 @@ class HomeView:
                         expand=True,
                         content=ft.Column(
                             controls=[
-                                ft.Text("History", theme_style=ft.TextThemeStyle.TITLE_MEDIUM),
-                                self.history_list,
+                                ft.Text("Recent Downloads", theme_style=ft.TextThemeStyle.TITLE_MEDIUM),
+                                self.recent_history_list,
                             ],
                             spacing=8,
                             expand=True,
@@ -478,6 +503,64 @@ class HomeView:
                 scroll=ft.ScrollMode.AUTO,
             ),
         )
+        self.history_card = ft.Container(
+            padding=20,
+            border_radius=20,
+            bgcolor=ft.Colors.SURFACE,
+            border=ft.Border.all(1, ft.Colors.with_opacity(0.2, YT_RED)),
+            shadow=ft.BoxShadow(
+                spread_radius=0,
+                blur_radius=24,
+                color=ft.Colors.with_opacity(0.1, ft.Colors.BLACK),
+                offset=ft.Offset(0, 10),
+            ),
+            content=ft.Column(
+                controls=[
+                    ft.Row(
+                        controls=[self._brand_logo(34), ft.Text("Download History", weight=ft.FontWeight.BOLD, size=18)],
+                        spacing=10,
+                        vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                    ),
+                    ft.Text(
+                        "Encrypted local history of your completed downloads. Tap an entry to view details.",
+                        color=ft.Colors.ON_SURFACE_VARIANT,
+                    ),
+                    ft.ResponsiveRow(
+                        controls=[
+                            ft.Container(col={"xs": 12, "sm": 7}, content=self.history_summary_text),
+                            ft.Container(
+                                col={"xs": 12, "sm": 5},
+                                alignment=ft.Alignment(1, 0),
+                                content=self.clear_history_btn,
+                            ),
+                        ],
+                    ),
+                    self.history_tab_list,
+                ],
+                spacing=12,
+                expand=True,
+            ),
+        )
+        self.history_tab_panel = ft.Container(
+            expand=True,
+            padding=16,
+            content=ft.Column(
+                controls=[
+                    ft.ResponsiveRow(
+                        controls=[
+                            ft.Container(
+                                col={"xs": 12, "sm": 11, "md": 10, "lg": 9, "xl": 8},
+                                content=self.history_card,
+                            )
+                        ],
+                        alignment=ft.MainAxisAlignment.CENTER,
+                    ),
+                ],
+                spacing=10,
+                expand=True,
+                scroll=ft.ScrollMode.AUTO,
+            ),
+        )
         self.about_card = ft.Container(
             padding=20,
             border_radius=20,
@@ -547,6 +630,7 @@ class HomeView:
             destinations=[
                 ft.NavigationBarDestination(icon=ft.Icons.DOWNLOAD, label="Single"),
                 ft.NavigationBarDestination(icon=ft.Icons.PLAYLIST_PLAY, label="Playlist"),
+                ft.NavigationBarDestination(icon=ft.Icons.HISTORY, label="History"),
                 ft.NavigationBarDestination(icon=ft.Icons.INFO_OUTLINE, label="About"),
             ],
         )
@@ -644,6 +728,8 @@ class HomeView:
             self.welcome_card.bgcolor = "#16161A" if is_dark else "#FFFFFF"
         if hasattr(self, "playlist_card"):
             self.playlist_card.bgcolor = "#16161A" if is_dark else "#FFFFFF"
+        if hasattr(self, "history_card"):
+            self.history_card.bgcolor = "#16161A" if is_dark else "#FFFFFF"
         if hasattr(self, "about_card"):
             self.about_card.bgcolor = "#16161A" if is_dark else "#FFFFFF"
         self._apply_input_styles()
@@ -904,6 +990,8 @@ class HomeView:
         if self.bottom_tab_index == 1:
             self.tab_host.content = self.playlist_tab_panel
         elif self.bottom_tab_index == 2:
+            self.tab_host.content = self.history_tab_panel
+        elif self.bottom_tab_index == 3:
             self.tab_host.content = self.about_tab_panel
         else:
             self.tab_host.content = self.root_container
@@ -949,8 +1037,8 @@ class HomeView:
         self._page_update()
 
     def _on_open_developer_dialog(self, _: ft.ControlEvent) -> None:
-        self.bottom_tab_index = 2
-        self.bottom_nav.selected_index = 2
+        self.bottom_tab_index = 3
+        self.bottom_nav.selected_index = 3
         self._set_active_panel()
         self._page_update()
 
@@ -1212,9 +1300,7 @@ class HomeView:
             self.state.status_text = result.message
 
         if result.success:
-            stamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            self.state.append_history(f"{stamp} - {self.state.media_title or self.state.url or 'Playlist download'}")
-            self._render_history()
+            self._append_download_history(result)
             self._show_popup("Download completed.", ft.Colors.GREEN_700)
             self._show_result_dialog("Download Completed", result.message)
         else:
@@ -1237,16 +1323,138 @@ class HomeView:
         self._show_result_dialog("Download Error", err)
         self._refresh_view()
 
+    def _append_download_history(self, result: DownloadResult) -> None:
+        source_url = self.playlist_url_field.value.strip() if self.active_download_context == "playlist" else self.state.url
+        target_dir = (
+            self.state.playlist_save_directory if self.active_download_context == "playlist" else self.state.save_directory
+        )
+        title = self.state.media_title or source_url or "Download"
+        if self.active_download_context == "playlist":
+            title = f"Playlist download ({len(self.playlist_selected_indices)} item(s))"
+        entry = HistoryEntry(
+            id=uuid4().hex,
+            timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            title=title,
+            url=source_url,
+            platform=self._detect_platform_label(source_url),
+            mode="playlist" if self.active_download_context == "playlist" else self.state.selected_mode,
+            quality=self.playlist_selected_quality if self.active_download_context == "playlist" else self.state.selected_quality,
+            save_directory=target_dir,
+            context=self.active_download_context,
+            status="success",
+            message=result.message,
+        )
+        self.state.append_history(entry)
+        self._persist_history()
+        self._render_history()
+
+    def _persist_history(self) -> None:
+        try:
+            self.history_store.save(self.state.history)
+        except Exception as exc:  # noqa: BLE001
+            self._set_status(f"Failed to persist encrypted history: {exc}")
+
+    def _detect_platform_label(self, url: str) -> str:
+        host = urlparse(url).netloc.lower()
+        if host.startswith("www."):
+            host = host[4:]
+        if "youtube.com" in host or "youtu.be" in host:
+            return "YouTube"
+        if "facebook.com" in host or "fb.watch" in host:
+            return "Facebook"
+        if "instagram.com" in host:
+            return "Instagram"
+        if "tiktok.com" in host:
+            return "TikTok"
+        if "twitter.com" in host or "x.com" in host:
+            return "X/Twitter"
+        if not host:
+            return "Unknown"
+        domain_parts = host.split(".")
+        return domain_parts[-2].upper() if len(domain_parts) >= 2 else host.upper()
+
     def _render_history(self) -> None:
-        self.history_list.controls = [
+        recent_entries = self.state.history[:6]
+        self.recent_history_list.controls = [
             ft.Container(
-                content=ft.Text(item, size=12),
-                padding=8,
-                border_radius=8,
+                content=ft.Column(
+                    controls=[
+                        ft.Text(f"{entry.platform} • {entry.title}", max_lines=1, overflow=ft.TextOverflow.ELLIPSIS),
+                        ft.Text(entry.timestamp, size=11, color=ft.Colors.ON_SURFACE_VARIANT),
+                    ],
+                    spacing=2,
+                ),
+                padding=10,
+                border_radius=10,
                 bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
             )
-            for item in self.state.history
+            for entry in recent_entries
         ]
+
+        self.history_summary_text.value = (
+            f"{len(self.state.history)} item(s) saved"
+            if self.state.history
+            else "No downloads yet."
+        )
+        self.history_tab_list.controls = [self._build_history_row(entry) for entry in self.state.history]
+
+    def _build_history_row(self, entry: HistoryEntry) -> ft.Control:
+        return ft.Container(
+            padding=12,
+            border_radius=12,
+            bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
+            border=ft.Border.all(1, ft.Colors.with_opacity(0.12, YT_RED)),
+            content=ft.ListTile(
+                leading=ft.Icon(ft.Icons.MOVIE_CREATION_OUTLINED if entry.context == "single" else ft.Icons.PLAYLIST_PLAY),
+                title=ft.Text(f"{entry.platform} • {entry.title}", max_lines=1, overflow=ft.TextOverflow.ELLIPSIS),
+                subtitle=ft.Text(
+                    f"{entry.timestamp} • {entry.mode.upper()} • {entry.quality}",
+                    max_lines=1,
+                    overflow=ft.TextOverflow.ELLIPSIS,
+                ),
+                trailing=ft.Icon(ft.Icons.CHEVRON_RIGHT),
+                on_click=lambda _: self._on_open_history_details(entry),
+            ),
+        )
+
+    def _on_open_history_details(self, entry: HistoryEntry) -> None:
+        details = [
+            f"Title: {entry.title}",
+            f"Platform: {entry.platform}",
+            f"Timestamp: {entry.timestamp}",
+            f"Context: {entry.context}",
+            f"Mode: {entry.mode}",
+            f"Quality: {entry.quality}",
+            f"Save folder: {entry.save_directory}",
+            f"URL: {entry.url or '-'}",
+            f"Result: {entry.message}",
+        ]
+        self.history_details_dialog.title = ft.Text("History Details")
+        self.history_details_dialog.content = ft.Text("\n".join(details), selectable=True)
+        try:
+            self.page.show_dialog(self.history_details_dialog)
+        except Exception:
+            self._show_popup("Unable to open details dialog.", ft.Colors.RED_700)
+
+    def _on_erase_history(self, _: ft.ControlEvent) -> None:
+        try:
+            self.page.show_dialog(self.confirm_clear_history_dialog)
+        except Exception:
+            self._show_popup("Unable to open confirmation dialog.", ft.Colors.RED_700)
+
+    def _on_confirm_erase_history(self, _: ft.ControlEvent) -> None:
+        self.state.clear_history()
+        try:
+            self.history_store.clear()
+        except Exception as exc:  # noqa: BLE001
+            self._set_status(f"Failed to erase encrypted history: {exc}")
+        self._render_history()
+        try:
+            self.page.pop_dialog()
+        except Exception:
+            self.confirm_clear_history_dialog.open = False
+        self._show_popup("History erased.", ft.Colors.BLUE_GREY_700)
+        self._refresh_view()
 
     def _set_status(self, text: str) -> None:
         self.state.status_text = text

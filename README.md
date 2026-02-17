@@ -50,7 +50,7 @@ Click the preview to open the full demo video.
 
 ## Changelog
 
-- See `changelog.md` for release notes and ongoing updates.
+- See [Changelog](changelog.md) for release notes and ongoing updates.
 
 ## Requirements
 
@@ -146,13 +146,13 @@ Ensure `appimagetool` is installed and available in `PATH`.
 Run packaging:
 
 ```bash
-./scripts/build_linux_packages.sh 1.0.0 amd64
+./scripts/build_linux_packages.sh 2.0 amd64
 ```
 
 Verbose mode (show full apt/pip/flet output live):
 
 ```bash
-./scripts/build_linux_packages.sh 1.0.0 amd64 --verbose
+./scripts/build_linux_packages.sh 2.0 amd64 --verbose
 ```
 
 The script:
@@ -240,7 +240,7 @@ StreamNest/
 
 - Install linker toolchain for LLVM 20: `sudo apt install lld-20`
 - Verify binary exists: `/usr/lib/llvm-20/bin/ld.lld`
-- Re-run: `./scripts/build_linux_packages.sh 1.0.0 amd64`
+- Re-run: `./scripts/build_linux_packages.sh 2.0 amd64`
 
 ## Developer
 

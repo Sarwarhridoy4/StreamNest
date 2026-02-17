@@ -47,3 +47,7 @@ Thumbs.db
 
 # Local toolchain shims
 .toolchain-bin/
+
+# Local encrypted history artifacts
+state/.history.key
+state/download_history.enc
