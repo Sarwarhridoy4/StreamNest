@@ -18,6 +18,14 @@ Click the preview to open the full demo video.
 
 ![Playlist tab screenshot](assets/screenshots/playlist.png)
 
+### History
+
+![History tab screenshot](assets/screenshots/history.png)
+
+### History Details
+
+![History details screenshot](assets/screenshots/h_details.png)
+
 ### About
 
 ![About tab screenshot](assets/screenshots/about.png)
