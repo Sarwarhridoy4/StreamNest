@@ -14,8 +14,13 @@ def main(page: ft.Page) -> None:
         page.dark_theme = ft.Theme(color_scheme_seed="#FF0000")
         page.theme_mode = ft.ThemeMode.SYSTEM
         page.padding = 0
-        page.window.min_width = 360
-        page.window.min_height = 640
+
+        platform_name = str(getattr(page, "platform", "")).lower()
+        is_desktop = any(name in platform_name for name in ("windows", "linux", "macos"))
+        if is_desktop and getattr(page, "window", None) is not None:
+            page.window.min_width = 360
+            page.window.min_height = 640
+
         page.scroll = ft.ScrollMode.AUTO
 
         home = HomeView(page)

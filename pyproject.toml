@@ -1,0 +1,29 @@
+[project]
+name = "streamnest"
+version = "1.0.0"
+description = "StreamNest media downloader built with Flet and yt-dlp."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "flet>=0.80.0",
+    "yt-dlp>=2025.1.15",
+]
+
+[tool.flet]
+org = "com.sarwarhridoy4"
+product = "StreamNest"
+company = "Sarwar Hossain"
+
+[tool.flet.app]
+path = "."
+module = "main"
+
+[tool.flet.android]
+split_per_abi = true
+
+[tool.flet.android.permission]
+"android.permission.INTERNET" = true
+"android.permission.READ_EXTERNAL_STORAGE" = true
+"android.permission.WRITE_EXTERNAL_STORAGE" = true
+"android.permission.READ_MEDIA_VIDEO" = true
+"android.permission.READ_MEDIA_AUDIO" = true

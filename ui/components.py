@@ -39,19 +39,19 @@ def status_chip(label: str, value_control: ft.Control) -> ft.Container:
         padding=8,
         border_radius=8,
         bgcolor=ft.Colors.with_opacity(0.08, YT_RED),
-        border=ft.border.all(1, ft.Colors.with_opacity(0.2, YT_RED)),
+        border=ft.Border.all(1, ft.Colors.with_opacity(0.2, YT_RED)),
     )
 
 
-def primary_button(text: str, on_click) -> ft.ElevatedButton:  # type: ignore[no-untyped-def]
-    return ft.ElevatedButton(
+def primary_button(text: str, on_click) -> ft.Button:  # type: ignore[no-untyped-def]
+    return ft.Button(
         content=text,
         on_click=on_click,
         style=ft.ButtonStyle(
             bgcolor={ft.ControlState.DEFAULT: YT_RED, ft.ControlState.DISABLED: ft.Colors.GREY_400},
-            color={ft.ControlState.DEFAULT: ft.Colors.WHITE, ft.ControlState.DISABLED: ft.Colors.WHITE70},
+            color={ft.ControlState.DEFAULT: ft.Colors.WHITE, ft.ControlState.DISABLED: ft.Colors.WHITE_70},
             shape=ft.RoundedRectangleBorder(radius=16),
-            padding=ft.padding.symmetric(horizontal=18, vertical=14),
+            padding=ft.Padding.symmetric(horizontal=18, vertical=14),
         ),
     )
 
@@ -68,6 +68,6 @@ def secondary_button(text: str, on_click, disabled: bool = False) -> ft.Outlined
                 ft.ControlState.DISABLED: ft.BorderSide(1, ft.Colors.GREY_400),
             },
             shape=ft.RoundedRectangleBorder(radius=16),
-            padding=ft.padding.symmetric(horizontal=18, vertical=14),
+            padding=ft.Padding.symmetric(horizontal=18, vertical=14),
         ),
     )
