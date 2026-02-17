@@ -336,8 +336,9 @@ class HomeView:
         )
         self.root_container = self._build_root_container()
         self.welcome_card = ft.Container(
-            padding=36,
-            border_radius=28,
+            width=960,
+            padding=ft.padding.symmetric(horizontal=42, vertical=38),
+            border_radius=30,
             bgcolor=ft.Colors.SURFACE,
             border=ft.border.all(1, ft.Colors.with_opacity(0.26, YT_RED)),
             shadow=ft.BoxShadow(
@@ -370,16 +371,17 @@ class HomeView:
         )
         self.welcome_panel = ft.Container(
             expand=True,
-            padding=28,
-            alignment=ft.Alignment(0, 0),
-            content=ft.ResponsiveRow(
+            padding=ft.padding.symmetric(horizontal=24, vertical=28),
+            content=ft.Column(
+                expand=True,
+                alignment=ft.MainAxisAlignment.CENTER,
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                 controls=[
                     ft.Container(
-                        col={"xs": 12, "sm": 12, "md": 11, "lg": 10, "xl": 9},
+                        alignment=ft.Alignment(0, 0),
                         content=self.welcome_card,
                     )
                 ],
-                alignment=ft.MainAxisAlignment.CENTER,
             ),
         )
         self.playlist_card = ft.Container(

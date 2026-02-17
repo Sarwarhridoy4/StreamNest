@@ -48,6 +48,10 @@ Click the preview to open the full demo video.
   - Current playlist file name
 - Download result dialogs and session history panel
 
+## Changelog
+
+- See `changelog.md` for release notes and ongoing updates.
+
 ## Requirements
 
 - Python 3.11+
@@ -171,6 +175,7 @@ StreamNest/
 ├── main.py                     # App entry point and page bootstrapping
 ├── requirements.txt            # Python dependencies
 ├── README.md                   # Project documentation
+├── changelog.md                # Project change history
 ├── LICENSE                     # MIT license
 ├── assets/                     # Icons, demo media, screenshots
 ├── services/

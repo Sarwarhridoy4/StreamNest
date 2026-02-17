@@ -21,13 +21,17 @@ def main(page: ft.Page) -> None:
         home = HomeView(page)
         page.add(home.build())
     except Exception:  # noqa: BLE001
+        traceback.print_exc()
         page.clean()
         page.scroll = ft.ScrollMode.AUTO
         page.add(
             ft.Column(
                 controls=[
                     ft.Text("Failed to initialize UI", weight=ft.FontWeight.BOLD, color=ft.Colors.RED),
-                    ft.Text(traceback.format_exc(), selectable=True),
+                    ft.Text(
+                        "An unexpected error occurred during startup. Please check the terminal logs.",
+                        selectable=True,
+                    ),
                 ],
                 expand=True,
                 scroll=ft.ScrollMode.AUTO,
