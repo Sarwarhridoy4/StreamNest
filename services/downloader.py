@@ -47,6 +47,7 @@ class DownloadResult:
 ProgressCallback = Callable[[ProgressInfo], None]
 ResultCallback = Callable[[DownloadResult], None]
 ErrorCallback = Callable[[str], None]
+LogCallback = Callable[[str], None]
 
 
 class DownloaderService:
@@ -71,6 +72,7 @@ class DownloaderService:
         on_progress: ProgressCallback,
         on_done: ResultCallback,
         on_error: ErrorCallback,
+        on_log: LogCallback | None = None,
     ) -> bool:
         with self._active_lock:
             if self._active_thread is not None and self._active_thread.is_alive():
@@ -79,7 +81,7 @@ class DownloaderService:
             self._cancel_event.clear()
             thread = Thread(
                 target=self._download_worker,
-                args=(request, on_progress, on_done, on_error),
+                args=(request, on_progress, on_done, on_error, on_log),
                 daemon=True,
             )
             self._active_thread = thread
@@ -92,21 +94,28 @@ class DownloaderService:
         on_progress: ProgressCallback,
         on_done: ResultCallback,
         on_error: ErrorCallback,
+        on_log: LogCallback | None,
     ) -> None:
         try:
-            ydl_opts = self._build_options(request, on_progress)
+            self._emit_log(on_log, f"Starting yt-dlp for URL: {request.url}")
+            ydl_opts = self._build_options(request, on_progress, on_log)
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 ydl.download([request.url])
 
             if self._cancel_event.is_set():
+                self._emit_log(on_log, "Download canceled by user.")
                 on_done(DownloadResult(success=False, message="Download canceled"))
             else:
+                self._emit_log(on_log, "Download completed.")
                 on_done(DownloadResult(success=True, message="Download completed"))
         except DownloadCancelledError:
+            self._emit_log(on_log, "Download canceled by user.")
             on_done(DownloadResult(success=False, message="Download canceled"))
         except yt_dlp.utils.DownloadError as exc:
+            self._emit_log(on_log, f"yt-dlp download error: {exc}")
             on_error(str(exc))
         except Exception as exc:  # noqa: BLE001
+            self._emit_log(on_log, f"Unexpected error: {exc}")
             on_error(f"Unexpected error: {exc}")
         finally:
             with self._active_lock:
@@ -116,6 +125,7 @@ class DownloaderService:
         self,
         request: DownloadRequest,
         on_progress: ProgressCallback,
+        on_log: LogCallback | None,
     ) -> dict[str, Any]:
         out_template = str(Path(request.save_dir) / "%(title).160s.%(ext)s")
 
@@ -132,6 +142,8 @@ class DownloaderService:
             "postprocessor_hooks": [self._postprocessor_hook_factory(on_progress)],
             "progress_hooks": [self._progress_hook_factory(on_progress)],
         }
+        if on_log is not None:
+            opts["logger"] = _YtDlpLogger(on_log)
 
         if self._ffmpeg_dir:
             opts["ffmpeg_location"] = self._ffmpeg_dir
@@ -170,6 +182,14 @@ class DownloaderService:
             )
 
         return opts
+
+    @staticmethod
+    def _emit_log(on_log: LogCallback | None, message: str) -> None:
+        if on_log is None:
+            return
+        text = message.strip()
+        if text:
+            on_log(text)
 
     def _progress_hook_factory(self, on_progress: ProgressCallback) -> Callable[[dict[str, Any]], None]:
         last_downloaded = 0.0
@@ -313,6 +333,26 @@ class DownloaderService:
         if factor is None:
             return None
         return magnitude * factor
+
+
+class _YtDlpLogger:
+    def __init__(self, on_log: LogCallback) -> None:
+        self._on_log = on_log
+
+    def debug(self, msg: str) -> None:
+        text = msg.strip()
+        if text:
+            self._on_log(text)
+
+    def warning(self, msg: str) -> None:
+        text = msg.strip()
+        if text:
+            self._on_log(f"WARNING: {text}")
+
+    def error(self, msg: str) -> None:
+        text = msg.strip()
+        if text:
+            self._on_log(f"ERROR: {text}")
 
     @staticmethod
     def _parse_bytes_str(value: Any) -> float | None:
