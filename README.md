@@ -41,6 +41,11 @@ Click the preview to open the full demo video.
   - Live updates on platform brightness change (when supported)
   - Optional **Force dark theme** override
 - Startup FFmpeg detection with OS-specific install guidance in the UI
+- One-click FFmpeg auto-install flow (Linux/macOS/Windows) with confirmation and privilege prompt support
+- Live install/output log windows:
+  - FFmpeg installer command output
+  - `yt-dlp` runtime logs for active downloads
+- Manual FFmpeg re-check action from the UI
 - Dynamic format loading before download
 - Download modes:
   - Video (MP4 remux)
@@ -96,9 +101,15 @@ pip install -r requirements.txt
 
 ## FFmpeg Setup
 
-- Linux: install `ffmpeg` with your package manager
-- macOS: `brew install ffmpeg`
-- Windows: install FFmpeg and add it to `PATH`
+- Automatic install from the app:
+  - Click **Install FFmpeg** when prompted
+  - Review command preview and confirm
+  - Enter password (Linux privilege flow) when required
+  - Track progress in **FFmpeg Install Log**
+- Manual install:
+  - Linux: install `ffmpeg` with your package manager
+  - macOS: `brew install ffmpeg`
+  - Windows: install FFmpeg and add it to `PATH` (or use Winget)
 
 Verify:
 
@@ -221,7 +232,15 @@ StreamNest/
 │   └── app_state.py            # Shared UI state model
 ├── ui/
 │   ├── components.py           # Reusable UI helpers
-│   └── home_view.py            # Single/Playlist/About UI and interaction logic
+│   ├── home_view.py            # Compatibility wrapper exporting HomeView
+│   └── home/                   # Modular HomeView implementation
+│       ├── home_view.py        # Core HomeView shell/state and shared handlers
+│       ├── control_layout_mixin.py
+│       ├── view_layout_mixin.py
+│       ├── download_mixin.py
+│       ├── playlist_mixin.py
+│       ├── history_mixin.py
+│       └── ffmpeg_install_mixin.py
 └── utils/
     ├── file_manager.py         # Directory helpers + size/speed/eta formatters
     └── validators.py           # URL and input validation helpers
