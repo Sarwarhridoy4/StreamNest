@@ -383,11 +383,11 @@ prepare_launcher_icon() {
 ensure_linux_linker() {
   local llvm_bin="/usr/lib/llvm-20/bin"
   if [[ -d "$llvm_bin" ]]; then
-    export PATH="$llvm_bin:$PATH"
-    if [[ ! -x "$llvm_bin/ld.lld" && ! -x "$llvm_bin/ld" ]]; then
-      log_error "Flutter Linux build requires ld.lld or ld in $llvm_bin."
-      log_error "Install linker tools first (Ubuntu example): sudo apt install lld-20"
-      exit 1
+    if [[ -x "$llvm_bin/ld.lld" || -x "$llvm_bin/ld" ]]; then
+      export PATH="$llvm_bin:$PATH"
+      log_step "Using linker from $llvm_bin."
+    else
+      log_warn "No linker found in $llvm_bin; falling back to system linker in PATH."
     fi
   fi
 
