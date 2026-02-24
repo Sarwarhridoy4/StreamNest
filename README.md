@@ -157,10 +157,10 @@ Install prerequisites first (Ubuntu/Debian):
 
 ```bash
 sudo apt update
-sudo apt install clang lld-20 cmake ninja-build pkg-config libgtk-3-dev desktop-file-utils dpkg-dev
+sudo apt install clang cmake ninja-build pkg-config libgtk-3-dev desktop-file-utils dpkg-dev
 ```
 
-Ensure `appimagetool` is installed and available in `PATH`.
+`./scripts/build_linux_packages.sh` auto-installs missing packaging dependencies, including fallback installation of `appimagetool` when it is not available in apt repositories.
 
 Run packaging:
 

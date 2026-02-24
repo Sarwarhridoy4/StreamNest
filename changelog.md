@@ -25,3 +25,5 @@ All notable changes to this project are documented in this file.
 - History entries now include structured metadata (platform, mode, quality, URL, timestamp, save folder, result).
 - `ui/home_view.py` now acts as a compatibility wrapper that re-exports `HomeView` from `ui/home/home_view.py`.
 - README screenshots section now enumerates all available images.
+- Linux packaging script now installs apt dependencies one-by-one and auto-installs `appimagetool` from AppImageKit releases when apt does not provide it.
+- Linux packaging dependency checks now try both `lld-20` and `lld` to improve compatibility across Ubuntu/Debian variants.

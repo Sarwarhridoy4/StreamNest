@@ -21,6 +21,7 @@ PYTHON_BIN=""
 PIP_BIN=""
 WORK_DIR=""
 ICON_BACKUP=""
+UNRESOLVED_APT_PACKAGES=()
 
 C_RESET=""
 C_BOLD=""
@@ -150,6 +151,7 @@ run_with_optional_sudo() {
 
 install_apt_packages() {
   local packages=("$@")
+  UNRESOLVED_APT_PACKAGES=()
   if [[ "${#packages[@]}" -eq 0 ]]; then
     log_ok "System dependencies already satisfied."
     return 0
@@ -163,14 +165,36 @@ install_apt_packages() {
 
   log_header "Installing system dependencies"
   log_step "Missing packages: ${packages[*]}"
+
   if [[ "$VERBOSE" -eq 1 ]]; then
     run_with_optional_sudo apt-get update
-    run_with_optional_sudo apt-get install -y "${packages[@]}"
   else
     run_with_optional_sudo apt-get update -qq
-    run_with_optional_sudo apt-get install -y -qq "${packages[@]}"
   fi
-  log_ok "System dependencies installed."
+
+  local pkg
+  local failed=()
+  for pkg in "${packages[@]}"; do
+    if [[ "$VERBOSE" -eq 1 ]]; then
+      if run_with_optional_sudo apt-get install -y "$pkg"; then
+        continue
+      fi
+    else
+      if run_with_optional_sudo apt-get install -y -qq "$pkg"; then
+        continue
+      fi
+    fi
+
+    failed+=("$pkg")
+    log_warn "Could not install apt package '$pkg'."
+  done
+
+  if [[ "${#failed[@]}" -gt 0 ]]; then
+    UNRESOLVED_APT_PACKAGES=("${failed[@]}")
+    log_warn "Unresolved apt packages: ${failed[*]}"
+  fi
+
+  log_ok "Apt dependency pass completed."
 }
 
 ensure_python_tools() {
@@ -214,6 +238,94 @@ ensure_python_requirements() {
   log_ok "Python dependencies are ready."
 }
 
+install_appimagetool_from_release() {
+  if have_command appimagetool; then
+    return 0
+  fi
+
+  log_header "Installing appimagetool from AppImageKit"
+  local appimage_arch="$ARCH"
+  case "$ARCH" in
+    amd64) appimage_arch="x86_64" ;;
+    arm64) appimage_arch="aarch64" ;;
+  esac
+
+  local url="https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-${appimage_arch}.AppImage"
+  local tmp_file
+  tmp_file="$(mktemp)"
+
+  if have_command curl; then
+    if [[ "$VERBOSE" -eq 1 ]]; then
+      curl -fL "$url" -o "$tmp_file"
+    else
+      curl -fsSL "$url" -o "$tmp_file"
+    fi
+  elif have_command wget; then
+    if [[ "$VERBOSE" -eq 1 ]]; then
+      wget "$url" -O "$tmp_file"
+    else
+      wget -q "$url" -O "$tmp_file"
+    fi
+  else
+    log_step "curl/wget not found, attempting to install curl."
+    if [[ "$VERBOSE" -eq 1 ]]; then
+      run_with_optional_sudo apt-get update
+      run_with_optional_sudo apt-get install -y curl
+      curl -fL "$url" -o "$tmp_file"
+    else
+      run_with_optional_sudo apt-get update -qq
+      run_with_optional_sudo apt-get install -y -qq curl
+      curl -fsSL "$url" -o "$tmp_file"
+    fi
+  fi
+
+  chmod +x "$tmp_file"
+  run_with_optional_sudo install -m 0755 "$tmp_file" /usr/local/bin/appimagetool
+  rm -f "$tmp_file"
+  log_ok "Installed appimagetool to /usr/local/bin/appimagetool"
+}
+
+ensure_appimagetool() {
+  if have_command appimagetool; then
+    return 0
+  fi
+
+  local pkg
+  for pkg in "${UNRESOLVED_APT_PACKAGES[@]}"; do
+    if [[ "$pkg" == "appimagetool" ]]; then
+      install_appimagetool_from_release
+      break
+    fi
+  done
+
+  if ! have_command appimagetool; then
+    install_appimagetool_from_release
+  fi
+}
+
+ensure_apt_linker_package() {
+  if have_command ld.lld || have_command ld; then
+    return 0
+  fi
+
+  local candidates=("lld-20" "lld")
+  local candidate
+  for candidate in "${candidates[@]}"; do
+    if [[ "$VERBOSE" -eq 1 ]]; then
+      if run_with_optional_sudo apt-get install -y "$candidate"; then
+        return 0
+      fi
+    else
+      if run_with_optional_sudo apt-get install -y -qq "$candidate"; then
+        return 0
+      fi
+    fi
+  done
+
+  log_error "No usable linker package could be installed (tried: ${candidates[*]})."
+  exit 1
+}
+
 ensure_system_requirements() {
   local missing_packages=()
 
@@ -225,10 +337,6 @@ ensure_system_requirements() {
   have_command dpkg-deb || missing_packages+=("dpkg-dev")
   have_command appimagetool || missing_packages+=("appimagetool")
   have_command convert || missing_packages+=("imagemagick")
-
-  if ! have_command ld.lld && ! have_command ld; then
-    missing_packages+=("lld-20")
-  fi
 
   # Deduplicate while preserving order.
   local deduped=()
@@ -242,6 +350,8 @@ ensure_system_requirements() {
   done
 
   install_apt_packages "${deduped[@]}"
+  ensure_apt_linker_package
+  ensure_appimagetool
 }
 
 prepare_launcher_icon() {
