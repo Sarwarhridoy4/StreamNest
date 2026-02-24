@@ -355,6 +355,10 @@ class ViewLayoutMixin:
                         color=ft.Colors.ON_SURFACE_VARIANT,
                     ),
                     ft.Divider(height=18),
+                    ft.Text("Official Website", theme_style=ft.TextThemeStyle.TITLE_MEDIUM),
+                    ft.Text("https://streamnest-puce.vercel.app", selectable=True),
+                    ft.TextButton(content="Open Website", url="https://streamnest-puce.vercel.app"),
+                    ft.Divider(height=18),
                     ft.Text("Developer", theme_style=ft.TextThemeStyle.TITLE_MEDIUM),
                     ft.Text("Sarwar Hossain", weight=ft.FontWeight.W_500),
                     ft.Text("https://github.com/Sarwarhridoy4", selectable=True),
@@ -442,4 +446,3 @@ class ViewLayoutMixin:
                 scroll=ft.ScrollMode.AUTO,
             ),
         )
-

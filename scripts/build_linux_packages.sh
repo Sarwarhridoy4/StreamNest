@@ -216,6 +216,7 @@ ensure_python_requirements() {
 
 ensure_system_requirements() {
   local missing_packages=()
+  local fuse_package=""
 
   have_command clang || missing_packages+=("clang")
   have_command cmake || missing_packages+=("cmake")
@@ -228,6 +229,22 @@ ensure_system_requirements() {
 
   if ! have_command ld.lld && ! have_command ld; then
     missing_packages+=("lld-20")
+  fi
+
+  # AppImage runtime requires libfuse.so.2 on the target machine.
+  if ! ldconfig -p 2>/dev/null | grep -q 'libfuse\.so\.2'; then
+    if apt-cache show libfuse2t64 >/dev/null 2>&1; then
+      fuse_package="libfuse2t64"
+    elif apt-cache show libfuse2 >/dev/null 2>&1; then
+      fuse_package="libfuse2"
+    fi
+
+    if [[ -n "$fuse_package" ]]; then
+      missing_packages+=("$fuse_package")
+    else
+      log_warn "libfuse.so.2 is missing and no apt package candidate was detected (tried: libfuse2t64, libfuse2)."
+      log_warn "Built AppImages may fail to launch on this machine until a FUSE2 compatibility library is installed."
+    fi
   fi
 
   # Deduplicate while preserving order.

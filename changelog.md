@@ -17,6 +17,7 @@ All notable changes to this project are documented in this file.
 - Modular `ui/home/` package split with mixins for layout, downloads, playlist, history, and FFmpeg flows.
 
 ### Changed
+- About tab now includes the official StreamNest website link (`https://streamnest-puce.vercel.app`).
 - Welcome screen card layout updated to keep the rounded welcome box centered.
 - Improved URL validation to block local/private network targets.
 - Safer output naming for downloads with restricted filenames.
