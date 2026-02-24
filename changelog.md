@@ -24,3 +24,4 @@ All notable changes to this project are documented in this file.
 - Startup error screen now avoids exposing full traceback details in the UI.
 - History entries now include structured metadata (platform, mode, quality, URL, timestamp, save folder, result).
 - `ui/home_view.py` now acts as a compatibility wrapper that re-exports `HomeView` from `ui/home/home_view.py`.
+- README screenshots section now enumerates all available images.

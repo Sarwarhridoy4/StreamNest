@@ -8,7 +8,7 @@ StreamNest is a desktop media downloader built with **Flet** and **yt-dlp**. It 
 
 Click the preview to open the full demo video.
 
-## Screenshots
+## All Screenshots
 
 ### Single Downloader
 
