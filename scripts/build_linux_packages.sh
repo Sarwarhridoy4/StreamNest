@@ -21,6 +21,7 @@ PYTHON_BIN=""
 PIP_BIN=""
 WORK_DIR=""
 ICON_BACKUP=""
+ICON_SVG_BACKUP=""
 UNRESOLVED_APT_PACKAGES=()
 
 C_RESET=""
@@ -135,6 +136,10 @@ cleanup() {
 
   if [[ -n "$ICON_BACKUP" && -f "$ICON_BACKUP" ]]; then
     mv -f "$ICON_BACKUP" "${ICON_BASE}.png"
+  fi
+
+  if [[ -n "$ICON_SVG_BACKUP" && -f "$ICON_SVG_BACKUP" ]]; then
+    mv -f "$ICON_SVG_BACKUP" "${ICON_BASE}.svg"
   fi
 }
 
@@ -327,13 +332,63 @@ ensure_apt_linker_package() {
   exit 1
 }
 
+ensure_apt_libstdcpp_dev() {
+  if [[ -d /usr/include/c++ ]]; then
+    return 0
+  fi
+
+  local candidates=("libstdc++-15-dev" "libstdc++-14-dev" "libstdc++-13-dev" "libstdc++-12-dev" "libstdc++-11-dev")
+  local candidate
+  for candidate in "${candidates[@]}"; do
+    if [[ "$VERBOSE" -eq 1 ]]; then
+      if run_with_optional_sudo apt-get install -y "$candidate"; then
+        return 0
+      fi
+    else
+      if run_with_optional_sudo apt-get install -y -qq "$candidate"; then
+        return 0
+      fi
+    fi
+  done
+
+  log_error "No usable libstdc++ dev package could be installed (tried: ${candidates[*]})."
+  log_error "Install C++ stdlib dev headers first (Ubuntu example): sudo apt install libstdc++-15-dev"
+  exit 1
+}
+
+ensure_apt_eglinfo_package() {
+  if have_command eglinfo; then
+    return 0
+  fi
+
+  local candidates=("mesa-utils" "mesa-utils-extra")
+  local candidate
+  for candidate in "${candidates[@]}"; do
+    if [[ "$VERBOSE" -eq 1 ]]; then
+      if run_with_optional_sudo apt-get install -y "$candidate"; then
+        return 0
+      fi
+    else
+      if run_with_optional_sudo apt-get install -y -qq "$candidate"; then
+        return 0
+      fi
+    fi
+  done
+
+  log_warn "Could not install eglinfo helper (tried: ${candidates[*]})."
+}
+
 ensure_system_requirements() {
   local missing_packages=()
 
+  have_command g++ || missing_packages+=("g++")
   have_command clang || missing_packages+=("clang")
   have_command cmake || missing_packages+=("cmake")
   have_command ninja || have_command ninja-build || missing_packages+=("ninja-build")
   have_command pkg-config || missing_packages+=("pkg-config")
+  if ! have_command pkg-config || ! pkg-config --exists gtk+-3.0 >/dev/null 2>&1; then
+    missing_packages+=("libgtk-3-dev")
+  fi
   have_command desktop-file-validate || missing_packages+=("desktop-file-utils")
   have_command dpkg-deb || missing_packages+=("dpkg-dev")
   have_command appimagetool || missing_packages+=("appimagetool")
@@ -351,12 +406,15 @@ ensure_system_requirements() {
   done
 
   install_apt_packages "${deduped[@]}"
+  ensure_apt_libstdcpp_dev
   ensure_apt_linker_package
+  ensure_apt_eglinfo_package
   ensure_appimagetool
 }
 
 prepare_launcher_icon() {
   local icon_file="${ICON_BASE}.png"
+  local icon_svg="${ICON_BASE}.svg"
   if [[ ! -f "$icon_file" ]]; then
     return 0
   fi
@@ -378,11 +436,28 @@ prepare_launcher_icon() {
   else
     log_step "Launcher icon format already compatible (${icon_type:-unknown})."
   fi
+
+  # flutter_launcher_icons in current Flet toolchain can fail to decode SVG input.
+  # Temporarily hide SVG so PNG is used for icon generation during Linux packaging.
+  if [[ -f "$icon_svg" ]]; then
+    ICON_SVG_BACKUP="$(mktemp)"
+    mv -f "$icon_svg" "$ICON_SVG_BACKUP"
+    log_step "Temporarily disabled ${ICON_BASE}.svg for launcher icon generation."
+  fi
 }
 
 ensure_linux_linker() {
   local llvm_bin="/usr/lib/llvm-20/bin"
   if [[ -d "$llvm_bin" ]]; then
+    if [[ ! -x "$llvm_bin/ld.lld" && ! -x "$llvm_bin/ld" ]]; then
+      log_warn "No linker found in $llvm_bin; attempting to install lld-20."
+      if [[ "$VERBOSE" -eq 1 ]]; then
+        run_with_optional_sudo apt-get install -y lld-20 || true
+      else
+        run_with_optional_sudo apt-get install -y -qq lld-20 || true
+      fi
+    fi
+
     if [[ -x "$llvm_bin/ld.lld" || -x "$llvm_bin/ld" ]]; then
       export PATH="$llvm_bin:$PATH"
       log_step "Using linker from $llvm_bin."
@@ -407,6 +482,11 @@ run_flet_linux_build() {
   log_header "Running Flet build"
   log_step "Command: $FLET_BIN build --yes linux $ROOT_DIR"
   log_step "Build log: $BUILD_LOG"
+  local cmake_install_dir="$ROOT_DIR/build/linux-install"
+  local cmake_destdir="$ROOT_DIR/build/cmake-destdir"
+  mkdir -p "$cmake_install_dir" "$cmake_destdir"
+  export CMAKE_INSTALL_PREFIX="$cmake_install_dir"
+  export DESTDIR="$cmake_destdir"
   if [[ "$VERBOSE" -eq 1 ]]; then
     if "$FLET_BIN" build --yes --no-rich-output linux "$ROOT_DIR" 2>&1 | tee "$BUILD_LOG"; then
       log_ok "Flet Linux build completed."

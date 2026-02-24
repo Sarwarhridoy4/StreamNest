@@ -157,21 +157,21 @@ Install prerequisites first (Ubuntu/Debian):
 
 ```bash
 sudo apt update
-sudo apt install clang cmake ninja-build pkg-config libgtk-3-dev desktop-file-utils dpkg-dev
+sudo apt install clang cmake ninja-build pkg-config libgtk-3-dev desktop-file-utils dpkg-dev g++
 ```
 
-`./scripts/build_linux_packages.sh` auto-installs missing packaging dependencies, including fallback installation of `appimagetool` when it is not available in apt repositories.
+`./scripts/build_linux_packages.sh` auto-installs missing packaging dependencies, including concrete `libstdc++-XX-dev` packages and fallback installation of `appimagetool` when it is not available in apt repositories. It will also attempt to install `lld-20` if `/usr/lib/llvm-20/bin` exists without a linker and stages CMake installs under `build/` to avoid requiring write access to `/usr/local`.
 
 Run packaging:
 
 ```bash
-./scripts/build_linux_packages.sh 2.0 amd64
+./scripts/build_linux_packages.sh 2.0.0 amd64
 ```
 
 Verbose mode (show full apt/pip/flet output live):
 
 ```bash
-./scripts/build_linux_packages.sh 2.0 amd64 --verbose
+./scripts/build_linux_packages.sh 2.0.0 amd64 --verbose
 ```
 
 The script:
@@ -267,7 +267,7 @@ StreamNest/
 
 - Install linker toolchain for LLVM 20: `sudo apt install lld-20`
 - Verify binary exists: `/usr/lib/llvm-20/bin/ld.lld`
-- Re-run: `./scripts/build_linux_packages.sh 2.0 amd64`
+- Re-run: `./scripts/build_linux_packages.sh 2.0.0 amd64`
 
 ## Developer
 

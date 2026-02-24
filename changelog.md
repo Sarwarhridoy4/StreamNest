@@ -1,4 +1,4 @@
-j# Changelog
+# Changelog
 
 All notable changes to this project are documented in this file.
 
@@ -27,3 +27,7 @@ All notable changes to this project are documented in this file.
 - README screenshots section now enumerates all available images.
 - Linux packaging script now installs apt dependencies one-by-one and auto-installs `appimagetool` from AppImageKit releases when apt does not provide it.
 - Linux packaging dependency checks now try both `lld-20` and `lld` to improve compatibility across Ubuntu/Debian variants.
+- Linux packaging now installs a concrete `libstdc++-XX-dev` package when needed and auto-installs `lld-20` if `/usr/lib/llvm-20/bin` lacks a linker.
+- Linux packaging stages CMake installs under `build/` to avoid requiring root access to `/usr/local`.
+- Flet app metadata version now uses valid semver (`2.0.0`) for packaging tools.
+- Launcher icon generation uses a non-empty PNG asset to avoid `flutter_launcher_icons` failures.
