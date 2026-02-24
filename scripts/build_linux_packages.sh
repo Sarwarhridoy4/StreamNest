@@ -323,6 +323,7 @@ ensure_apt_linker_package() {
   done
 
   log_error "No usable linker package could be installed (tried: ${candidates[*]})."
+  log_error "Install linker tools first (Ubuntu example): sudo apt install lld-20"
   exit 1
 }
 
@@ -392,6 +393,7 @@ ensure_linux_linker() {
 
   if ! command -v ld.lld >/dev/null 2>&1 && ! command -v ld >/dev/null 2>&1; then
     log_error "No usable linker found (ld.lld or ld)."
+    log_error "Install linker tools first (Ubuntu example): sudo apt install lld-20"
     exit 1
   fi
 
