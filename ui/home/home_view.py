@@ -234,38 +234,68 @@ class HomeView(
 
         def _worker() -> None:
             try:
-                # Convert path to file:// URL for webbrowser
-                if os.name == 'nt':  # Windows
-                    file_url = f"file:///{folder.replace('\\', '/')}"
-                else:  # Unix-like systems
-                    file_url = f"file://{folder}"
+                system = platform.system().lower()
 
-                self._run_ui(lambda: self._set_status(f"Opening folder: {folder}"))
-                success = webbrowser.open(file_url)
+                if system.startswith("windows"):
+                    self._run_ui(lambda: self._set_status(f"Opening folder with Windows Explorer: {folder}"))
+                    os.startfile(folder)  # type: ignore[attr-defined]
 
-                if not success:
-                    # Fallback to system-specific commands
-                    system = platform.system().lower()
-                    if system.startswith("windows"):
-                        os.startfile(folder)  # type: ignore[attr-defined]
-                    elif system == "darwin":
-                        subprocess.run(["open", folder], check=False)  # noqa: S603,S607
-                    else:
-                        # For Linux, try xdg-open
-                        has_display = 'DISPLAY' in os.environ or 'WAYLAND_DISPLAY' in os.environ
-                        if not has_display:
-                            self._run_ui(lambda: self._set_status("Cannot open folder: No GUI display detected"))
-                            return
+                elif system == "darwin":
+                    self._run_ui(lambda: self._set_status(f"Opening folder with Finder: {folder}"))
+                    subprocess.run(["open", folder], check=False)  # noqa: S603,S607
 
+                else:  # Linux/Unix
+                    # Check if we have a GUI environment
+                    has_display = 'DISPLAY' in os.environ or 'WAYLAND_DISPLAY' in os.environ
+                    if not has_display:
+                        self._run_ui(lambda: self._set_status("Cannot open folder: No GUI display detected"))
+                        return
+
+                    self._run_ui(lambda: self._set_status(f"Opening folder with file manager: {folder}"))
+
+                    # Try xdg-open first (most standard approach)
+                    try:
                         result = subprocess.run(
                             ["xdg-open", folder],
                             capture_output=True,
                             text=True,
-                            timeout=10
+                            timeout=5
                         )
+                        if result.returncode == 0:
+                            return  # Success
+                    except (subprocess.TimeoutExpired, FileNotFoundError):
+                        pass
 
-                        if result.returncode != 0:
-                            raise Exception(f"xdg-open failed: {result.stderr}")
+                    # Fallback to common file managers
+                    file_managers = [
+                        ["nautilus", "--no-desktop", folder],  # GNOME Files
+                        ["dolphin", folder],  # KDE Dolphin
+                        ["thunar", folder],  # XFCE Thunar
+                        ["nemo", folder],    # Cinnamon Nemo
+                        ["pcmanfm", folder], # LXDE PCManFM
+                    ]
+
+                    for cmd in file_managers:
+                        try:
+                            result = subprocess.run(
+                                cmd,
+                                capture_output=True,
+                                timeout=5
+                            )
+                            if result.returncode == 0:
+                                return  # Success
+                        except (subprocess.TimeoutExpired, FileNotFoundError):
+                            continue
+
+                    # Last resort: try webbrowser as fallback
+                    try:
+                        if os.name == 'nt':
+                            file_url = f"file:///{folder.replace('\\', '/')}"
+                        else:
+                            file_url = f"file://{folder}"
+                        webbrowser.open(file_url)
+                    except Exception:
+                        raise Exception("No file manager found and webbrowser fallback failed")
 
             except subprocess.TimeoutExpired:
                 error_msg = "Folder opening timed out"
