@@ -10,8 +10,8 @@ from ui.home_view import HomeView
 def main(page: ft.Page) -> None:
     try:
         page.title = "StreamNest Media Downloader"
-        page.theme = ft.Theme(color_scheme_seed="#FF0000")
-        page.dark_theme = ft.Theme(color_scheme_seed="#FF0000")
+        page.theme = ft.Theme(color_scheme_seed="#6366f1")
+        page.dark_theme = ft.Theme(color_scheme_seed="#6366f1")
         page.theme_mode = ft.ThemeMode.SYSTEM
         page.padding = 0
 

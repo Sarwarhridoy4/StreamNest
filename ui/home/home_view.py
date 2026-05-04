@@ -16,7 +16,7 @@ from services.format_extractor import (
     QualityOption,
 )
 from state.app_state import AppState
-from ui.components import YT_RED
+from ui.components import PRIMARY_COLOR
 from utils.file_manager import ensure_download_directory, resolve_download_directory
 from utils.history_store import HistoryStore
 from utils.validators import is_valid_url
@@ -176,8 +176,8 @@ class HomeView(
     def _apply_theme_palette(self) -> None:
         is_dark = self._theme_is_dark()
         self.page.bgcolor = "#0B0B0D" if is_dark else "#FFF7F5"
-        self.progress_bar.color = YT_RED
-        self.playlist_progress_bar.color = YT_RED
+        self.progress_bar.bgcolor = PRIMARY_COLOR
+        self.playlist_progress_bar.bgcolor = PRIMARY_COLOR
 
         if hasattr(self, "left_panel"):
             self.left_panel.bgcolor = "#151518" if is_dark else "#FFFFFF"
@@ -196,8 +196,8 @@ class HomeView(
     def _apply_input_styles(self) -> None:
         is_dark = self._theme_is_dark()
         fill = "#202020" if is_dark else "#FFFFFF"
-        border = ft.Colors.with_opacity(0.35, YT_RED)
-        focused_border = YT_RED
+        border = ft.Colors.with_opacity(0.35, PRIMARY_COLOR)
+        focused_border = PRIMARY_COLOR
         inputs = [
             self.url_field,
             self.playlist_url_field,

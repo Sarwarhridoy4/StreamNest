@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import flet as ft
 
-from ui.components import YT_RED, build_header, labeled_control, primary_button, status_chip
+from ui.components import PRIMARY_COLOR, SECONDARY_COLOR, build_header, labeled_control, primary_button, status_chip
 
 
 class ViewLayoutMixin:
@@ -13,15 +13,19 @@ class ViewLayoutMixin:
         )
 
         self.left_panel = ft.Container(
-            padding=22,
-            bgcolor=ft.Colors.SURFACE,
-            border_radius=20,
-            border=ft.Border.all(1, ft.Colors.with_opacity(0.24, YT_RED)),
+            padding=24,
+            gradient=ft.LinearGradient(
+                begin=ft.Alignment(-1, -1),
+                end=ft.Alignment(1, 1),
+                colors=[ft.Colors.SURFACE, ft.Colors.with_opacity(0.9, ft.Colors.SURFACE)],
+            ),
+            border_radius=24,
+            border=ft.Border.all(1, ft.Colors.with_opacity(0.24, PRIMARY_COLOR)),
             shadow=ft.BoxShadow(
                 spread_radius=0,
-                blur_radius=24,
-                color=ft.Colors.with_opacity(0.12, ft.Colors.BLACK),
-                offset=ft.Offset(0, 10),
+                blur_radius=32,
+                color=ft.Colors.with_opacity(0.15, ft.Colors.BLACK),
+                offset=ft.Offset(0, 12),
             ),
             expand=False,
             content=ft.Column(
@@ -91,15 +95,19 @@ class ViewLayoutMixin:
         )
 
         self.right_panel = ft.Container(
-            padding=22,
-            border_radius=20,
-            bgcolor=ft.Colors.SURFACE_CONTAINER,
-            border=ft.Border.all(1, ft.Colors.with_opacity(0.2, YT_RED)),
+            padding=24,
+            border_radius=24,
+            gradient=ft.LinearGradient(
+                begin=ft.Alignment(-1, -1),
+                end=ft.Alignment(1, 1),
+                colors=[ft.Colors.SURFACE_CONTAINER, ft.Colors.SURFACE_CONTAINER_LOWEST],
+            ),
+            border=ft.Border.all(1, ft.Colors.with_opacity(0.2, PRIMARY_COLOR)),
             shadow=ft.BoxShadow(
                 spread_radius=0,
-                blur_radius=22,
-                color=ft.Colors.with_opacity(0.1, ft.Colors.BLACK),
-                offset=ft.Offset(0, 8),
+                blur_radius=28,
+                color=ft.Colors.with_opacity(0.12, ft.Colors.BLACK),
+                offset=ft.Offset(0, 10),
             ),
             expand=False,
             content=ft.Column(
@@ -132,15 +140,19 @@ class ViewLayoutMixin:
         self.root_container = self._build_root_container()
         self.welcome_card = ft.Container(
             width=960,
-            padding=ft.padding.symmetric(horizontal=42, vertical=38),
-            border_radius=30,
-            bgcolor=ft.Colors.SURFACE,
-            border=ft.Border.all(1, ft.Colors.with_opacity(0.26, YT_RED)),
+            padding=ft.padding.symmetric(horizontal=48, vertical=42),
+            border_radius=32,
+            gradient=ft.LinearGradient(
+                begin=ft.Alignment(-1, -1),
+                end=ft.Alignment(1, 1),
+                colors=[ft.Colors.SURFACE, ft.Colors.with_opacity(0.9, ft.Colors.SURFACE)],
+            ),
+            border=ft.Border.all(1, ft.Colors.with_opacity(0.26, PRIMARY_COLOR)),
             shadow=ft.BoxShadow(
                 spread_radius=0,
-                blur_radius=30,
-                color=ft.Colors.with_opacity(0.14, ft.Colors.BLACK),
-                offset=ft.Offset(0, 12),
+                blur_radius=36,
+                color=ft.Colors.with_opacity(0.18, ft.Colors.BLACK),
+                offset=ft.Offset(0, 16),
             ),
             content=ft.Column(
                 controls=[
@@ -182,15 +194,19 @@ class ViewLayoutMixin:
             ),
         )
         self.playlist_card = ft.Container(
-            padding=20,
-            border_radius=20,
-            bgcolor=ft.Colors.SURFACE,
-            border=ft.Border.all(1, ft.Colors.with_opacity(0.2, YT_RED)),
+            padding=24,
+            border_radius=24,
+            gradient=ft.LinearGradient(
+                begin=ft.Alignment(-1, -1),
+                end=ft.Alignment(1, 1),
+                colors=[ft.Colors.SURFACE, ft.Colors.with_opacity(0.9, ft.Colors.SURFACE)],
+            ),
+            border=ft.Border.all(1, ft.Colors.with_opacity(0.2, PRIMARY_COLOR)),
             shadow=ft.BoxShadow(
                 spread_radius=0,
-                blur_radius=24,
-                color=ft.Colors.with_opacity(0.1, ft.Colors.BLACK),
-                offset=ft.Offset(0, 10),
+                blur_radius=32,
+                color=ft.Colors.with_opacity(0.15, ft.Colors.BLACK),
+                offset=ft.Offset(0, 12),
             ),
             content=ft.Column(
                 controls=[
@@ -273,15 +289,19 @@ class ViewLayoutMixin:
             ),
         )
         self.history_card = ft.Container(
-            padding=20,
-            border_radius=20,
-            bgcolor=ft.Colors.SURFACE,
-            border=ft.Border.all(1, ft.Colors.with_opacity(0.2, YT_RED)),
+            padding=24,
+            border_radius=24,
+            gradient=ft.LinearGradient(
+                begin=ft.Alignment(-1, -1),
+                end=ft.Alignment(1, 1),
+                colors=[ft.Colors.SURFACE, ft.Colors.with_opacity(0.9, ft.Colors.SURFACE)],
+            ),
+            border=ft.Border.all(1, ft.Colors.with_opacity(0.2, PRIMARY_COLOR)),
             shadow=ft.BoxShadow(
                 spread_radius=0,
-                blur_radius=24,
-                color=ft.Colors.with_opacity(0.1, ft.Colors.BLACK),
-                offset=ft.Offset(0, 10),
+                blur_radius=32,
+                color=ft.Colors.with_opacity(0.15, ft.Colors.BLACK),
+                offset=ft.Offset(0, 12),
             ),
             content=ft.Column(
                 controls=[
@@ -331,15 +351,19 @@ class ViewLayoutMixin:
             ),
         )
         self.about_card = ft.Container(
-            padding=20,
-            border_radius=20,
-            bgcolor=ft.Colors.SURFACE,
-            border=ft.Border.all(1, ft.Colors.with_opacity(0.2, YT_RED)),
+            padding=24,
+            border_radius=24,
+            gradient=ft.LinearGradient(
+                begin=ft.Alignment(-1, -1),
+                end=ft.Alignment(1, 1),
+                colors=[ft.Colors.SURFACE, ft.Colors.with_opacity(0.9, ft.Colors.SURFACE)],
+            ),
+            border=ft.Border.all(1, ft.Colors.with_opacity(0.2, PRIMARY_COLOR)),
             shadow=ft.BoxShadow(
                 spread_radius=0,
-                blur_radius=24,
-                color=ft.Colors.with_opacity(0.1, ft.Colors.BLACK),
-                offset=ft.Offset(0, 10),
+                blur_radius=32,
+                color=ft.Colors.with_opacity(0.15, ft.Colors.BLACK),
+                offset=ft.Offset(0, 12),
             ),
             content=ft.Column(
                 controls=[

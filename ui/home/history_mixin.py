@@ -8,7 +8,7 @@ import flet as ft
 
 from services.downloader import DownloadResult
 from state.app_state import HistoryEntry
-from ui.components import YT_RED
+from ui.components import PRIMARY_COLOR
 
 
 class HistoryMixin:
@@ -92,7 +92,7 @@ class HistoryMixin:
             padding=12,
             border_radius=12,
             bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
-            border=ft.Border.all(1, ft.Colors.with_opacity(0.12, YT_RED)),
+            border=ft.Border.all(1, ft.Colors.with_opacity(0.12, PRIMARY_COLOR)),
             content=ft.ListTile(
                 leading=ft.Icon(ft.Icons.MOVIE_CREATION_OUTLINED if entry.context == "single" else ft.Icons.PLAYLIST_PLAY),
                 title=ft.Text(f"{entry.platform} • {entry.title}", max_lines=1, overflow=ft.TextOverflow.ELLIPSIS),

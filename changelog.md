@@ -6,7 +6,7 @@ All notable changes to this project are documented in this file.
 
 ### Added
 - Welcome screen flow with one-click entry into tabbed app UI.
-- Bottom navigation tabs for Single, Playlist, and About sections.
+- Bottom navigation tabs for Single, Playlist, History, and About sections.
 - Dedicated History tab with professional list layout and detailed modal view per download entry.
 - Encrypted persistent download history storage using Fernet (`state/download_history.enc`).
 - Erase History action with confirmation dialog.
@@ -15,6 +15,8 @@ All notable changes to this project are documented in this file.
 - `yt-dlp` runtime log collection with in-app log viewer.
 - Manual FFmpeg re-check action in the UI.
 - Modular `ui/home/` package split with mixins for layout, downloads, playlist, history, and FFmpeg flows.
+- Modern professional UI design with indigo/purple color scheme, subtle gradients, enhanced shadows, and icons on buttons.
+- Improved typography with better font weights and sizes for enhanced readability.
 
 ### Changed
 - About tab now includes the official StreamNest website link (`https://streamnest-puce.vercel.app`).

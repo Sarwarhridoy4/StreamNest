@@ -1,6 +1,6 @@
 # StreamNest
 
-StreamNest is a desktop media downloader built with **Flet** and **yt-dlp**. It supports single media downloads and playlist workflows across providers supported by `yt-dlp`.
+StreamNest is a sleek, professional desktop media downloader built with **Flet** and **yt-dlp**. Featuring a modern indigo-themed UI with gradients and icons, it supports single media downloads and playlist workflows across providers supported by `yt-dlp`.
 
 ## Demo
 
@@ -33,13 +33,15 @@ Click the preview to open the full demo video.
 ## Key Features
 
 - Welcome-first entry flow with one-click launch into the app
-- Centered card-based UI with bottom navigation tabs: **Single**, **Playlist**, **About**
+- Centered card-based UI with bottom navigation tabs: **Single**, **Playlist**, **History**, **About**
 - Back-to-welcome action available from all app cards
 - Unified app branding with official play-circle icon assets
+- Modern, professional design with indigo/purple theme and subtle gradients
 - Device-theme aware styling:
   - Follows system theme by default
   - Live updates on platform brightness change (when supported)
   - Optional **Force dark theme** override
+- Enhanced UI elements with icons, improved typography, and polished buttons
 - Startup FFmpeg detection with OS-specific install guidance in the UI
 - One-click FFmpeg auto-install flow (Linux/macOS/Windows) with confirmation and privilege prompt support
 - Live install/output log windows:
@@ -59,7 +61,8 @@ Click the preview to open the full demo video.
   - Progress bar
   - Speed and ETA
   - Current playlist file name
-- Download result dialogs and session history panel
+- Download result dialogs and encrypted local download history
+- Recent downloads preview in the main interface
 
 ## Changelog
 

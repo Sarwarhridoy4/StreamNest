@@ -15,8 +15,8 @@ class ControlLayoutMixin:
             expand=True,
         )
 
-        self.load_formats_btn = secondary_button("Load Formats", self._on_load_formats)
-        self.open_playlist_btn = secondary_button("Open Playlist Tab", self._on_open_playlist_dialog)
+        self.load_formats_btn = secondary_button("Load Formats", self._on_load_formats, icon=ft.Icons.SEARCH)
+        self.open_playlist_btn = secondary_button("Open Playlist Tab", self._on_open_playlist_dialog, icon=ft.Icons.PLAYLIST_PLAY)
 
         self.quality_dropdown = ft.Dropdown(
             label="Quality",
@@ -43,8 +43,8 @@ class ControlLayoutMixin:
         self.page.services.append(self.directory_picker)
 
         self.save_dir_text = ft.Text(self.state.save_directory, max_lines=2, overflow=ft.TextOverflow.ELLIPSIS)
-        self.pick_dir_btn = secondary_button("Choose Save Folder", self._on_pick_directory)
-        self.open_dir_btn = secondary_button("Open Folder", self._on_open_directory)
+        self.pick_dir_btn = secondary_button("Choose Save Folder", self._on_pick_directory, icon=ft.Icons.FOLDER_OPEN)
+        self.open_dir_btn = secondary_button("Open Folder", self._on_open_directory, icon=ft.Icons.FOLDER)
 
         self.progress_bar = ft.ProgressBar(value=0.0)
         self.status_text = ft.Text("Idle")
@@ -73,9 +73,9 @@ class ControlLayoutMixin:
         self.welcome_install_ffmpeg_btn.visible = self.ffmpeg_missing and self.ffmpeg_install_supported
         self.welcome_recheck_ffmpeg_btn = ft.TextButton(content="Re-check FFmpeg", on_click=self._on_recheck_ffmpeg)
 
-        self.download_btn = primary_button("Download", self._on_download)
-        self.cancel_btn = secondary_button("Cancel", self._on_cancel, disabled=True)
-        self.developer_info_btn = secondary_button("About Developer", self._on_open_developer_dialog)
+        self.download_btn = primary_button("Download", self._on_download, icon=ft.Icons.DOWNLOAD)
+        self.cancel_btn = secondary_button("Cancel", self._on_cancel, disabled=True, icon=ft.Icons.CANCEL)
+        self.developer_info_btn = secondary_button("About Developer", self._on_open_developer_dialog, icon=ft.Icons.INFO)
         self.back_to_welcome_btn = ft.TextButton(
             content="Back to Welcome",
             on_click=self._on_back_to_welcome,
@@ -102,7 +102,7 @@ class ControlLayoutMixin:
         self.recent_history_list = ft.ListView(spacing=6, auto_scroll=False, expand=True)
         self.history_tab_list = ft.ListView(spacing=10, auto_scroll=False, expand=True)
         self.history_summary_text = ft.Text("No downloads yet.", color=ft.Colors.ON_SURFACE_VARIANT)
-        self.clear_history_btn = secondary_button("Erase History", self._on_erase_history)
+        self.clear_history_btn = secondary_button("Erase History", self._on_erase_history, icon=ft.Icons.DELETE_FOREVER)
 
         # Playlist controls
         self.playlist_url_field = ft.TextField(
@@ -128,8 +128,8 @@ class ControlLayoutMixin:
             max_lines=2,
             overflow=ft.TextOverflow.ELLIPSIS,
         )
-        self.playlist_pick_dir_btn = secondary_button("Choose Save Folder", self._on_pick_playlist_directory)
-        self.playlist_open_dir_btn = secondary_button("Open Folder", self._on_open_playlist_directory)
+        self.playlist_pick_dir_btn = secondary_button("Choose Save Folder", self._on_pick_playlist_directory, icon=ft.Icons.FOLDER_OPEN)
+        self.playlist_open_dir_btn = secondary_button("Open Folder", self._on_open_playlist_directory, icon=ft.Icons.FOLDER)
 
         self.playlist_status_text = ft.Text(self.playlist_status_message)
         self.playlist_progress_bar = ft.ProgressBar(value=0.0)
@@ -139,8 +139,8 @@ class ControlLayoutMixin:
         self.playlist_eta_text = ft.Text("-", selectable=False)
         self.playlist_items_list = ft.ListView(spacing=4, auto_scroll=True, height=220)
 
-        self.playlist_load_btn = primary_button("Load Playlist", self._on_load_playlist)
-        self.playlist_download_btn = primary_button("Download Selected", self._on_playlist_download)
+        self.playlist_load_btn = primary_button("Load Playlist", self._on_load_playlist, icon=ft.Icons.LIST)
+        self.playlist_download_btn = primary_button("Download Selected", self._on_playlist_download, icon=ft.Icons.DOWNLOAD)
         self.playlist_select_all_btn = ft.TextButton(content="Select all", on_click=self._on_playlist_select_all)
         self.playlist_clear_btn = ft.TextButton(content="Clear", on_click=self._on_playlist_clear)
         self.result_dialog = ft.AlertDialog(
