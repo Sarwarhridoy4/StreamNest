@@ -85,7 +85,6 @@ class ViewLayoutMixin:
                         spacing=8,
                         run_spacing=8,
                     ),
-                    self.theme_switch,
                     self.developer_info_btn,
                 ],
                 spacing=14,
@@ -437,7 +436,24 @@ class ViewLayoutMixin:
 
         return ft.SafeArea(
             expand=True,
-            content=self.tab_host,
+            content=ft.Stack(
+                controls=[
+                    self.tab_host,
+                    # Floating theme toggle button
+                    ft.Container(
+                        content=ft.FloatingActionButton(
+                            icon=self._get_theme_icon(),
+                            on_click=self._on_theme_toggle,
+                            bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
+                            foreground_color=ft.Colors.ON_SURFACE,
+                            mini=True,
+                        ),
+                        alignment=ft.Alignment(1.0, -1.0),  # Top-right corner
+                        padding=ft.Padding.all(16),
+                    ),
+                ],
+                expand=True,
+            ),
         )
 
     def _build_root_container(self) -> ft.Container:

@@ -88,7 +88,7 @@ class ControlLayoutMixin:
             content="Back to Welcome",
             on_click=self._on_back_to_welcome,
         )
-        self.theme_switch = ft.Switch(label="Force dark theme", value=False, on_change=self._on_theme_toggle)
+        # Theme toggle is now a floating action button
 
         self.thumbnail = ft.Image(
             src="",

@@ -40,7 +40,7 @@ Click the preview to open the full demo video.
 - Device-theme aware styling:
   - Follows system theme by default
   - Live updates on platform brightness change (when supported)
-  - Optional **Force dark theme** override
+  - Floating theme toggle button (System → Dark → Light → System)
 - Enhanced UI elements with icons, improved typography, and polished buttons
 - Startup FFmpeg detection with OS-specific install guidance in the UI
 - One-click FFmpeg auto-install flow (Linux/macOS/Windows) with confirmation and privilege prompt support
@@ -152,7 +152,7 @@ python main.py
 2. Click **Open StreamNest** to enter the tabbed app UI.
 3. Use **Back to Welcome** to return to the welcome screen.
 4. Theme follows your system setting by default.
-5. Enable **Force dark theme** in Single tab to override system theme.
+5. Use the floating theme button (top-right) to cycle through System → Dark → Light themes.
 
 ## Build Linux Packages (.deb + .AppImage)
 

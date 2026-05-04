@@ -140,6 +140,15 @@ class HomeView(
             fit=ft.BoxFit.CONTAIN,
         )
 
+    def _get_theme_icon(self) -> str:
+        """Get the appropriate icon for the current theme mode."""
+        if self.page.theme_mode == ft.ThemeMode.DARK:
+            return ft.Icons.BRIGHTNESS_4  # Dark theme active
+        elif self.page.theme_mode == ft.ThemeMode.LIGHT:
+            return ft.Icons.BRIGHTNESS_7  # Light theme active
+        else:  # SYSTEM
+            return ft.Icons.BRIGHTNESS_AUTO  # System theme (auto)
+
     def _on_platform_brightness_change(self, _: ft.ControlEvent) -> None:
         """Handle platform brightness changes to update theme automatically."""
         if self.page.theme_mode != ft.ThemeMode.SYSTEM:
@@ -279,13 +288,19 @@ class HomeView(
             self._refresh_view()
 
     def _on_theme_toggle(self, _: ft.ControlEvent) -> None:
-        """Toggle between system theme and forced dark theme."""
-        if self.theme_switch.value:
-            # Force dark theme
+        """Cycle through theme modes: System → Dark → Light → System."""
+        current_mode = self.page.theme_mode
+
+        if current_mode == ft.ThemeMode.SYSTEM:
             self.page.theme_mode = ft.ThemeMode.DARK
-        else:
-            # Use system theme (default)
+        elif current_mode == ft.ThemeMode.DARK:
+            self.page.theme_mode = ft.ThemeMode.LIGHT
+        elif current_mode == ft.ThemeMode.LIGHT:
             self.page.theme_mode = ft.ThemeMode.SYSTEM
+        else:
+            # Default to system if unknown state
+            self.page.theme_mode = ft.ThemeMode.SYSTEM
+
         self.theme_manager.apply_theme_palette()
         self._page_update()
 

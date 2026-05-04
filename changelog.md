@@ -17,6 +17,7 @@ All notable changes to this project are documented in this file.
 - Modular `ui/home/` package split with mixins for layout, downloads, playlist, history, and FFmpeg flows.
 - Modern professional UI design with indigo/purple color scheme, subtle gradients, enhanced shadows, and icons on buttons.
 - Improved typography with better font weights and sizes for enhanced readability.
+- Floating theme toggle button accessible from all screens (cycles through System → Dark → Light themes).
 
 ### Changed
 - About tab now includes the official StreamNest website link (`https://streamnest-puce.vercel.app`).
