@@ -276,10 +276,15 @@ ensure_system_requirements() {
   have_command cmake || missing_packages+=("cmake")
   have_command ninja || have_command ninja-build || missing_packages+=("ninja-build")
   have_command pkg-config || missing_packages+=("pkg-config")
+  have_command g++ || missing_packages+=("g++")
   have_command desktop-file-validate || missing_packages+=("desktop-file-utils")
   have_command dpkg-deb || missing_packages+=("dpkg-dev")
   have_command appimagetool || missing_packages+=("appimagetool")
   have_command convert || missing_packages+=("imagemagick")
+
+  # GTK development libraries required for Flutter Linux desktop builds
+  # Always include GTK dev libraries as they're required for Flet builds
+  missing_packages+=("libgtk-3-dev")
 
   if ! have_command ld.lld && ! have_command ld; then
     missing_packages+=("lld-20")
