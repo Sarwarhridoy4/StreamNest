@@ -55,9 +55,11 @@ class PlaylistMixin:
 
             self._run_ui(_apply)
         except ValueError as exc:
-            self._run_ui(lambda: self._set_playlist_status(str(exc)))
+            error_msg = str(exc)
+            self._run_ui(lambda: self._set_playlist_status(error_msg))
         except Exception as exc:  # noqa: BLE001
-            self._run_ui(lambda: self._set_playlist_status(f"Playlist load failed: {exc}"))
+            error_msg = str(exc)
+            self._run_ui(lambda: self._set_playlist_status(f"Playlist load failed: {error_msg}"))
 
     def _on_playlist_item_toggle(self, event: ft.ControlEvent) -> None:
         raw_index = event.control.data

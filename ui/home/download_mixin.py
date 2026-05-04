@@ -83,7 +83,8 @@ class DownloadMixin:
 
             self._run_ui(_apply)
         except Exception as exc:  # noqa: BLE001
-            self._run_ui(lambda: self._set_status(f"Format extraction failed: {exc}"))
+            error_msg = str(exc)
+            self._run_ui(lambda: self._set_status(f"Format extraction failed: {error_msg}"))
         finally:
             def _finalize() -> None:
                 self.state.is_fetching_formats = False

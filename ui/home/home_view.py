@@ -222,10 +222,11 @@ class HomeView(
                 else:
                     subprocess.Popen(["xdg-open", folder])  # noqa: S603,S607
             except Exception as exc:  # noqa: BLE001
+                error_msg = str(exc)
                 if for_playlist:
-                    self._run_ui(lambda: self._set_playlist_status(f"Open folder failed: {exc}"))
+                    self._run_ui(lambda: self._set_playlist_status(f"Open folder failed: {error_msg}"))
                 else:
-                    self._run_ui(lambda: self._set_status(f"Open folder failed: {exc}"))
+                    self._run_ui(lambda: self._set_status(f"Open folder failed: {error_msg}"))
 
         self.page.run_thread(_worker)
 
@@ -278,8 +279,14 @@ class HomeView(
             self._refresh_view()
 
     def _on_theme_toggle(self, _: ft.ControlEvent) -> None:
-        self.page.theme_mode = ft.ThemeMode.DARK if self.theme_switch.value else ft.ThemeMode.SYSTEM
-        self._apply_theme_palette()
+        """Toggle between system theme and forced dark theme."""
+        if self.theme_switch.value:
+            # Force dark theme
+            self.page.theme_mode = ft.ThemeMode.DARK
+        else:
+            # Use system theme (default)
+            self.page.theme_mode = ft.ThemeMode.SYSTEM
+        self.theme_manager.apply_theme_palette()
         self._page_update()
 
     def _on_bottom_tab_change(self, event: ft.ControlEvent) -> None:
