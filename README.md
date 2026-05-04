@@ -99,7 +99,7 @@ python -m venv .venv
 3. Install dependencies:
 
 ```bash
-pip install -r requirements.txt
+pip install -e .
 ```
 
 ## FFmpeg Setup
@@ -201,7 +201,7 @@ With this repo on the `android` branch:
 1. Install dependencies:
 
 ```bash
-pip install -r requirements.txt
+pip install -e .
 ```
 
 2. Build APK:
@@ -223,7 +223,7 @@ Android packaging metadata is configured in `pyproject.toml` under `[tool.flet]`
 ```text
 StreamNest/
 ├── main.py                     # App entry point and page bootstrapping
-├── requirements.txt            # Python dependencies
+├── pyproject.toml              # Project configuration and dependencies
 ├── README.md                   # Project documentation
 ├── changelog.md                # Project change history
 ├── LICENSE                     # MIT license
