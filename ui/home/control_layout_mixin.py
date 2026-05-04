@@ -240,5 +240,5 @@ class ControlLayoutMixin:
             actions_alignment=ft.MainAxisAlignment.END,
         )
 
-        self._apply_input_styles()
+        # Input styles are now applied by ThemeManager
 

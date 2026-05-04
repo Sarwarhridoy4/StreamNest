@@ -126,7 +126,7 @@ class HomeView(
     def _initialize_ui_components(self) -> None:
         """Initialize and configure all UI components and apply initial theming."""
         self._build_controls()
-        self._apply_theme_palette()
+        self.theme_manager.apply_theme_palette()
         self._apply_quality_options()
         self._apply_playlist_quality_options()
         self._refresh_view()
@@ -146,15 +146,6 @@ class HomeView(
             return
         self.theme_manager.apply_theme_palette()
         self._page_update()
-
-        for control in dropdowns:
-            control.filled = True
-            control.fill_color = fill
-            control.border_radius = 14
-            control.content_padding = ft.Padding.symmetric(horizontal=14, vertical=12)
-            control.border_color = border
-            control.focused_border_color = focused_border
-            control.focused_border_width = 2
 
     def _on_url_commit(self, _: ft.ControlEvent) -> None:
         self.state.url = self.url_field.value.strip() if self.url_field.value else ""

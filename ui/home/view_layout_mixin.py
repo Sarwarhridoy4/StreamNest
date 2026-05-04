@@ -140,7 +140,7 @@ class ViewLayoutMixin:
         self.root_container = self._build_root_container()
         self.welcome_card = ft.Container(
             width=960,
-            padding=ft.padding.symmetric(horizontal=48, vertical=42),
+            padding=ft.Padding.symmetric(horizontal=48, vertical=42),
             border_radius=32,
             gradient=ft.LinearGradient(
                 begin=ft.Alignment(-1, -1),
@@ -180,7 +180,7 @@ class ViewLayoutMixin:
         )
         self.welcome_panel = ft.Container(
             expand=True,
-            padding=ft.padding.symmetric(horizontal=24, vertical=28),
+            padding=ft.Padding.symmetric(horizontal=24, vertical=28),
             content=ft.Column(
                 expand=True,
                 alignment=ft.MainAxisAlignment.CENTER,
@@ -433,7 +433,7 @@ class ViewLayoutMixin:
         )
         self.page.navigation_bar = self.bottom_nav
         self._set_active_panel()
-        self._apply_theme_palette()
+        self.theme_manager.apply_theme_palette()
 
         return ft.SafeArea(
             expand=True,
