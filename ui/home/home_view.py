@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import webbrowser
 from pathlib import Path
 import subprocess
 from typing import Callable
@@ -216,20 +217,68 @@ class HomeView(
             return
 
         folder = ensure_download_directory(path)
+
+        # Check if folder exists
+        if not os.path.exists(folder):
+            status = f"Folder does not exist: {folder}"
+            if for_playlist:
+                self._set_playlist_status(status)
+            else:
+                self._set_status(status)
+            return
+
         if for_playlist:
-            self._set_playlist_status(f"Opening host folder: {folder}")
+            self._set_playlist_status(f"Opening playlist folder: {folder}")
         else:
-            self._set_status(f"Opening host folder: {folder}")
+            self._set_status(f"Opening download folder: {folder}")
 
         def _worker() -> None:
             try:
-                system = platform.system().lower()
-                if system.startswith("windows"):
-                    os.startfile(folder)  # type: ignore[attr-defined]
-                elif system == "darwin":
-                    subprocess.Popen(["open", folder])  # noqa: S603,S607
+                # Convert path to file:// URL for webbrowser
+                if os.name == 'nt':  # Windows
+                    file_url = f"file:///{folder.replace('\\', '/')}"
+                else:  # Unix-like systems
+                    file_url = f"file://{folder}"
+
+                self._run_ui(lambda: self._set_status(f"Opening folder: {folder}"))
+                success = webbrowser.open(file_url)
+
+                if not success:
+                    # Fallback to system-specific commands
+                    system = platform.system().lower()
+                    if system.startswith("windows"):
+                        os.startfile(folder)  # type: ignore[attr-defined]
+                    elif system == "darwin":
+                        subprocess.run(["open", folder], check=False)  # noqa: S603,S607
+                    else:
+                        # For Linux, try xdg-open
+                        has_display = 'DISPLAY' in os.environ or 'WAYLAND_DISPLAY' in os.environ
+                        if not has_display:
+                            self._run_ui(lambda: self._set_status("Cannot open folder: No GUI display detected"))
+                            return
+
+                        result = subprocess.run(
+                            ["xdg-open", folder],
+                            capture_output=True,
+                            text=True,
+                            timeout=10
+                        )
+
+                        if result.returncode != 0:
+                            raise Exception(f"xdg-open failed: {result.stderr}")
+
+            except subprocess.TimeoutExpired:
+                error_msg = "Folder opening timed out"
+                if for_playlist:
+                    self._run_ui(lambda: self._set_playlist_status(f"Open folder failed: {error_msg}"))
                 else:
-                    subprocess.Popen(["xdg-open", folder])  # noqa: S603,S607
+                    self._run_ui(lambda: self._set_status(f"Open folder failed: {error_msg}"))
+            except Exception as exc:  # noqa: BLE001
+                error_msg = str(exc)
+                if for_playlist:
+                    self._run_ui(lambda: self._set_playlist_status(f"Open folder failed: {error_msg}"))
+                else:
+                    self._run_ui(lambda: self._set_status(f"Open folder failed: {error_msg}"))
             except Exception as exc:  # noqa: BLE001
                 error_msg = str(exc)
                 if for_playlist:
