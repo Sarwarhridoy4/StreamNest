@@ -148,6 +148,37 @@ run_with_optional_sudo() {
   fi
 }
 
+install_appimagetool() {
+  local arch="$1"
+  local appimagetool_url=""
+  local appimagetool_file=""
+
+  case "$arch" in
+    amd64|x86_64)
+      appimagetool_url="https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
+      appimagetool_file="appimagetool-x86_64.AppImage"
+      ;;
+    arm64|aarch64)
+      appimagetool_url="https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-aarch64.AppImage"
+      appimagetool_file="appimagetool-aarch64.AppImage"
+      ;;
+    *)
+      log_error "Unsupported architecture for appimagetool: $arch"
+      return 1
+      ;;
+  esac
+
+  log_step "Downloading appimagetool from AppImageKit releases"
+  if ! curl -L -o "$appimagetool_file" "$appimagetool_url"; then
+    log_error "Failed to download appimagetool"
+    return 1
+  fi
+
+  chmod +x "$appimagetool_file"
+  sudo mv "$appimagetool_file" /usr/local/bin/appimagetool
+  log_ok "appimagetool installed successfully"
+}
+
 install_apt_packages() {
   local packages=("$@")
   if [[ "${#packages[@]}" -eq 0 ]]; then
@@ -161,15 +192,38 @@ install_apt_packages() {
     exit 1
   fi
 
-  log_header "Installing system dependencies"
-  log_step "Missing packages: ${packages[*]}"
-  if [[ "$VERBOSE" -eq 1 ]]; then
-    run_with_optional_sudo apt-get update
-    run_with_optional_sudo apt-get install -y "${packages[@]}"
-  else
-    run_with_optional_sudo apt-get update -qq
-    run_with_optional_sudo apt-get install -y -qq "${packages[@]}"
+  # Handle appimagetool specially - download from AppImageKit if not available via apt
+  local apt_packages=()
+  local appimagetool_needed=false
+
+  for pkg in "${packages[@]}"; do
+    if [[ "$pkg" == "appimagetool" ]]; then
+      appimagetool_needed=true
+    else
+      apt_packages+=("$pkg")
+    fi
+  done
+
+  if [[ "${#apt_packages[@]}" -gt 0 ]]; then
+    log_header "Installing system dependencies"
+    log_step "Installing via apt: ${apt_packages[*]}"
+    if [[ "$VERBOSE" -eq 1 ]]; then
+      run_with_optional_sudo apt-get update
+      run_with_optional_sudo apt-get install -y "${apt_packages[@]}"
+    else
+      run_with_optional_sudo apt-get update -qq
+      run_with_optional_sudo apt-get install -y -qq "${apt_packages[@]}"
+    fi
   fi
+
+  if [[ "$appimagetool_needed" == true ]]; then
+    log_step "Installing appimagetool from AppImageKit releases"
+    if ! install_appimagetool "$ARCH"; then
+      log_error "Failed to install appimagetool"
+      exit 1
+    fi
+  fi
+
   log_ok "System dependencies installed."
 }
 
@@ -198,18 +252,18 @@ ensure_python_tools() {
 ensure_python_requirements() {
   ensure_python_tools
 
-  if [[ ! -f "$ROOT_DIR/requirements.txt" ]]; then
-    log_warn "requirements.txt not found; skipping Python dependency installation."
+  if [[ ! -f "$ROOT_DIR/pyproject.toml" ]]; then
+    log_warn "pyproject.toml not found; skipping Python dependency installation."
     return 0
   fi
 
-  log_header "Validating Python dependencies"
+  log_header "Installing Python dependencies"
   if [[ "$VERBOSE" -eq 1 ]]; then
     # shellcheck disable=SC2086
-    $PIP_BIN install --disable-pip-version-check -r "$ROOT_DIR/requirements.txt"
+    $PIP_BIN install --disable-pip-version-check -e "$ROOT_DIR"
   else
     # shellcheck disable=SC2086
-    $PIP_BIN install --quiet --disable-pip-version-check -r "$ROOT_DIR/requirements.txt"
+    $PIP_BIN install --quiet --disable-pip-version-check -e "$ROOT_DIR"
   fi
   log_ok "Python dependencies are ready."
 }
