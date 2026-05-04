@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import os
-import webbrowser
 from pathlib import Path
+import platform
 import subprocess
+import webbrowser
 from typing import Callable
 
 import flet as ft
@@ -39,6 +40,8 @@ class HomeView(
 ):
     def __init__(self, page: ft.Page) -> None:
         """Initialize the HomeView with all necessary components and state."""
+        import sys
+
         self.page = page
 
         # Initialize utility classes
@@ -191,36 +194,19 @@ class HomeView(
         await self._pick_directory(for_playlist=True)
 
     def _on_open_directory(self, _: ft.ControlEvent) -> None:
+
         self._open_folder(self.state.save_directory, for_playlist=False)
 
     def _on_open_playlist_directory(self, _: ft.ControlEvent) -> None:
         self._open_folder(self.state.playlist_save_directory, for_playlist=True)
 
     def _open_folder(self, path: str, for_playlist: bool) -> None:
-        if self.platform_utils.is_remote_mobile_web_session():
-            status = (
-                "This session runs on Linux host via web. Android storage is not accessible here. "
-                "Use a packaged Android build to access phone folders."
-            )
-            if for_playlist:
-                self._set_playlist_status(status)
-            else:
-                self._set_status(status)
-            return
-
-        if not self.platform_utils.supports_open_folder():
-            status = "Open folder is not available on this host OS."
-            if for_playlist:
-                self._set_playlist_status(status)
-            else:
-                self._set_status(status)
-            return
-
         folder = ensure_download_directory(path)
 
         # Check if folder exists
         if not os.path.exists(folder):
             status = f"Folder does not exist: {folder}"
+            print(f"DEBUG: {status}")
             if for_playlist:
                 self._set_playlist_status(status)
             else:
@@ -232,91 +218,93 @@ class HomeView(
         else:
             self._set_status(f"Opening download folder: {folder}")
 
-        def _worker() -> None:
-            try:
-                system = platform.system().lower()
+        # Run file manager opening synchronously (not in a thread)
+        # GUI applications need to run in the main thread
+        try:
+            system = platform.system().lower()
 
-                if system.startswith("windows"):
-                    self._run_ui(lambda: self._set_status(f"Opening folder with Windows Explorer: {folder}"))
-                    os.startfile(folder)  # type: ignore[attr-defined]
+            if system.startswith("windows"):
+                os.startfile(folder)  # type: ignore[attr-defined]
 
-                elif system == "darwin":
-                    self._run_ui(lambda: self._set_status(f"Opening folder with Finder: {folder}"))
-                    subprocess.run(["open", folder], check=False)  # noqa: S603,S607
+            elif system == "darwin":
+                subprocess.run(["open", folder], check=False)  # noqa: S603,S607
 
-                else:  # Linux/Unix
-                    # Check if we have a GUI environment
-                    has_display = 'DISPLAY' in os.environ or 'WAYLAND_DISPLAY' in os.environ
-                    if not has_display:
-                        self._run_ui(lambda: self._set_status("Cannot open folder: No GUI display detected"))
-                        return
+            else:  # Linux/Unix
+                # Check if we have a GUI environment
+                has_display = 'DISPLAY' in os.environ or 'WAYLAND_DISPLAY' in os.environ
+                if not has_display:
+                    status = "Cannot open folder: No GUI display detected"
+                    if for_playlist:
+                        self._set_playlist_status(status)
+                    else:
+                        self._set_status(status)
+                    return
+                # Check if we have a GUI environment
+                has_display = 'DISPLAY' in os.environ or 'WAYLAND_DISPLAY' in os.environ
+                if not has_display:
+                    status = "Cannot open folder: No GUI display detected"
+                    if for_playlist:
+                        self._set_playlist_status(status)
+                    else:
+                        self._set_status(status)
+                    return
 
-                    self._run_ui(lambda: self._set_status(f"Opening folder with file manager: {folder}"))
+                # Try xdg-open first (most standard approach)
+                try:
+                    result = subprocess.run(
+                        ["xdg-open", folder],
+                        capture_output=True,
+                        text=True,
+                        timeout=5
+                    )
+                    if result.returncode == 0:
+                        return  # Success
+                except (subprocess.TimeoutExpired, FileNotFoundError):
+                    pass
 
-                    # Try xdg-open first (most standard approach)
+                # Fallback to common file managers
+                file_managers = [
+                    ["nautilus", "--no-desktop", folder],  # GNOME Files
+                    ["dolphin", folder],  # KDE Dolphin
+                    ["thunar", folder],  # XFCE Thunar
+                    ["nemo", folder],    # Cinnamon Nemo
+                    ["pcmanfm", folder], # LXDE PCManFM
+                ]
+
+                for cmd in file_managers:
                     try:
                         result = subprocess.run(
-                            ["xdg-open", folder],
+                            cmd,
                             capture_output=True,
-                            text=True,
                             timeout=5
                         )
                         if result.returncode == 0:
                             return  # Success
                     except (subprocess.TimeoutExpired, FileNotFoundError):
-                        pass
+                        continue
 
-                    # Fallback to common file managers
-                    file_managers = [
-                        ["nautilus", "--no-desktop", folder],  # GNOME Files
-                        ["dolphin", folder],  # KDE Dolphin
-                        ["thunar", folder],  # XFCE Thunar
-                        ["nemo", folder],    # Cinnamon Nemo
-                        ["pcmanfm", folder], # LXDE PCManFM
-                    ]
+                # Last resort: try webbrowser as fallback
+                try:
+                    if os.name == 'nt':
+                        file_url = f"file:///{folder.replace('\\', '/')}"
+                    else:
+                        file_url = f"file://{folder}"
+                    webbrowser.open(file_url)
+                except Exception:
+                    raise Exception("No file manager found and webbrowser fallback failed")
 
-                    for cmd in file_managers:
-                        try:
-                            result = subprocess.run(
-                                cmd,
-                                capture_output=True,
-                                timeout=5
-                            )
-                            if result.returncode == 0:
-                                return  # Success
-                        except (subprocess.TimeoutExpired, FileNotFoundError):
-                            continue
-
-                    # Last resort: try webbrowser as fallback
-                    try:
-                        if os.name == 'nt':
-                            file_url = f"file:///{folder.replace('\\', '/')}"
-                        else:
-                            file_url = f"file://{folder}"
-                        webbrowser.open(file_url)
-                    except Exception:
-                        raise Exception("No file manager found and webbrowser fallback failed")
-
-            except subprocess.TimeoutExpired:
-                error_msg = "Folder opening timed out"
-                if for_playlist:
-                    self._run_ui(lambda: self._set_playlist_status(f"Open folder failed: {error_msg}"))
-                else:
-                    self._run_ui(lambda: self._set_status(f"Open folder failed: {error_msg}"))
-            except Exception as exc:  # noqa: BLE001
-                error_msg = str(exc)
-                if for_playlist:
-                    self._run_ui(lambda: self._set_playlist_status(f"Open folder failed: {error_msg}"))
-                else:
-                    self._run_ui(lambda: self._set_status(f"Open folder failed: {error_msg}"))
-            except Exception as exc:  # noqa: BLE001
-                error_msg = str(exc)
-                if for_playlist:
-                    self._run_ui(lambda: self._set_playlist_status(f"Open folder failed: {error_msg}"))
-                else:
-                    self._run_ui(lambda: self._set_status(f"Open folder failed: {error_msg}"))
-
-        self.page.run_thread(_worker)
+        except subprocess.TimeoutExpired:
+            error_msg = "Folder opening timed out"
+            if for_playlist:
+                self._set_playlist_status(f"Open folder failed: {error_msg}")
+            else:
+                self._set_status(f"Open folder failed: {error_msg}")
+        except Exception as exc:  # noqa: BLE001
+            error_msg = str(exc)
+            if for_playlist:
+                self._set_playlist_status(f"Open folder failed: {error_msg}")
+            else:
+                self._set_status(f"Open folder failed: {error_msg}")
 
     async def _pick_directory(self, for_playlist: bool) -> None:
         if not self.platform_utils.supports_directory_picker():
@@ -483,9 +471,11 @@ class HomeView(
         self.download_btn.disabled = self.state.is_downloading
         self.cancel_btn.disabled = not self.state.is_downloading
         self.pick_dir_btn.disabled = False
-        self.open_dir_btn.disabled = not self.platform_utils.supports_open_folder()
+        supports_open = self.platform_utils.supports_open_folder()
+
+        self.open_dir_btn.disabled = not supports_open
         self.playlist_pick_dir_btn.disabled = False
-        self.playlist_open_dir_btn.disabled = not self.platform_utils.supports_open_folder()
+        self.playlist_open_dir_btn.disabled = not supports_open
         self.install_ffmpeg_btn.visible = self.ffmpeg_missing and self.ffmpeg_install_supported
         self.welcome_install_ffmpeg_btn.visible = self.ffmpeg_missing and self.ffmpeg_install_supported
         self.install_ffmpeg_btn.disabled = self.ffmpeg_install_running
