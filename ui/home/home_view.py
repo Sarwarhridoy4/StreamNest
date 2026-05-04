@@ -2,8 +2,6 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-import platform
-import shutil
 import subprocess
 from typing import Callable
 
@@ -16,7 +14,6 @@ from services.format_extractor import (
     QualityOption,
 )
 from state.app_state import AppState
-from ui.components import PRIMARY_COLOR
 from utils.file_manager import ensure_download_directory, resolve_download_directory
 from utils.history_store import HistoryStore
 from utils.validators import is_valid_url
@@ -26,6 +23,9 @@ from ui.home.history_mixin import HistoryMixin
 from ui.home.playlist_mixin import PlaylistMixin
 from ui.home.control_layout_mixin import ControlLayoutMixin
 from ui.home.view_layout_mixin import ViewLayoutMixin
+from ui.home.platform_utils import PlatformUtils
+from ui.home.ffmpeg_utils import FFmpegUtils
+from ui.home.theme_manager import ThemeManager
 
 
 class HomeView(
@@ -37,73 +37,102 @@ class HomeView(
     ViewLayoutMixin,
 ):
     def __init__(self, page: ft.Page) -> None:
+        """Initialize the HomeView with all necessary components and state."""
         self.page = page
+
+        # Initialize utility classes
+        self.platform_utils = PlatformUtils(page)
+        self.ffmpeg_utils = FFmpegUtils(self.platform_utils)
+        self.theme_manager = ThemeManager(self)
+
+        # Initialize core application state and services
+        self._initialize_core_state()
+        self._initialize_services()
+
+        # Initialize UI state and platform-specific properties
+        self._initialize_ui_state()
+        self._initialize_ffmpeg_state()
+
+        # Setup platform theme listener and initial UI
+        self.theme_manager.setup_theme_listener()
+        self._initialize_ui_components()
+
+    def _initialize_core_state(self) -> None:
+        """Initialize core application state including directories and history."""
         default_dir = ensure_download_directory(None)
         self.state = AppState(save_directory=default_dir, playlist_save_directory=default_dir)
+
+        # Initialize history storage and load existing history
         self.history_store = HistoryStore()
         self.state.set_history(self.history_store.load())
 
+    def _initialize_services(self) -> None:
+        """Initialize core services for downloading and format extraction."""
         self.downloader = DownloaderService()
         self.extractor = FormatExtractor()
 
+    def _initialize_ui_state(self) -> None:
+        """Initialize UI state variables for quality options and playlist management."""
+        # Quality options for single downloads
         self.quality_options: list[QualityOption] = [
             QualityOption(label="Best", value="best"),
             QualityOption(label="Worst", value="worst"),
         ]
 
+        # Quality options for playlist downloads
         self.playlist_quality_options: list[QualityOption] = [
             QualityOption(label="Best", value="best"),
             QualityOption(label="Worst", value="worst"),
         ]
+
+        # Playlist-specific state variables
         self.playlist_selected_quality = "best"
         self.playlist_entries: list[PlaylistEntry] = []
         self.playlist_selected_indices: set[int] = set()
         self.playlist_status_message = "Load playlist to choose items."
         self.active_download_context = "single"
+
+        # Playlist progress tracking
         self.playlist_progress = 0.0
         self.playlist_speed = ""
         self.playlist_eta = ""
         self.playlist_live_status = "Idle"
         self.playlist_current_file = "-"
+
+        # Navigation and view state
         self.bottom_tab_index = 0
         self.show_welcome = True
-        self.platform_name = self._platform_name()
-        self.is_mobile_platform = self._is_mobile_platform()
-        self.is_android_platform = self._is_android_platform()
-        self._platform_theme_listener_enabled = False
+
+    # Platform properties are now handled by PlatformUtils
+
+    def _initialize_ffmpeg_state(self) -> None:
+        """Initialize FFmpeg-related state and detection."""
         self.ffmpeg_notice_shown = False
-        self.ffmpeg_missing = self._is_ffmpeg_missing()
-        self.ffmpeg_install_hint = self._build_ffmpeg_install_hint()
-        self.ffmpeg_install_supported = self._supports_ffmpeg_auto_install()
+        self.ffmpeg_missing = self.ffmpeg_utils.is_ffmpeg_missing()
+        self.ffmpeg_install_hint = self.ffmpeg_utils.build_ffmpeg_install_hint()
+        self.ffmpeg_install_supported = self.ffmpeg_utils.supports_ffmpeg_auto_install()
         self.ffmpeg_install_running = False
         self.pending_ffmpeg_install_plan: list[tuple[list[str], bool]] = []
         self.ffmpeg_install_logs: list[str] = []
         self.ytdlp_logs: list[str] = []
 
+        # Set appropriate status messages if FFmpeg is missing
         if self.ffmpeg_missing:
             self.state.status_text = "FFmpeg not found. Install it to ensure merge/extract features work."
             self.playlist_status_message = "FFmpeg not found. Install it for reliable playlist post-processing."
 
-        try:
-            self.page.on_platform_brightness_change = self._on_platform_brightness_change
-            self._platform_theme_listener_enabled = True
-        except Exception:
-            self._platform_theme_listener_enabled = False
+    # Theme listener setup is now handled by ThemeManager
 
+    def _initialize_ui_components(self) -> None:
+        """Initialize and configure all UI components and apply initial theming."""
         self._build_controls()
         self._apply_theme_palette()
         self._apply_quality_options()
         self._apply_playlist_quality_options()
         self._refresh_view()
 
-    def _theme_is_dark(self) -> bool:
-        if self.page.theme_mode == ft.ThemeMode.DARK:
-            return True
-        if self.page.theme_mode == ft.ThemeMode.LIGHT:
-            return False
-        return self._device_prefers_dark()
-
     def _brand_logo(self, size: int) -> ft.Image:
+        """Create and return the brand logo image."""
         return ft.Image(
             src="assets/icon.png",
             width=size,
@@ -111,111 +140,12 @@ class HomeView(
             fit=ft.BoxFit.CONTAIN,
         )
 
-    def _platform_name(self) -> str:
-        return str(getattr(self.page, "platform", "")).lower()
-
-    def _is_mobile_platform(self) -> bool:
-        return "android" in self.platform_name or "ios" in self.platform_name
-
-    def _is_android_platform(self) -> bool:
-        return "android" in self.platform_name
-
-    def _is_remote_mobile_web_session(self) -> bool:
-        return self.is_mobile_platform and bool(getattr(self.page, "web", False))
-
-    def _supports_directory_picker(self) -> bool:
-        if "ios" in self.platform_name:
-            return False
-        return not self._is_remote_mobile_web_session()
-
-    def _supports_open_folder(self) -> bool:
-        system = platform.system().lower()
-        return system.startswith("windows") or system == "darwin" or system.startswith("linux")
-
-    def _is_ffmpeg_missing(self) -> bool:
-        return shutil.which("ffmpeg") is None
-
-    def _supports_ffmpeg_auto_install(self) -> bool:
-        if self.is_android_platform or self._is_remote_mobile_web_session():
-            return False
-        system = platform.system().lower()
-        return system.startswith("linux") or system.startswith("windows") or system == "darwin"
-
-    def _build_ffmpeg_install_hint(self) -> str:
-        if self.is_android_platform:
-            return "FFmpeg not found. Android builds should bundle FFmpeg or use media that does not require post-processing."
-        system = platform.system().lower()
-        base = "FFmpeg not found."
-        if system.startswith("linux"):
-            return f"{base} Install with your package manager, e.g. `sudo apt install ffmpeg`."
-        if system == "darwin":
-            return f"{base} Install with Homebrew: `brew install ffmpeg`."
-        if system.startswith("windows"):
-            return f"{base} Install via Winget: `winget install Gyan.FFmpeg`."
-        if system == "android":
-            return f"{base} Bundle FFmpeg with the app or include a mobile FFmpeg integration."
-        return f"{base} Install FFmpeg and ensure it is available in PATH."
-
-    def _device_prefers_dark(self) -> bool:
-        brightness = getattr(self.page, "platform_brightness", None)
-        if brightness is None:
-            return False
-        brightness_enum = getattr(ft, "Brightness", None)
-        if brightness_enum is not None and brightness == brightness_enum.DARK:
-            return True
-        if isinstance(brightness, str):
-            return brightness.lower() == "dark"
-        return False
-
     def _on_platform_brightness_change(self, _: ft.ControlEvent) -> None:
+        """Handle platform brightness changes to update theme automatically."""
         if self.page.theme_mode != ft.ThemeMode.SYSTEM:
             return
-        self._apply_theme_palette()
+        self.theme_manager.apply_theme_palette()
         self._page_update()
-
-    def _apply_theme_palette(self) -> None:
-        is_dark = self._theme_is_dark()
-        self.page.bgcolor = "#0B0B0D" if is_dark else "#FFF7F5"
-        self.progress_bar.bgcolor = PRIMARY_COLOR
-        self.playlist_progress_bar.bgcolor = PRIMARY_COLOR
-
-        if hasattr(self, "left_panel"):
-            self.left_panel.bgcolor = "#151518" if is_dark else "#FFFFFF"
-        if hasattr(self, "right_panel"):
-            self.right_panel.bgcolor = "#1D1D21" if is_dark else "#FFFDFC"
-        if hasattr(self, "welcome_card"):
-            self.welcome_card.bgcolor = "#16161A" if is_dark else "#FFFFFF"
-        if hasattr(self, "playlist_card"):
-            self.playlist_card.bgcolor = "#16161A" if is_dark else "#FFFFFF"
-        if hasattr(self, "history_card"):
-            self.history_card.bgcolor = "#16161A" if is_dark else "#FFFFFF"
-        if hasattr(self, "about_card"):
-            self.about_card.bgcolor = "#16161A" if is_dark else "#FFFFFF"
-        self._apply_input_styles()
-
-    def _apply_input_styles(self) -> None:
-        is_dark = self._theme_is_dark()
-        fill = "#202020" if is_dark else "#FFFFFF"
-        border = ft.Colors.with_opacity(0.35, PRIMARY_COLOR)
-        focused_border = PRIMARY_COLOR
-        inputs = [
-            self.url_field,
-            self.playlist_url_field,
-            self.playlist_range_field,
-        ]
-        dropdowns = [
-            self.quality_dropdown,
-            self.playlist_quality_dropdown,
-        ]
-
-        for control in inputs:
-            control.filled = True
-            control.fill_color = fill
-            control.border_radius = 14
-            control.content_padding = ft.Padding.symmetric(horizontal=14, vertical=12)
-            control.border_color = border
-            control.focused_border_color = focused_border
-            control.focused_border_width = 2
 
         for control in dropdowns:
             control.filled = True
@@ -266,7 +196,7 @@ class HomeView(
         self._open_folder(self.state.playlist_save_directory, for_playlist=True)
 
     def _open_folder(self, path: str, for_playlist: bool) -> None:
-        if self._is_remote_mobile_web_session():
+        if self.platform_utils.is_remote_mobile_web_session():
             status = (
                 "This session runs on Linux host via web. Android storage is not accessible here. "
                 "Use a packaged Android build to access phone folders."
@@ -277,7 +207,7 @@ class HomeView(
                 self._set_status(status)
             return
 
-        if not self._supports_open_folder():
+        if not self.platform_utils.supports_open_folder():
             status = "Open folder is not available on this host OS."
             if for_playlist:
                 self._set_playlist_status(status)
@@ -309,8 +239,8 @@ class HomeView(
         self.page.run_thread(_worker)
 
     async def _pick_directory(self, for_playlist: bool) -> None:
-        if not self._supports_directory_picker():
-            if self._is_remote_mobile_web_session():
+        if not self.platform_utils.supports_directory_picker():
+            if self.platform_utils.is_remote_mobile_web_session():
                 status = (
                     "Cannot pick Android storage in web session (`flet run --android`). "
                     "Package and run the app on Android to access device folders."
@@ -461,9 +391,9 @@ class HomeView(
         self.download_btn.disabled = self.state.is_downloading
         self.cancel_btn.disabled = not self.state.is_downloading
         self.pick_dir_btn.disabled = False
-        self.open_dir_btn.disabled = not self._supports_open_folder()
+        self.open_dir_btn.disabled = not self.platform_utils.supports_open_folder()
         self.playlist_pick_dir_btn.disabled = False
-        self.playlist_open_dir_btn.disabled = not self._supports_open_folder()
+        self.playlist_open_dir_btn.disabled = not self.platform_utils.supports_open_folder()
         self.install_ffmpeg_btn.visible = self.ffmpeg_missing and self.ffmpeg_install_supported
         self.welcome_install_ffmpeg_btn.visible = self.ffmpeg_missing and self.ffmpeg_install_supported
         self.install_ffmpeg_btn.disabled = self.ffmpeg_install_running
