@@ -66,9 +66,9 @@ class HomeView(
         default_dir = ensure_download_directory(None)
         self.state = AppState(save_directory=default_dir, playlist_save_directory=default_dir)
 
-        # Initialize history storage and load existing history
+        # Initialize history storage but defer loading
         self.history_store = HistoryStore()
-        self.state.set_history(self.history_store.load())
+        self.state.set_history([])  # Start with empty history
 
     def _initialize_services(self) -> None:
         """Initialize core services for downloading and format extraction."""
@@ -112,18 +112,13 @@ class HomeView(
     def _initialize_ffmpeg_state(self) -> None:
         """Initialize FFmpeg-related state and detection."""
         self.ffmpeg_notice_shown = False
-        self.ffmpeg_missing = self.ffmpeg_utils.is_ffmpeg_missing()
-        self.ffmpeg_install_hint = self.ffmpeg_utils.build_ffmpeg_install_hint()
+        self.ffmpeg_missing = False  # Will be checked later
+        self.ffmpeg_install_hint = "Checking FFmpeg availability..."
         self.ffmpeg_install_supported = self.ffmpeg_utils.supports_ffmpeg_auto_install()
         self.ffmpeg_install_running = False
         self.pending_ffmpeg_install_plan: list[tuple[list[str], bool]] = []
         self.ffmpeg_install_logs: list[str] = []
         self.ytdlp_logs: list[str] = []
-
-        # Set appropriate status messages if FFmpeg is missing
-        if self.ffmpeg_missing:
-            self.state.status_text = "FFmpeg not found. Install it to ensure merge/extract features work."
-            self.playlist_status_message = "FFmpeg not found. Install it for reliable playlist post-processing."
 
     # Theme listener setup is now handled by ThemeManager
 
@@ -134,6 +129,10 @@ class HomeView(
         self._apply_quality_options()
         self._apply_playlist_quality_options()
         self._refresh_view()
+
+        # Load history and check FFmpeg asynchronously after UI is ready
+        self.page.run_task(self._load_history_async)
+        self.page.run_task(self._check_ffmpeg_async)
 
     def _brand_logo(self, size: int) -> ft.Image:
         """Create and return the brand logo image."""
@@ -510,6 +509,39 @@ class HomeView(
             action()
 
         self.page.run_task(_apply)
+
+    async def _load_history_async(self) -> None:
+        """Load history in background after UI initialization."""
+        try:
+            history = self.history_store.load()
+            self.state.set_history(history)
+            self._render_history()
+            self._page_update()
+        except Exception:  # noqa: BLE001
+            # History loading failed, but don't crash the app
+            pass
+
+    async def _check_ffmpeg_async(self) -> None:
+        """Check FFmpeg availability in background after UI initialization."""
+        try:
+            self.ffmpeg_missing = self.ffmpeg_utils.is_ffmpeg_missing()
+            self.ffmpeg_install_hint = self.ffmpeg_utils.build_ffmpeg_install_hint()
+
+            # Set appropriate status messages if FFmpeg is missing
+            if self.ffmpeg_missing:
+                self.state.status_text = "FFmpeg not found. Install it to ensure merge/extract features work."
+                self.playlist_status_message = "FFmpeg not found. Install it for reliable playlist post-processing."
+            else:
+                if not self.state.status_text.startswith("FFmpeg"):
+                    # Don't override other status messages
+                    pass
+
+            self._refresh_view()
+        except Exception:  # noqa: BLE001
+            # FFmpeg check failed, assume it's missing
+            self.ffmpeg_missing = True
+            self.ffmpeg_install_hint = "Unable to check FFmpeg status."
+            self._refresh_view()
 
     def _page_update(self) -> None:
         self.page.update()
