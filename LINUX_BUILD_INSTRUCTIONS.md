@@ -1,11 +1,9 @@
 
 # Linux Build Instructions for StreamNest
 
-This document provides instructions to build the StreamNest Media Downloader as a Linux executable using Flet.
+This document provides detailed instructions to build the StreamNest Media Downloader as a Linux executable using Flet.
 
----
-
-# Prerequisites
+## Prerequisites
 
 - **Operating System**: Linux (Ubuntu/Debian recommended)
 - **Python**: 3.11.x (recommended)
@@ -14,12 +12,10 @@ This document provides instructions to build the StreamNest Media Downloader as 
 - **Build Tools**: Required Linux packages for Flutter desktop builds
 
 > IMPORTANT:
-> Python 3.14 currently causes Linux build failures with Flet desktop packaging.
-> Use Python 3.11 for stable builds.
+> Python 3.14 requires a workaround for Linux builds due to macro redefinition errors.
+> Use the `CXXFLAGS` flag as shown in the troubleshooting section below.
 
----
-
-# Installing System Dependencies
+## Installing System Dependencies
 
 On Ubuntu/Debian-based systems:
 
@@ -42,9 +38,7 @@ sudo apt install -y \
     software-properties-common
 ````
 
----
-
-# Install Python 3.11
+## Install Python 3.11
 
 Python 3.11 is recommended for stable Flet builds. Installation varies by distribution.
 
@@ -126,9 +120,7 @@ pyenv global 3.11.9
 python --version
 ```
 
----
-
-# Project Structure
+## Project Structure
 
 The project follows the required Flet structure:
 
@@ -137,9 +129,7 @@ The project follows the required Flet structure:
 * `requirements.txt` → Python dependencies
 * `assets/` → Icons, splash screens, etc.
 
----
-
-# Create Virtual Environment
+## Create Virtual Environment
 
 Remove old environments first:
 
@@ -171,9 +161,7 @@ Expected:
 Python 3.11.x
 ```
 
----
-
-# Install Dependencies
+## Install Dependencies
 
 Upgrade pip:
 
@@ -193,9 +181,7 @@ Install/update Flet tools:
 pip install -U flet flet-cli
 ```
 
----
-
-# Verify Environment
+## Verify Environment
 
 Run:
 
@@ -210,9 +196,7 @@ Flet 0.85.0 on Linux
 Python 3.11.x
 ```
 
----
-
-# Clean Previous Build Artifacts
+## Clean Previous Build Artifacts
 
 Before building:
 
@@ -221,9 +205,7 @@ flutter clean
 rm -rf build .dart_tool
 ```
 
----
-
-# Build the Linux Executable
+## Build the Linux Executable
 
 Run:
 
@@ -238,9 +220,7 @@ This command will:
 * Package Python dependencies
 * Build the Linux executable
 
----
-
-# Build Output
+## Build Output
 
 Generated files will be located in:
 
@@ -250,9 +230,7 @@ build/linux/
 
 The executable can be distributed directly to compatible Linux systems.
 
----
-
-# Run the Built Application
+## Run the Built Application
 
 Example:
 
@@ -260,9 +238,7 @@ Example:
 ./build/linux/streamnest
 ```
 
----
-
-# Configuration
+## Configuration
 
 Build configuration is defined in `pyproject.toml`.
 
@@ -279,9 +255,7 @@ Additional Linux-specific settings can be added under:
 [tool.flet.linux]
 ```
 
----
-
-# Troubleshooting
+## Troubleshooting
 
 ## Flet 0.85.0 Macro Redefinition Error
 
@@ -313,13 +287,13 @@ You are likely using Python 3.14.
 
 Fix:
 
-* Remove current virtual environment
-* Install Python 3.11
-* Recreate `.venv`
-* Reinstall dependencies
-* Rebuild
+Use the following command to build with Python 3.14:
 
----
+```bash
+export CXXFLAGS="-Wno-macro-redefined" && flet build linux
+```
+
+Alternatively, switch to Python 3.11 for stable builds without workarounds.
 
 ## Android SDK Warning
 
@@ -337,8 +311,6 @@ Install Android Studio if Android support is needed:
 
 [Android Studio](https://developer.android.com/studio?utm_source=chatgpt.com)
 
----
-
 ## Verbose Build Logs
 
 For detailed debugging:
@@ -348,15 +320,10 @@ flet build linux -v
 export CXXFLAGS="-Wno-macro-redefined" && flet build linux
 ```
 
----
-
-# Additional Notes
+## Additional Notes# Additional Notes
 
 * First build may take several minutes
 * Flutter SDK is downloaded automatically
 * Final executable is self-contained
 * Recommended Python version: 3.11.x
-* Avoid Python 3.14 until officially supported by Flet
-
-```
-```
+* Python 3.14 is supported with the `CXXFLAGS` workaround

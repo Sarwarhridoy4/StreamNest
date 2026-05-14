@@ -27,10 +27,10 @@ def create_splash_screen() -> ft.Control:
         async def pulse():
             while True:
                 logo_container.scale = 1.1
-                await logo_container.update_async()
+                logo_container.update()
                 await asyncio.sleep(0.75)
                 logo_container.scale = 1.0
-                await logo_container.update_async()
+                logo_container.update()
                 await asyncio.sleep(0.75)
         import asyncio
         asyncio.create_task(pulse())
@@ -39,7 +39,7 @@ def create_splash_screen() -> ft.Control:
     import asyncio
     async def delayed_start():
         await asyncio.sleep(0.1)
-        await start_pulse()
+        start_pulse()
     asyncio.create_task(delayed_start())
 
     return ft.Container(

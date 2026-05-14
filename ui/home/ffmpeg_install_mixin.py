@@ -43,9 +43,30 @@ class FfmpegInstallMixin:
         except Exception:
             self._show_popup("Unable to open install confirmation dialog.", ft.Colors.RED_700)
 
+    def _is_ffmpeg_missing(self) -> bool:
+        """Backward-compatible wrapper for FFmpeg presence check."""
+        try:
+            return self.ffmpeg_utils.is_ffmpeg_missing()
+        except Exception:
+            return True
+
+    def _build_ffmpeg_install_hint(self) -> str:
+        """Backward-compatible wrapper for FFmpeg install hint."""
+        try:
+            return self.ffmpeg_utils.build_ffmpeg_install_hint()
+        except Exception:
+            return "FFmpeg not found."
+
     def _on_recheck_ffmpeg(self, _: ft.ControlEvent) -> None:
-        self.ffmpeg_missing = self._is_ffmpeg_missing()
-        self.ffmpeg_install_hint = self._build_ffmpeg_install_hint()
+        # Compatibility: support older environments where _is_ffmpeg_missing may not exist
+        try:
+            self.ffmpeg_missing = self._is_ffmpeg_missing()
+        except AttributeError:
+            self.ffmpeg_missing = self.ffmpeg_utils.is_ffmpeg_missing()
+        try:
+            self.ffmpeg_install_hint = self._build_ffmpeg_install_hint()
+        except AttributeError:
+            self.ffmpeg_install_hint = self.ffmpeg_utils.build_ffmpeg_install_hint()
         self.ffmpeg_warning_text.value = self.ffmpeg_install_hint
         self.welcome_ffmpeg_warning_text.value = self.ffmpeg_install_hint
         self.ffmpeg_warning_text.visible = self.ffmpeg_missing
@@ -262,7 +283,7 @@ class FfmpegInstallMixin:
                 text=True,
                 bufsize=1,
             )
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             return False, str(exc)
 
         if input_data is not None and process.stdin is not None:

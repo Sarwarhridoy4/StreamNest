@@ -10,25 +10,47 @@ Click the preview to open the full demo video.
 
 ## All Screenshots
 
+### Welcome Screen
+
+![Welcome screen](assets/screenshots/welcome_screen.png)
+
 ### Single Downloader
 
-![Single tab screenshot](assets/screenshots/single.png)
+![Single downloader](assets/screenshots/single_downloader.png)
 
 ### Playlist Downloader
 
-![Playlist tab screenshot](assets/screenshots/playlist.png)
+![Playlist downloader](assets/screenshots/playlist_downloader.png)
 
-### History
+### Download History
 
-![History tab screenshot](assets/screenshots/history.png)
+![Download history](assets/screenshots/download_history.png)
 
 ### History Details
 
-![History details screenshot](assets/screenshots/h_details.png)
+![History details](assets/screenshots/history_details.png)
 
-### About
+### About Section
 
-![About tab screenshot](assets/screenshots/about.png)
+![About section](assets/screenshots/about_section.png)
+
+### Additional Screenshots
+
+#### FFmpeg Install Dialog
+
+![FFmpeg install dialog](assets/screenshots/ffmpeg_install_dialog.png)
+
+#### Download Progress
+
+![Download progress](assets/screenshots/download_progress.png)
+
+#### Download Complete
+
+![Download complete](assets/screenshots/download_complete.png)
+
+#### Playlist Selection
+
+![Playlist selection](assets/screenshots/playlist_selection.png)
 
 ## Key Features
 
@@ -154,43 +176,68 @@ python main.py
 4. Theme follows your system setting by default.
 5. Use the floating theme button (top-right) to cycle through System → Dark → Light themes.
 
-## Build Linux Packages (.deb + .AppImage)
+## Development
 
-Install prerequisites first (Ubuntu/Debian):
+### Testing
+
+Install test dependencies:
+
+```bash
+pip install -e .[test]
+```
+
+Run tests:
+
+```bash
+pytest
+```
+
+### Linting and Type Checking
+
+Install development dependencies:
+
+```bash
+pip install -e .[dev]
+```
+
+Lint with Ruff:
+
+```bash
+ruff check .
+```
+
+Type check with MyPy:
+
+```bash
+mypy .
+```
+
+### CI
+
+This project uses GitHub Actions for continuous integration. The CI pipeline runs on push and pull requests, performing linting, type checking, and tests.
+
+## Build Instructions
+
+### Linux Packages (.deb + .AppImage)
+
+For detailed Linux build instructions, see [LINUX_BUILD_INSTRUCTIONS.md](LINUX_BUILD_INSTRUCTIONS.md).
+
+Brief overview:
+
+Install prerequisites:
 
 ```bash
 sudo apt update
 sudo apt install clang cmake ninja-build pkg-config libgtk-3-dev desktop-file-utils dpkg-dev g++
 ```
 
-`./scripts/build_linux_packages.sh` auto-installs missing packaging dependencies, including concrete `libstdc++-XX-dev` packages and fallback installation of `appimagetool` when it is not available in apt repositories. It will also attempt to install `lld-20` if `/usr/lib/llvm-20/bin` exists without a linker and stages CMake installs under `build/` to avoid requiring write access to `/usr/local`.
-
-Run packaging:
+Run packaging script:
 
 ```bash
 ./scripts/build_linux_packages.sh 2.0.0 amd64
 ```
 
-Verbose mode (show full apt/pip/flet output live):
-
-```bash
-./scripts/build_linux_packages.sh 2.0.0 amd64 --verbose
-```
-
-The script:
-
-- Runs `flet build --yes linux` (with one retry using `--clear-cache`)
-- Builds `.deb` and `.AppImage` from the generated Linux bundle
-- Writes package checksums
-- Supports `--verbose` (or `-v`) to stream full command output; default mode is compact and styled
-
-Output files in `dist/`:
-
-- `streamnest_<version>_amd64.deb`
-- `StreamNest-<version>-x86_64.AppImage`
-- `checksums-<version>.sha256`
-
-## Build Android APK
+### Android APK
 
 Follow the official guide for environment setup (Java, Android SDK, Android command-line tools):
 
@@ -227,12 +274,20 @@ StreamNest/
 ├── README.md                   # Project documentation
 ├── changelog.md                # Project change history
 ├── LICENSE                     # MIT license
+├── .github/
+│   └── workflows/
+│       └── ci.yml              # GitHub Actions CI configuration
+├── .gitignore                  # Git ignore patterns
 ├── assets/                     # Icons, demo media, screenshots
 ├── services/
 │   ├── downloader.py           # yt-dlp orchestration, hooks, progress
 │   └── format_extractor.py     # Format and playlist metadata extraction
 ├── state/
 │   └── app_state.py            # Shared UI state model
+├── tests/                      # Unit and integration tests
+│   ├── __init__.py
+│   ├── test_ffmpeg_utils.py    # Tests for FFmpeg utilities
+│   └── test_ffmpeg_install_mixin.py  # Tests for FFmpeg install mixin
 ├── ui/
 │   ├── components.py           # Reusable UI helpers
 │   ├── home_view.py            # Compatibility wrapper exporting HomeView
