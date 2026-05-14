@@ -369,10 +369,10 @@ run_flet_linux_build() {
   : > "$BUILD_LOG"
 
   log_header "Running Flet build"
-  log_step "Command: $FLET_BIN build --yes linux $ROOT_DIR"
+  log_step "Command: CXXFLAGS=\"-Wno-macro-redefined\" $FLET_BIN build --yes linux $ROOT_DIR"
   log_step "Build log: $BUILD_LOG"
   if [[ "$VERBOSE" -eq 1 ]]; then
-    if "$FLET_BIN" build --yes --no-rich-output linux "$ROOT_DIR" 2>&1 | tee "$BUILD_LOG"; then
+    if CXXFLAGS="-Wno-macro-redefined" "$FLET_BIN" build --yes --no-rich-output linux "$ROOT_DIR" 2>&1 | tee "$BUILD_LOG"; then
       log_ok "Flet Linux build completed."
       return
     fi
@@ -380,11 +380,11 @@ run_flet_linux_build() {
     log_warn "Initial build failed. Retrying once with --clear-cache..."
     {
       echo "----- retry with --clear-cache -----"
-      "$FLET_BIN" build --yes --no-rich-output --clear-cache linux "$ROOT_DIR"
+      CXXFLAGS="-Wno-macro-redefined" "$FLET_BIN" build --yes --no-rich-output --clear-cache linux "$ROOT_DIR"
     } 2>&1 | tee -a "$BUILD_LOG" || exit 1
     log_ok "Flet Linux build completed on retry."
   else
-    if "$FLET_BIN" build --yes --no-rich-output linux "$ROOT_DIR" >"$BUILD_LOG" 2>&1; then
+    if CXXFLAGS="-Wno-macro-redefined" "$FLET_BIN" build --yes --no-rich-output linux "$ROOT_DIR" >"$BUILD_LOG" 2>&1; then
       log_ok "Flet Linux build completed."
       return
     fi
@@ -392,7 +392,7 @@ run_flet_linux_build() {
     log_warn "Initial build failed. Retrying once with --clear-cache..."
     {
       echo "----- retry with --clear-cache -----"
-      "$FLET_BIN" build --yes --no-rich-output --clear-cache linux "$ROOT_DIR"
+      CXXFLAGS="-Wno-macro-redefined" "$FLET_BIN" build --yes --no-rich-output --clear-cache linux "$ROOT_DIR"
     } >>"$BUILD_LOG" 2>&1 || {
       log_error "Flet build failed. Last 60 log lines:"
       tail -n 60 "$BUILD_LOG" | sed 's/^/  | /' >&2
