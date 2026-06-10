@@ -1,15 +1,17 @@
 from __future__ import annotations
 
 import traceback
+from typing import Callable
 
 import flet as ft
 
 from ui.home_view import HomeView
 
 
-def create_splash_screen() -> ft.Control:
-    """Create a splash screen to show during app initialization."""
-    # Animated logo container with pulsing effect
+def create_splash_screen() -> tuple[ft.Control, Callable[[], None]]:
+    """Create a splash screen and return (root_control, start_animation)."""
+    import asyncio
+
     logo_container = ft.Container(
         content=ft.Image(
             src="assets/icon.png",
@@ -19,12 +21,11 @@ def create_splash_screen() -> ft.Control:
         ),
         animate_scale=ft.Animation(duration=1500, curve=ft.AnimationCurve.EASE_IN_OUT),
         scale=1.0,
-        on_click=None,  # Placeholder to enable animation
+        on_click=None,
     )
 
-    # Start pulsing animation
-    def start_pulse(e=None):
-        async def pulse():
+    def start_pulse() -> None:
+        async def pulse() -> None:
             while True:
                 logo_container.scale = 1.1
                 logo_container.update()
@@ -32,17 +33,10 @@ def create_splash_screen() -> ft.Control:
                 logo_container.scale = 1.0
                 logo_container.update()
                 await asyncio.sleep(0.75)
-        import asyncio
+
         asyncio.create_task(pulse())
 
-    # Trigger animation after a short delay
-    import asyncio
-    async def delayed_start():
-        await asyncio.sleep(0.1)
-        start_pulse()
-    asyncio.create_task(delayed_start())
-
-    return ft.Container(
+    root = ft.Container(
         expand=True,
         alignment=ft.Alignment(0, 0),
         content=ft.Column(
@@ -68,6 +62,8 @@ def create_splash_screen() -> ft.Control:
             spacing=16,
         ),
     )
+
+    return root, start_pulse
 
 
 async def initialize_app_async(page: ft.Page) -> None:
@@ -113,11 +109,11 @@ def main(page: ft.Page) -> None:
 
     page.scroll = ft.ScrollMode.AUTO
 
-    # Show splash screen first
-    page.add(create_splash_screen())
+    splash, start_splash_animation = create_splash_screen()
+    page.add(splash)
     page.update()
+    start_splash_animation()
 
-    # Initialize app in background
     page.run_task(initialize_app_async, page)
 
 

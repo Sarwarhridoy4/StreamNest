@@ -5,6 +5,27 @@ All notable changes to this project are documented in this file.
 ## [Unreleased]
 
 ### Added
+- FFmpeg version display in the UI on startup and re-check.
+- Robust `ffmpeg -version` detection with timeout, error classification, and minimum version check.
+- FFmpeg minimum version threshold (`4.0.0`) enforced during detection.
+- FFmpeg diagnostic API exposing human-readable failure reasons (not in PATH, crash, timeout, old version).
+- `is_ffmpeg_version_sufficient()` and `get_ffmpeg_version()` helpers in `FFmpegUtils`.
+
+### Changed
+- FFmpeg warning text is always visible; uses green text when detected and red text when missing.
+- FFmpeg installer and re-check paths show `FFmpeg {version} detected.` when present.
+- `FFmpeg::is_ffmpeg_missing()` now validates actual `ffmpeg -version` execution instead of only `shutil.which`.
+- `DownloaderService._detect_ffmpeg_dir()` now runs `ffmpeg -version` before accepting a binary directory.
+- FFmpeg re-check flow prefers version display over generic install hint when FFmpeg is found.
+
+### Fixed
+- Flet splash-screen `RuntimeError` caused by updating a control before it was attached to the page.
+- Startup task argument mismatch (`initialize_app_async`) after refactor.
+- FFmpeg installation completion now toggles warning text color and visibility correctly.
+
+## [2.0.1] - 2026-06-10
+
+### Added
 - Welcome screen flow with one-click entry into tabbed app UI.
 - Bottom navigation tabs for Single, Playlist, History, and About sections.
 - Dedicated History tab with professional list layout and detailed modal view per download entry.
@@ -35,3 +56,16 @@ All notable changes to this project are documented in this file.
 - Linux packaging stages CMake installs under `build/` to avoid requiring root access to `/usr/local`.
 - Flet app metadata version now uses valid semver (`2.0.0`) for packaging tools.
 - Launcher icon generation uses a non-empty PNG asset to avoid `flutter_launcher_icons` failures.
+
+## [2.0.0] - 2026-06-10
+
+### Added
+- Initial public release.
+- Core download engine wrapping `yt-dlp` with threaded execution, progress hooks, and cancel support.
+- Single-video and playlist download modes with quality selection.
+- Audio extraction to MP3 via FFmpeg.
+- Persisted download history and state using encrypted storage.
+- FFmpeg presence auto-detection and guided installer on first launch.
+- About / Developer info screen.
+- Dark and light theme support with system-aware defaults.
+- Linux `.deb` and `.AppImage` packaging scripts.

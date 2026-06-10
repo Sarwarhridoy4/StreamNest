@@ -483,8 +483,10 @@ class HomeView(
         self.welcome_recheck_ffmpeg_btn.disabled = self.ffmpeg_install_running
         self.view_ffmpeg_log_btn.disabled = not self.ffmpeg_install_logs and not self.ffmpeg_install_running
         self.view_ytdlp_log_btn.disabled = not self.ytdlp_logs
-        self.ffmpeg_warning_text.visible = self.ffmpeg_missing
-        self.welcome_ffmpeg_warning_text.visible = self.ffmpeg_missing
+        self.ffmpeg_warning_text.visible = True
+        self.ffmpeg_warning_text.color = ft.Colors.GREEN_700 if not self.ffmpeg_missing else ft.Colors.RED_700
+        self.welcome_ffmpeg_warning_text.visible = True
+        self.welcome_ffmpeg_warning_text.color = ft.Colors.GREEN_700 if not self.ffmpeg_missing else ft.Colors.RED_700
 
         self.mode_group.value = self.state.selected_mode
         self.quality_dropdown.value = self.state.selected_quality
@@ -525,20 +527,19 @@ class HomeView(
         """Check FFmpeg availability in background after UI initialization."""
         try:
             self.ffmpeg_missing = self.ffmpeg_utils.is_ffmpeg_missing()
-            self.ffmpeg_install_hint = self.ffmpeg_utils.build_ffmpeg_install_hint()
-
-            # Set appropriate status messages if FFmpeg is missing
             if self.ffmpeg_missing:
+                self.ffmpeg_install_hint = self.ffmpeg_utils.build_ffmpeg_install_hint()
                 self.state.status_text = "FFmpeg not found. Install it to ensure merge/extract features work."
                 self.playlist_status_message = "FFmpeg not found. Install it for reliable playlist post-processing."
             else:
-                if not self.state.status_text.startswith("FFmpeg"):
-                    # Don't override other status messages
-                    pass
-
+                version = self.ffmpeg_utils.get_ffmpeg_version()
+                self.ffmpeg_install_hint = f"FFmpeg {version} detected."
+                if not self.state.status_text:
+                    self.state.status_text = "Ready."
+                if not self.playlist_status_message:
+                    self.playlist_status_message = "Ready."
             self._refresh_view()
         except Exception:  # noqa: BLE001
-            # FFmpeg check failed, assume it's missing
             self.ffmpeg_missing = True
             self.ffmpeg_install_hint = "Unable to check FFmpeg status."
             self._refresh_view()
