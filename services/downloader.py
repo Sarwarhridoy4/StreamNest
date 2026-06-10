@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass
 from pathlib import Path
 import re
 import shutil
+import subprocess
 from threading import Event, Lock, Thread
 import time
 from typing import Any, Callable, Optional
@@ -271,6 +273,18 @@ class DownloaderService:
     def _detect_ffmpeg_dir() -> str | None:
         ffmpeg_bin = shutil.which("ffmpeg")
         if not ffmpeg_bin:
+            return None
+        try:
+            result = subprocess.run(
+                [ffmpeg_bin, "-version"],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                stdin=subprocess.DEVNULL,
+                timeout=3,
+            )
+            if result.returncode != 0:
+                return None
+        except (OSError, subprocess.TimeoutExpired):
             return None
         return str(Path(ffmpeg_bin).resolve().parent)
 

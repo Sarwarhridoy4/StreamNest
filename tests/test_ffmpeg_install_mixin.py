@@ -61,16 +61,16 @@ class TestFfmpegInstallMixin:
         mixin.ffmpeg_missing = True
         mixin.ffmpeg_install_hint = "old hint"
         ffmpeg_utils.is_ffmpeg_missing.return_value = False
-        ffmpeg_utils.build_ffmpeg_install_hint.return_value = "new hint"
+        ffmpeg_utils.build_ffmpeg_install_hint.return_value = "Install hint"
+        ffmpeg_utils.get_ffmpeg_version.return_value = "5.1.2"
 
         mixin._on_recheck_ffmpeg(None)
 
         assert mixin.ffmpeg_missing is False
-        assert mixin.ffmpeg_install_hint == "new hint"
-        # Check UI updates
-        assert mixin.ffmpeg_warning_text.value == "new hint"
+        assert mixin.ffmpeg_install_hint == "FFmpeg 5.1.2 detected."
+        assert mixin.ffmpeg_warning_text.value == "FFmpeg 5.1.2 detected."
         assert mixin.ffmpeg_warning_text.visible is False
-        assert mixin.welcome_ffmpeg_warning_text.value == "new hint"
+        assert mixin.welcome_ffmpeg_warning_text.value == "FFmpeg 5.1.2 detected."
         assert mixin.welcome_ffmpeg_warning_text.visible is False
         assert mixin.install_ffmpeg_btn.visible is False
         assert mixin.welcome_install_ffmpeg_btn.visible is False

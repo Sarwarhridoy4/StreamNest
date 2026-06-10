@@ -55,7 +55,7 @@ class ControlLayoutMixin:
             self.ffmpeg_install_hint,
             color=ft.Colors.RED_700,
             selectable=True,
-            visible=self.ffmpeg_missing,
+            visible=True,
         )
         self.install_ffmpeg_btn = secondary_button("Install FFmpeg", self._on_install_ffmpeg)
         self.install_ffmpeg_btn.visible = self.ffmpeg_missing and self.ffmpeg_install_supported
@@ -67,7 +67,7 @@ class ControlLayoutMixin:
             color=ft.Colors.RED_700,
             selectable=True,
             text_align=ft.TextAlign.CENTER,
-            visible=self.ffmpeg_missing,
+            visible=True,
         )
         self.welcome_install_ffmpeg_btn = secondary_button("Install FFmpeg", self._on_install_ffmpeg)
         self.welcome_install_ffmpeg_btn.visible = self.ffmpeg_missing and self.ffmpeg_install_supported

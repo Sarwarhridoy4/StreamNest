@@ -64,13 +64,18 @@ class FfmpegInstallMixin:
         except AttributeError:
             self.ffmpeg_missing = self.ffmpeg_utils.is_ffmpeg_missing()
         try:
-            self.ffmpeg_install_hint = self._build_ffmpeg_install_hint()
+            if self.ffmpeg_missing:
+                self.ffmpeg_install_hint = self._build_ffmpeg_install_hint()
+            else:
+                self.ffmpeg_install_hint = f"FFmpeg {self.ffmpeg_utils.get_ffmpeg_version()} detected."
         except AttributeError:
             self.ffmpeg_install_hint = self.ffmpeg_utils.build_ffmpeg_install_hint()
         self.ffmpeg_warning_text.value = self.ffmpeg_install_hint
         self.welcome_ffmpeg_warning_text.value = self.ffmpeg_install_hint
-        self.ffmpeg_warning_text.visible = self.ffmpeg_missing
-        self.welcome_ffmpeg_warning_text.visible = self.ffmpeg_missing
+        self.ffmpeg_warning_text.visible = True
+        self.welcome_ffmpeg_warning_text.visible = True
+        self.ffmpeg_warning_text.color = ft.Colors.GREEN_700 if not self.ffmpeg_missing else ft.Colors.RED_700
+        self.welcome_ffmpeg_warning_text.color = ft.Colors.GREEN_700 if not self.ffmpeg_missing else ft.Colors.RED_700
         self.install_ffmpeg_btn.visible = self.ffmpeg_missing and self.ffmpeg_install_supported
         self.welcome_install_ffmpeg_btn.visible = self.ffmpeg_missing and self.ffmpeg_install_supported
         status = "FFmpeg detected." if not self.ffmpeg_missing else "FFmpeg still not detected in PATH."
@@ -334,8 +339,10 @@ class FfmpegInstallMixin:
         self.pending_ffmpeg_install_plan = []
         self.ffmpeg_warning_text.value = self.ffmpeg_install_hint
         self.welcome_ffmpeg_warning_text.value = self.ffmpeg_install_hint
-        self.ffmpeg_warning_text.visible = self.ffmpeg_missing
-        self.welcome_ffmpeg_warning_text.visible = self.ffmpeg_missing
+        self.ffmpeg_warning_text.visible = True
+        self.welcome_ffmpeg_warning_text.visible = True
+        self.ffmpeg_warning_text.color = ft.Colors.GREEN_700 if not self.ffmpeg_missing else ft.Colors.RED_700
+        self.welcome_ffmpeg_warning_text.color = ft.Colors.GREEN_700 if not self.ffmpeg_missing else ft.Colors.RED_700
         self.install_ffmpeg_btn.visible = self.ffmpeg_missing and self.ffmpeg_install_supported
         self.welcome_install_ffmpeg_btn.visible = self.ffmpeg_missing and self.ffmpeg_install_supported
         self.install_ffmpeg_btn.disabled = False
