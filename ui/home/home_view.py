@@ -426,6 +426,9 @@ class HomeView(
         self._set_active_panel()
         self._page_update()
 
+    def _page_update(self) -> None:
+        self.page.update()
+
     def _on_close_result_dialog(self, _: ft.ControlEvent) -> None:
         try:
             self.page.pop_dialog()
