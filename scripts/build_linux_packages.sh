@@ -259,9 +259,9 @@ ensure_python_requirements() {
 
   log_header "Installing Python dependencies"
   if [[ "$VERBOSE" -eq 1 ]]; then
-    "$UV_BIN" pip install --system --editable "$ROOT_DIR"
+    "$UV_BIN" pip install --editable "$ROOT_DIR"
   else
-    "$UV_BIN" pip install --quiet --system --editable "$ROOT_DIR"
+    "$UV_BIN" pip install --quiet --editable "$ROOT_DIR"
   fi
   log_ok "Python dependencies are ready."
 }
