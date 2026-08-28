@@ -234,7 +234,7 @@ sudo apt install clang cmake ninja-build pkg-config libgtk-3-dev desktop-file-ut
 Run packaging script:
 
 ```bash
-./scripts/build_linux_packages.sh 2.0.0 amd64
+./scripts/build_linux_packages.sh 2.0.2 amd64
 ```
 
 ### Android APK
@@ -331,7 +331,7 @@ StreamNest/
 
 - Install linker toolchain for LLVM 20: `sudo apt install lld-20`
 - Verify binary exists: `/usr/lib/llvm-20/bin/ld.lld`
-- Re-run: `./scripts/build_linux_packages.sh 2.0.0 amd64`
+- Re-run: `./scripts/build_linux_packages.sh 2.0.2 amd64`
 
 ## Developer
 

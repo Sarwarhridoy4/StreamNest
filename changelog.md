@@ -29,6 +29,14 @@ All notable changes to this project are documented in this file.
 - Startup task argument mismatch (`initialize_app_async`) after refactor.
 - FFmpeg installation completion now toggles warning text color and visibility correctly.
 
+## [2.0.2] - 2026-08-28
+
+### Fixed
+- History feature breaks in packaged/installed builds due to read-only application directory.
+  - `HistoryStore` now uses XDG state directory (`$XDG_STATE_HOME/streamnest` or `~/.local/state/streamnest`) by default instead of the source tree.
+  - Adds transparent fallback to `$TMPDIR/streamnest` when the primary location is inaccessible.
+  - Fixes `Permission denied` errors for `.history.key` and `download_history.enc` on Linux `.deb`/AppImage installs.
+
 ## [2.0.1] - 2026-06-10
 
 ### Added
