@@ -311,6 +311,12 @@ StreamNest/
 - Ensure dependencies are installed in the active virtual environment.
 - Check terminal output for runtime exceptions.
 
+### History storage fails with permission errors
+
+- If you installed StreamNest as a `.deb` or AppImage, the app no longer stores history inside the installation directory.
+- History is saved under the XDG state directory by default (`$XDG_STATE_HOME/streamnest` or `~/.local/state/streamnest`).
+- If that location is unavailable, the app transparently falls back to `$TMPDIR/streamnest`.
+
 ### Speed/ETA missing on some media
 
 - Some providers/streams do not expose stable throughput metrics.

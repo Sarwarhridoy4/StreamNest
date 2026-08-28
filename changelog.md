@@ -4,6 +4,12 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### Fixed
+- History feature breaks in packaged/installed builds due to read-only application directory.
+  - `HistoryStore` now uses XDG state directory (`$XDG_STATE_HOME/streamnest` or `~/.local/state/streamnest`) by default instead of the source tree.
+  - Adds transparent fallback to `$TMPDIR/streamnest` when the primary location is inaccessible.
+  - Fixes `Permission denied` errors for `.history.key` and `download_history.enc` on Linux `.deb`/AppImage installs.
+
 ### Added
 - FFmpeg version display in the UI on startup and re-check.
 - Robust `ffmpeg -version` detection with timeout, error classification, and minimum version check.
