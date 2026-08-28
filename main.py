@@ -8,7 +8,7 @@ import flet as ft
 from ui.home_view import HomeView
 
 
-def create_splash_screen() -> tuple[ft.Control, Callable[[], None]]:
+def create_splash_screen() -> tuple[ft.Control, Callable[[ft.Page], None]]:
     """Create a splash screen and return (root_control, start_animation)."""
     import asyncio
 
@@ -24,14 +24,14 @@ def create_splash_screen() -> tuple[ft.Control, Callable[[], None]]:
         on_click=None,
     )
 
-    def start_pulse() -> None:
+    def start_pulse(page: ft.Page) -> None:
         async def pulse() -> None:
             while True:
                 logo_container.scale = 1.1
-                logo_container.update()
+                page.update()
                 await asyncio.sleep(0.75)
                 logo_container.scale = 1.0
-                logo_container.update()
+                page.update()
                 await asyncio.sleep(0.75)
 
         asyncio.create_task(pulse())
@@ -112,7 +112,7 @@ def main(page: ft.Page) -> None:
     splash, start_splash_animation = create_splash_screen()
     page.add(splash)
     page.update()
-    start_splash_animation()
+    start_splash_animation(page)
 
     page.run_task(initialize_app_async, page)
 

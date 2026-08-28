@@ -107,21 +107,21 @@ cd StreamNest
 2. Create and activate a virtual environment:
 
 ```bash
-python -m venv .venv
+uv venv
 source .venv/bin/activate
 ```
 
 Windows (PowerShell):
 
 ```powershell
-python -m venv .venv
+uv venv
 .venv\Scripts\Activate.ps1
 ```
 
 3. Install dependencies:
 
 ```bash
-pip install -e .
+uv pip install -e .
 ```
 
 ## FFmpeg Setup
@@ -183,7 +183,7 @@ python main.py
 Install test dependencies:
 
 ```bash
-pip install -e .[test]
+uv pip install -e .[test]
 ```
 
 Run tests:
@@ -197,7 +197,7 @@ pytest
 Install development dependencies:
 
 ```bash
-pip install -e .[dev]
+uv pip install -e .[dev]
 ```
 
 Lint with Ruff:
@@ -248,7 +248,7 @@ With this repo on the `android` branch:
 1. Install dependencies:
 
 ```bash
-pip install -e .
+uv pip install -e .
 ```
 
 2. Build APK:

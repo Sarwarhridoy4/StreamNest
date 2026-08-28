@@ -18,7 +18,7 @@ FLET_FLUTTER_BUNDLE="$ROOT_DIR/build/flutter/build/linux/x64/release/bundle"
 BUILD_LOG="$ROOT_DIR/build/flet-build.log"
 FLET_BIN=""
 PYTHON_BIN=""
-PIP_BIN=""
+UV_BIN=""
 WORK_DIR=""
 ICON_BACKUP=""
 
@@ -239,12 +239,12 @@ ensure_python_tools() {
     exit 1
   fi
 
-  if [[ -x "$ROOT_DIR/.venv/bin/pip" ]]; then
-    PIP_BIN="$ROOT_DIR/.venv/bin/pip"
-  elif "$PYTHON_BIN" -m pip --version >/dev/null 2>&1; then
-    PIP_BIN="$PYTHON_BIN -m pip"
+  if [[ -x "$ROOT_DIR/.venv/bin/uv" ]]; then
+    UV_BIN="$ROOT_DIR/.venv/bin/uv"
+  elif have_command uv; then
+    UV_BIN="uv"
   else
-    log_error "pip is required but not available for '$PYTHON_BIN'."
+    log_error "uv is required but not available for '$PYTHON_BIN'."
     exit 1
   fi
 }
@@ -259,11 +259,9 @@ ensure_python_requirements() {
 
   log_header "Installing Python dependencies"
   if [[ "$VERBOSE" -eq 1 ]]; then
-    # shellcheck disable=SC2086
-    $PIP_BIN install --disable-pip-version-check -e "$ROOT_DIR"
+    "$UV_BIN" pip install --system --editable "$ROOT_DIR"
   else
-    # shellcheck disable=SC2086
-    $PIP_BIN install --quiet --disable-pip-version-check -e "$ROOT_DIR"
+    "$UV_BIN" pip install --quiet --system --editable "$ROOT_DIR"
   fi
   log_ok "Python dependencies are ready."
 }

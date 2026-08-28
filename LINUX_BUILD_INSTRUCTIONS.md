@@ -7,7 +7,7 @@ This document provides detailed instructions to build the StreamNest Media Downl
 
 - **Operating System**: Linux (Ubuntu/Debian recommended)
 - **Python**: 3.11.x (recommended)
-- **Flet CLI**: Installed via pip
+- **Flet CLI**: Installed via uv
 - **Flutter SDK**: Automatically downloaded by Flet if missing
 - **Build Tools**: Required Linux packages for Flutter desktop builds
 
@@ -76,7 +76,7 @@ Python 3.11.x
 On Fedora 40+:
 
 ```bash
-sudo dnf install python3.11 python3.11-devel python3.11-pip
+    sudo dnf install python3.11 python3.11-devel
 ```
 
 Verify:
@@ -163,22 +163,22 @@ Python 3.11.x
 
 ## Install Dependencies
 
-Upgrade pip:
+Upgrade uv:
 
 ```bash
-pip install -U pip
+uv pip install -U pip
 ```
 
 Install project dependencies:
 
 ```bash
-pip install -r requirements.txt
+uv pip install -e .
 ```
 
 Install/update Flet tools:
 
 ```bash
-pip install -U flet flet-cli
+uv pip install -U flet flet-cli
 ```
 
 ## Verify Environment
