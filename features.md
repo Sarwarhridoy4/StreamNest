@@ -6,6 +6,8 @@ yt-dlp option(s), what StreamNest currently lacks, and a suggested implementatio
 
 See also: https://github.com/yt-dlp/yt-dlp#options (yt-dlp option reference).
 
+**Status key:** ✅ Implemented · ⬜ Pending (not yet built)
+
 ---
 
 ## 1. Subtitles & closed captions
@@ -13,14 +15,14 @@ See also: https://github.com/yt-dlp/yt-dlp#options (yt-dlp option reference).
 StreamNest downloads video/audio only. yt-dlp can fetch and embed subtitles, which is a core
 feature for media archival.
 
-| # | Feature | yt-dlp option(s) | Why add it | Suggested implementation |
-|---|---------|------------------|------------|--------------------------|
-| 1.1 | Write subtitle files | `--write-subs`, `--write-auto-subs` | Save subtitles alongside media | Add a "Subtitles" checkbox group; map to `writesubtitles` / `writeautomaticsubs` |
-| 1.2 | Embed subtitles in file | `--embed-subs` | Self-contained video with captions | FFmpeg `FFmpegEmbedSubtitle` postprocessor when `embed-subs` enabled |
-| 1.3 | Subtitle languages | `--sub-langs` | Choose which languages to fetch | Text field or multiselect (e.g. `en,es,fr`); pass to `subtitleslangs` |
-| 1.4 | Subtitle format conversion | `--convert-subs` | Normalize to SRT/VTT/TTML | Dropdown for target format; pass to `convertsubs` |
-| 1.5 | Embed chapters | `--embed-chapters` | Chapter markers in output file | `FFmpegEmbedChapter` postprocessor |
-| 1.6 | Split by chapters | `--split-chapters` | One file per chapter | `SplitChaptersFFmpeg` postprocessor |
+| # | Feature | Status | yt-dlp option(s) | Suggested implementation |
+|---|---------|--------|------------------|--------------------------|
+| 1.1 | Write subtitle files | ✅ Implemented | `--write-subs` | `writesubtitles: true` in `_build_options` |
+| 1.2 | Embed subtitles in file | ✅ Implemented | `--embed-subs` | `FFmpegEmbedSubtitle` postprocessor |
+| 1.3 | Subtitle languages | ✅ Implemented | `--sub-langs` | `subtitleslangs` text field |
+| 1.4 | Subtitle format conversion | ✅ Implemented | `--convert-subs` | `convertsubs` dropdown (SRT/VTT/TTML) |
+| 1.5 | Embed chapters | ⬜ Pending | `--embed-chapters` | `FFmpegEmbedChapter` postprocessor |
+| 1.6 | Split by chapters | ⬜ Pending | `--split-chapters` | `SplitChaptersFFmpeg` postprocessor |
 
 ---
 
