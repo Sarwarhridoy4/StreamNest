@@ -55,7 +55,9 @@ class ThemeManager:
 
         # Update progress bars
         self.home_view.progress_bar.bgcolor = PRIMARY_COLOR
-        self.home_view.playlist_progress_bar.bgcolor = PRIMARY_COLOR
+        progress_bar = getattr(self.home_view, "playlist_progress_bar", None)
+        if progress_bar is not None:
+            progress_bar.bgcolor = PRIMARY_COLOR
 
         # Update card backgrounds
         self._apply_card_backgrounds(is_dark)
