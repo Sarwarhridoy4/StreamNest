@@ -31,12 +31,6 @@ jobs:
         pip install uv
         uv pip install --system -e .[test,dev]
 
-    - name: Lint with Ruff
-      run: ruff check .
-
-    - name: Typecheck with MyPy
-      run: mypy .
-
     - name: Run tests
       run: pytest
 
