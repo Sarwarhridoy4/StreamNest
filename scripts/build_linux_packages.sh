@@ -12,6 +12,7 @@ ARCH="amd64"
 VERBOSE=0
 
 ICON_BASE="$ROOT_DIR/assets/icon"
+DESKTOP_ID="com.sarwarhridoy4.streamnest"
 OUT_DIR="$ROOT_DIR/dist"
 DEFAULT_LINUX_OUT="$ROOT_DIR/build/linux"
 FLET_FLUTTER_BUNDLE="$ROOT_DIR/build/flutter/build/linux/x64/release/bundle"
@@ -480,12 +481,12 @@ create_desktop_file() {
 Name=$APP_NAME
 Comment=$DESCRIPTION
 Exec=$exec_cmd
-Icon=$PACKAGE_NAME
+Icon=$DESKTOP_ID
 Terminal=false
 Type=Application
 Categories=AudioVideo;
 StartupNotify=true
-StartupWMClass=$APP_NAME
+StartupWMClass=$DESKTOP_ID
 DESKTOP
 }
 
@@ -496,7 +497,7 @@ install_icons() {
     if [[ ! -f "$src" ]]; then
       src="${ICON_BASE}.png"
     fi
-    install -Dm644 "$src" "$root/usr/share/icons/hicolor/${size}x${size}/apps/${PACKAGE_NAME}.png"
+    install -Dm644 "$src" "$root/usr/share/icons/hicolor/${size}x${size}/apps/${DESKTOP_ID}.png"
   done
 }
 
@@ -551,7 +552,7 @@ chmod +x "$APPDIR/AppRun"
 
 create_desktop_file "$APPDIR/${PACKAGE_NAME}.desktop" "$EXECUTABLE"
 cp "$APPDIR/${PACKAGE_NAME}.desktop" "$APP_USR_DIR/share/applications/${PACKAGE_NAME}.desktop"
-install -Dm644 "${ICON_BASE}.png" "$APPDIR/${PACKAGE_NAME}.png"
+install -Dm644 "${ICON_BASE}.png" "$APPDIR/${DESKTOP_ID}.png"
 install_icons "$APPDIR"
 
 desktop-file-validate "$APPDIR/${PACKAGE_NAME}.desktop"
