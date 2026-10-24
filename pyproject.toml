@@ -5,9 +5,9 @@ description = "StreamNest media downloader built with Flet and yt-dlp."
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "flet[all]>=0.82.0,<2.0.0",
-    "yt-dlp>=2026.3.10,<2027.0.0",
-    "cryptography>=45.0.0,<51.0.0",
+    "flet[all]>=1.0.5,<2.0.0",
+    "yt-dlp>=2026.10.21,<2027.0.0",
+    "cryptography>=50.0.2,<51.0.0",
 ]
 
 [project.optional-dependencies]
