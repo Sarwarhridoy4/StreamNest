@@ -100,6 +100,23 @@ class ViewLayoutMixin:
                         ],
                     ),
                     self.size_text,
+                    section_divider("Subtitles"),
+                    ft.Row(
+                        controls=[
+                            self.subtitles_checkbox,
+                            self.embed_subtitles_checkbox,
+                        ],
+                        wrap=True,
+                        spacing=8,
+                    ),
+                    ft.Row(
+                        controls=[
+                            labeled_control("Languages", self.subtitles_langs_field),
+                            labeled_control("Convert", self.convert_subs_dropdown),
+                        ],
+                        spacing=8,
+                        run_spacing=8,
+                    ),
                     section_divider("Progress"),
                     self.progress_bar,
                     self.status_text,
