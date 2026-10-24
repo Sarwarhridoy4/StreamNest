@@ -7,7 +7,7 @@ PACKAGE_NAME="streamnest"
 EXECUTABLE="streamnest"
 DESCRIPTION="Desktop media downloader built with Flet and yt-dlp"
 MAINTAINER="${MAINTAINER:-StreamNest Team <support@streamnest.app>}"
-VERSION="2.0.2"
+VERSION="2.0.3"
 ARCH="amd64"
 VERBOSE=0
 
@@ -37,7 +37,7 @@ usage() {
 Usage: ./scripts/build_linux_packages.sh [version] [arch] [--verbose|-v]
 
 Arguments:
-  version   Package version (default: 2.0.2)
+  version   Package version (default: 2.0.3)
   arch      Target architecture: amd64 | arm64 (default: amd64)
   -v, --verbose   Stream full command output instead of compact mode
 USAGE
