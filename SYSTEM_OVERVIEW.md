@@ -29,39 +29,39 @@ StreamNest follows a **layered, mixin-based GUI architecture**:
 ```mermaid
 graph TD
     subgraph Entry["Entry Point"]
-        main[main.py<br/>Flet app entry + splash + bootstrap]
+        main[main.py Flet app entry + splash + bootstrap]
     end
 
     subgraph UI["UI Layer — ui/home/"]
-        HV[HomeView<br/>mixin composite + controller]
-        CLM[ControlLayoutMixin<br/>form/button wiring]
-        VLM[ViewLayoutMixin<br/>panel + tab navigation]
-        DLM[DownloadMixin<br/>download orchestration]
-        PLM[PlaylistMixin<br/>playlist load/select]
-        HMM[HistoryMixin<br/>history UI + persistence]
-        FIM[FfmpegInstallMixin<br/>FFmpeg detect/install]
+        HV[HomeView mixin composite + controller]
+        CLM[ControlLayoutMixin form/button wiring]
+        VLM[ViewLayoutMixin panel + tab navigation]
+        DLM[DownloadMixin download orchestration]
+        PLM[PlaylistMixin playlist load/select]
+        HMM[HistoryMixin history UI + persistence]
+        FIM[FfmpegInstallMixin FFmpeg detect/install]
     end
 
     subgraph Helpers["UI Helpers"]
-        TM[ThemeManager<br/>theme palette + brightness listener]
-        PU[PlatformUtils<br/>platform detection + capabilities]
-        FFU[FFmpegUtils<br/>FFmpeg detection + install hints]
+        TM[ThemeManager theme palette + brightness listener]
+        PU[PlatformUtils platform detection + capabilities]
+        FFU[FFmpegUtils FFmpeg detection + install hints]
     end
 
     subgraph State["State Layer — state/"]
-        AS[AppState<br/>thread-safe shared state]
-        HE[HistoryEntry<br/>download record dataclass]
+        AS[AppState thread-safe shared state]
+        HE[HistoryEntry download record dataclass]
     end
 
     subgraph Services["Services Layer — services/"]
-        DS[DownloaderService<br/>yt-dlp threaded wrapper]
-        FE[FormatExtractor<br/>metadata + quality extraction]
+        DS[DownloaderService yt-dlp threaded wrapper]
+        FE[FormatExtractor metadata + quality extraction]
     end
 
     subgraph Utils["Utilities Layer — utils/"]
-        HS[HistoryStore<br/>Fernet-encrypted persistence]
-        FM[file_manager<br/>path/size/speed/eta helpers]
-        VD[validators<br/>URL safety + filename sanitization]
+        HS[HistoryStore Fernet-encrypted persistence]
+        FM[file_manager path/size/speed/eta helpers]
+        VD[validators URL safety + filename sanitization]
     end
 
     main --> HV
@@ -247,21 +247,18 @@ stateDiagram-v2
     Dark --> Light : Toggle theme button
     Light --> System : Toggle theme button
     
-    System --> System : Platform brightness change<br/>(if SYSTEM mode)
+    System --> System : Platform brightness change (if SYSTEM mode)
     
     note right of System
-        Follows OS theme.<br/>
-        Live updates on brightness change.
+        Follows OS theme. Live updates on brightness change.
     end note
     
     note right of Dark
-        Dark palette: #0B0B0D bg,<br/>
-        #16161A cards.
+        Dark palette: #0B0B0D bg, #16161A cards.
     end note
     
     note right of Light
-        Light palette: #FFF7F5 bg,<br/>
-        #FFFFFF cards.
+        Light palette: #FFF7F5 bg, #FFFFFF cards.
     end note
 ```
 
@@ -340,23 +337,23 @@ sequenceDiagram
 
 ```mermaid
 flowchart TD
-    Start([Startup]) --> Detect{FFmpegUtils.<br/>is_ffmpeg_missing()}
+    Start([Startup]) --> Detect{FFmpegUtils.is_ffmpeg_missing()}
     
-    Detect -->|Missing| ShowWarning[Show red warning<br/>Offer Install FFmpeg button]
-    Detect -->|Found| ShowVersion[Show green: FFmpeg {version}<br/>detected]
+    Detect -->|Missing| ShowWarning[Show red warning Offer Install FFmpeg button]
+    Detect -->|Found| ShowVersion[Show green: FFmpeg {version} detected]
     
     ShowVersion --> End1[Ready]
     
-    ShowWarning --> ClickInstall{User clicks<br/>Install FFmpeg?}
+    ShowWarning --> ClickInstall{User clicks Install FFmpeg?}
     
-    ClickInstall -->|No| End2[Continue without FFmpeg<br/>merge/extract disabled]
+    ClickInstall -->|No| End2[Continue without FFmpeg merge/extract disabled]
     
-    ClickInstall -->|Yes| Confirm[Confirmation dialog<br/>+ privilege prompt Linux]
-    Confirm --> InstallPlan[Build OS-specific install command<br/>Linux: apt / macOS: brew / Windows: winget]
-    InstallPlan --> InstallLog[Run subprocess install<br/>stream output to FFmpeg Install Log]
-    InstallLog --> Recheck{Installation<br/>successful?}
+    ClickInstall -->|Yes| Confirm[Confirmation dialog + privilege prompt Linux]
+    Confirm --> InstallPlan[Build OS-specific install command Linux: apt / macOS: brew / Windows: winget]
+    InstallPlan --> InstallLog[Run subprocess install stream output to FFmpeg Install Log]
+    InstallLog --> Recheck{Installation successful?}
     
-    Recheck -->|Yes| RecheckUI[Show FFmpeg {version} detected<br/>hide install button]
+    Recheck -->|Yes| RecheckUI[Show FFmpeg {version} detected hide install button]
     Recheck -->|No| InstallFail[Show install failure hint]
     
     RecheckUI --> End3[Merge/extract enabled]
@@ -373,25 +370,25 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    Complete([Download completes]) --> CreateEntry[Create HistoryEntry<br/>id, timestamp, title, url, platform,<br/>mode, quality, save_directory, context,<br/>status, message]
+    Complete([Download completes]) --> CreateEntry[Create HistoryEntry id, timestamp, title, url, platform, mode, quality, save_directory, context, status, message]
     
-    CreateEntry --> Append[AppState.append_history(entry)<br/>lock-protected, cap at 50]
+    CreateEntry --> Append[AppState.append_history(entry) lock-protected, cap at 50]
     
-    Append --> Save[HistoryStore.save(entries)<br/>Fernet-encrypt JSON payload]
+    Append --> Save[HistoryStore.save(entries) Fernet-encrypt JSON payload]
     
-    Save --> XDG{Write to XDG state dir?<br/>$XDG_STATE_HOME/streamnest}
+    Save --> XDG{Write to XDG state dir? $XDG_STATE_HOME/streamnest}
     
-    XDG -->|Yes| XDGWrite[Write download_history.enc +<br/>.history.key (0o600)]
+    XDG -->|Yes| XDGWrite[Write download_history.enc + .history.key (0o600)]
     XDG -->|No| Fallback[Fallback to $TMPDIR/streamnest]
     
-    Fallback --> FBWrite[Write encrypted history to<br/>temporary directory]
+    Fallback --> FBWrite[Write encrypted history to temporary directory]
     
     XDGWrite --> End[History persisted]
     FBWrite --> End
     
     subgraph Startup
         Direction TB
-        Load[App startup] --> LoadHistory[HistoryStore.load()<br/>decrypt + repopulate AppState.history]
+        Load[App startup] --> LoadHistory[HistoryStore.load() decrypt + repopulate AppState.history]
     end
     
     style Complete fill:#e1f5fe
@@ -439,15 +436,15 @@ flowchart TD
     end
 
     subgraph Linux["Linux Build"]
-        SysDeps[System deps:<br/>clang, cmake, ninja,<br/>libgtk-3-dev, lld-20]
-        VEnv[uv venv +<br/>uv pip install -e .]
-        FletBuild[flet build linux<br/>Flutter desktop shell]
-        Deb[./scripts/build_linux_packages.sh<br/>→ .deb + .AppImage]
+        SysDeps[System deps: clang, cmake, ninja, libgtk-3-dev, lld-20]
+        VEnv[uv venv + uv pip install -e .]
+        FletBuild[flet build linux Flutter desktop shell]
+        Deb[./scripts/build_linux_packages.sh → .deb + .AppImage]
     end
 
     subgraph Android["Android Build"]
         AndroidSDK[Java + Android SDK]
-        FletAPK[flet build apk<br/>split-per-ABI]
+        FletAPK[flet build apk split-per-ABI]
     end
 
     Py --> VEnv
