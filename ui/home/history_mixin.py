@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 from urllib.parse import urlparse
 from uuid import uuid4
@@ -25,7 +25,7 @@ class HistoryMixin:
             title = f"Playlist download ({len(self.playlist_selected_indices)} item(s))"
         entry = HistoryEntry(
             id=uuid4().hex,
-            timestamp=datetime.now(datetime.UTC).strftime("%Y-%m-%d %H:%M:%S"),
+            timestamp=datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S"),
             title=title,
             url=source_url,
             platform=self._detect_platform_label(source_url),
@@ -88,6 +88,17 @@ class HistoryMixin:
             else "No downloads yet."
         )
         self.history_tab_list.controls = [self._build_history_row(entry) for entry in self.state.history]
+
+        has_history = bool(self.state.history)
+        empty_state = getattr(self, "history_empty_state", None)
+        tab_list = getattr(self, "history_tab_list", None)
+        clear_btn = getattr(self, "clear_history_btn", None)
+        if empty_state is not None:
+            empty_state.visible = not has_history
+        if tab_list is not None:
+            tab_list.visible = has_history
+        if clear_btn is not None:
+            clear_btn.visible = has_history
 
     def _build_history_row(self, entry: HistoryEntry) -> ft.Control:
         return ft.Container(

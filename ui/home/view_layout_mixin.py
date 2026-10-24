@@ -2,7 +2,14 @@ from __future__ import annotations
 
 import flet as ft
 
-from ui.components import PRIMARY_COLOR, build_header, labeled_control, primary_button, status_chip
+from ui.components import (
+    PRIMARY_COLOR,
+    build_header,
+    labeled_control,
+    primary_button,
+    section_divider,
+    status_chip,
+)
 
 
 class ViewLayoutMixin:
@@ -10,6 +17,29 @@ class ViewLayoutMixin:
         header = build_header(
             "StreamNest Downloader",
             "Load formats dynamically, then download video/audio or selected playlist items.",
+        )
+
+        self.history_empty_state = ft.Container(
+            padding=32,
+            alignment=ft.Alignment(0, 0),
+            content=ft.Column(
+                controls=[
+                    ft.Icon(ft.Icons.HISTORY_TOGGLE_OFF, size=48, color=ft.Colors.ON_SURFACE_VARIANT),
+                    ft.Text(
+                        "No downloads yet",
+                        theme_style=ft.TextThemeStyle.TITLE_MEDIUM,
+                        weight=ft.FontWeight.W_600,
+                        text_align=ft.TextAlign.CENTER,
+                    ),
+                    ft.Text(
+                        "Your completed downloads will appear here.",
+                        color=ft.Colors.ON_SURFACE_VARIANT,
+                        text_align=ft.TextAlign.CENTER,
+                    ),
+                ],
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                spacing=10,
+            ),
         )
 
         self.left_panel = ft.Container(
@@ -37,6 +67,7 @@ class ViewLayoutMixin:
                         vertical_alignment=ft.CrossAxisAlignment.CENTER,
                     ),
                     header,
+                    section_divider("FFmpeg"),
                     self.ffmpeg_warning_text,
                     self.install_ffmpeg_btn,
                     ft.Row(
@@ -44,6 +75,7 @@ class ViewLayoutMixin:
                         wrap=True,
                         spacing=8,
                     ),
+                    section_divider("Source"),
                     labeled_control("URL", self.url_field),
                     ft.ResponsiveRow(
                         controls=[
@@ -53,6 +85,7 @@ class ViewLayoutMixin:
                         spacing=8,
                         run_spacing=8,
                     ),
+                    section_divider("Options"),
                     labeled_control("Mode", self.mode_group),
                     ft.ResponsiveRow(
                         controls=[
@@ -67,6 +100,7 @@ class ViewLayoutMixin:
                         ],
                     ),
                     self.size_text,
+                    section_divider("Progress"),
                     self.progress_bar,
                     self.status_text,
                     ft.ResponsiveRow(
@@ -77,6 +111,7 @@ class ViewLayoutMixin:
                         spacing=8,
                         run_spacing=8,
                     ),
+                    section_divider("Action"),
                     ft.ResponsiveRow(
                         controls=[
                             ft.Container(col={"xs": 12, "sm": 6}, content=self.download_btn),
@@ -222,6 +257,7 @@ class ViewLayoutMixin:
                     ),
                     self.playlist_url_field,
                     self.playlist_range_field,
+                    section_divider("Options"),
                     ft.ResponsiveRow(
                         controls=[
                             ft.Container(col={"xs": 12, "sm": 6}, content=self.playlist_load_btn),
@@ -248,6 +284,7 @@ class ViewLayoutMixin:
                         spacing=8,
                         run_spacing=8,
                     ),
+                    section_divider("Progress"),
                     self.playlist_progress_bar,
                     self.playlist_live_status_text,
                     status_chip("Current file", self.playlist_current_file_text),
@@ -260,6 +297,7 @@ class ViewLayoutMixin:
                         run_spacing=8,
                     ),
                     ft.Row(controls=[self.playlist_select_all_btn, self.playlist_clear_btn], spacing=6),
+                    section_divider("Items"),
                     ft.Text("Playlist Items", weight=ft.FontWeight.W_500),
                     self.playlist_items_list,
                     self.playlist_status_text,
@@ -323,6 +361,7 @@ class ViewLayoutMixin:
                             ),
                         ],
                     ),
+                    self.history_empty_state,
                     self.history_tab_list,
                 ],
                 spacing=12,

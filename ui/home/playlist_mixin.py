@@ -112,6 +112,7 @@ class PlaylistMixin:
         self._reset_ytdlp_logs()
         self._append_ytdlp_log(f"Starting playlist download: {url}")
         self._append_ytdlp_log(f"Selected playlist entries: {selected_expr}")
+        self._set_download_controls_loading(is_loading=True)
 
         request = DownloadRequest(
             url=url,
@@ -131,6 +132,7 @@ class PlaylistMixin:
 
         if not started:
             self.state.set_downloading(False)
+            self._set_download_controls_loading(is_loading=False)
             self._set_playlist_status("Unable to start download. Another task is active.")
         else:
             self._set_playlist_status(

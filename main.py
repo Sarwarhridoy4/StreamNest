@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import traceback
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import flet as ft
@@ -11,31 +12,43 @@ from ui.home_view import HomeView
 if TYPE_CHECKING:
     from collections.abc import Callable
 
+APP_DIR = Path(__file__).resolve().parent
+ICON_PATH = str(APP_DIR / "assets" / "icon.png")
+
 
 def create_splash_screen() -> tuple[ft.Control, Callable[[ft.Page], None]]:
     """Create a splash screen and return (root_control, start_animation)."""
 
     logo_container = ft.Container(
         content=ft.Image(
-            src="assets/icon.png",
-            width=120,
-            height=120,
+            src=ICON_PATH,
+            width=100,
+            height=100,
             fit=ft.BoxFit.CONTAIN,
         ),
-        animate_scale=ft.Animation(duration=1500, curve=ft.AnimationCurve.EASE_IN_OUT),
+        animate_scale=ft.Animation(duration=1200, curve=ft.AnimationCurve.EASE_IN_OUT),
         scale=1.0,
         on_click=None,
     )
 
+    status_text = ft.Text(
+        "Preparing StreamNest...",
+        size=14,
+        color=ft.Colors.ON_SURFACE_VARIANT,
+        text_align=ft.TextAlign.CENTER,
+    )
+
+    progress_ring = ft.ProgressRing(width=32, height=32, stroke_width=3)
+
     def start_pulse(page: ft.Page) -> None:
         async def pulse() -> None:
             while True:
-                logo_container.scale = 1.1
+                logo_container.scale = 1.08
                 page.update()
-                await asyncio.sleep(0.75)
+                await asyncio.sleep(0.7)
                 logo_container.scale = 1.0
                 page.update()
-                await asyncio.sleep(0.75)
+                await asyncio.sleep(0.7)
 
         _ = asyncio.create_task(pulse())  # noqa: RUF006  # fire-and-forget splash animation
 
@@ -49,29 +62,29 @@ def create_splash_screen() -> tuple[ft.Control, Callable[[ft.Page], None]]:
                 logo_container,
                 ft.Text(
                     "StreamNest",
-                    size=32,
+                    size=34,
                     weight=ft.FontWeight.BOLD,
                     text_align=ft.TextAlign.CENTER,
                 ),
-                ft.Text(
-                    "Loading...",
-                    size=16,
-                    color=ft.Colors.ON_SURFACE_VARIANT,
-                    text_align=ft.TextAlign.CENTER,
+                status_text,
+                ft.Container(height=24),
+                ft.Row(
+                    controls=[progress_ring],
+                    alignment=ft.MainAxisAlignment.CENTER,
                 ),
-                ft.Container(height=20),
-                ft.ProgressRing(width=40, height=40),
             ],
             spacing=16,
         ),
     )
 
-    return root, start_pulse
+    return root, start_pulse, status_text
 
 
-async def initialize_app_async(page: ft.Page) -> None:
+async def initialize_app_async(page: ft.Page, status_text: ft.Text) -> None:
     """Initialize the app asynchronously and replace splash screen."""
     try:
+        status_text.value = "Loading interface..."
+        page.update()
         home = HomeView(page)
         main_ui = home.build()
         page.controls.clear()
@@ -106,7 +119,7 @@ def main(page: ft.Page) -> None:
 
     # Set window icon for desktop builds
     try:
-        page.window_icon = "assets/icon.png"
+        page.window_icon = ICON_PATH
     except Exception:
         pass
 
@@ -118,12 +131,12 @@ def main(page: ft.Page) -> None:
 
     page.scroll = ft.ScrollMode.AUTO
 
-    splash, start_splash_animation = create_splash_screen()
+    splash, start_splash_animation, status_text = create_splash_screen()
     page.add(splash)
     page.update()
     start_splash_animation(page)
 
-    page.run_task(initialize_app_async, page)
+    page.run_task(initialize_app_async, page, status_text)
 
 
 if __name__ == "__main__":

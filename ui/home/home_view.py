@@ -16,6 +16,7 @@ from services.format_extractor import (
     QualityOption,
 )
 from state.app_state import AppState
+from ui.components import ToastManager
 from ui.home.control_layout_mixin import ControlLayoutMixin
 from ui.home.download_mixin import DownloadMixin
 from ui.home.ffmpeg_install_mixin import FfmpegInstallMixin
@@ -31,6 +32,8 @@ from utils.validators import is_valid_url
 
 if TYPE_CHECKING:
     from collections.abc import Callable
+
+BRAND_ICON_PATH = str(Path(__file__).resolve().parent.parent.parent / "assets" / "icon.png")
 
 
 class HomeView(
@@ -50,6 +53,7 @@ class HomeView(
         self.platform_utils = PlatformUtils(page)
         self.ffmpeg_utils = FFmpegUtils(self.platform_utils)
         self.theme_manager = ThemeManager(self)
+        self.toast = ToastManager(page)
 
         # Initialize core application state and services
         self._initialize_core_state()
@@ -139,7 +143,7 @@ class HomeView(
     def _brand_logo(self, size: int) -> ft.Image:
         """Create and return the brand logo image."""
         return ft.Image(
-            src="assets/icon.png",
+            src=BRAND_ICON_PATH,
             width=size,
             height=size,
             fit=ft.BoxFit.CONTAIN,

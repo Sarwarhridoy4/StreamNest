@@ -10,6 +10,20 @@ from utils.validators import is_valid_url
 
 
 class DownloadMixin:
+    def _set_download_controls_loading(self, is_loading: bool) -> None:
+        """Toggle download/cancel button states during an active download."""
+        self.download_btn.disabled = is_loading
+        self.cancel_btn.disabled = not is_loading
+        if is_loading:
+            self.download_btn.text = "Downloading\u2026"
+        else:
+            self.download_btn.text = "Download"
+        try:
+            self.download_btn.update()
+            self.cancel_btn.update()
+        except Exception:
+            self._page_update()
+
     def _on_download(self, _: ft.ControlEvent) -> None:
         self.state.url = self.url_field.value.strip() if self.url_field.value else ""
 
@@ -33,6 +47,7 @@ class DownloadMixin:
         self.state.eta_text = ""
         self._reset_ytdlp_logs()
         self._append_ytdlp_log(f"Starting single download: {self.state.url}")
+        self._set_download_controls_loading(is_loading=True)
 
         request = DownloadRequest(
             url=self.state.url,
@@ -51,12 +66,14 @@ class DownloadMixin:
 
         if not started:
             self.state.set_downloading(False)
+            self._set_download_controls_loading(is_loading=False)
             self._set_status("Unable to start download. Another task is active.")
 
         self._refresh_view()
 
     def _on_cancel(self, _: ft.ControlEvent) -> None:
         self.downloader.cancel()
+        self._set_download_controls_loading(is_loading=False)
         self._set_status("Canceling download...")
 
     def _fetch_formats(self) -> None:
@@ -65,6 +82,11 @@ class DownloadMixin:
 
         self.state.is_fetching_formats = True
         self._set_status("Fetching formats...")
+        self.load_formats_btn.disabled = True
+        try:
+            self.load_formats_btn.update()
+        except Exception:
+            self._page_update()
         self.page.run_thread(self._fetch_formats_worker, self.state.url)
 
     def _fetch_formats_worker(self, url: str) -> None:
@@ -88,6 +110,11 @@ class DownloadMixin:
         finally:
             def _finalize() -> None:
                 self.state.is_fetching_formats = False
+                self.load_formats_btn.disabled = False
+                try:
+                    self.load_formats_btn.update()
+                except Exception:
+                    self._page_update()
                 self._refresh_view()
 
             self._run_ui(_finalize)
@@ -145,6 +172,7 @@ class DownloadMixin:
 
     def _handle_done(self, result: DownloadResult) -> None:
         self.state.set_downloading(False)
+        self._set_download_controls_loading(is_loading=False)
         self._append_ytdlp_log(f"Result: {result.message}")
 
         if self.active_download_context == "playlist":
@@ -171,6 +199,7 @@ class DownloadMixin:
 
     def _handle_error(self, err: str) -> None:
         self.state.set_downloading(False)
+        self._set_download_controls_loading(is_loading=False)
         self._append_ytdlp_log(f"ERROR: {err}")
         if self.active_download_context == "playlist":
             self.playlist_live_status = f"Error: {err}"
