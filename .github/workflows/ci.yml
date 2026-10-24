@@ -71,7 +71,7 @@ jobs:
     - name: Install Python dependencies
       run: |
         pip install uv
-        uv pip install -e .
+        uv pip install --system -e .
 
     - name: Make build script executable
       run: chmod +x scripts/build_linux_packages.sh
