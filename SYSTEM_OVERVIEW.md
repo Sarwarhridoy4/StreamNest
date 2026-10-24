@@ -383,7 +383,6 @@ flowchart TD
     FBWrite --> End
     
     subgraph Startup
-        Direction TB
         Load[App startup] --> LoadHistory[Load history]
     end
     
