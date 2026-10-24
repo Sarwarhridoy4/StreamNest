@@ -54,6 +54,10 @@ class DownloadMixin:
             mode=self.state.selected_mode,
             quality=self.state.selected_quality,
             save_dir=ensure_download_directory(self.state.save_directory),
+            subtitles=self.state.subtitles_enabled,
+            embed_subtitles=self.state.embed_subtitles,
+            subtitles_langs=self.state.subtitles_langs or None,
+            convert_subs=self.state.convert_subs or None,
         )
 
         started = self.downloader.start_download(
@@ -75,6 +79,13 @@ class DownloadMixin:
         self.downloader.cancel()
         self._set_download_controls_loading(is_loading=False)
         self._set_status("Canceling download...")
+
+    def _on_subtitles_change(self, _: ft.ControlEvent) -> None:
+        self.state.subtitles_enabled = bool(self.subtitles_checkbox.value)
+        self.state.embed_subtitles = bool(self.embed_subtitles_checkbox.value)
+        self.state.subtitles_langs = (self.subtitles_langs_field.value or "").strip()
+        self.state.convert_subs = self.convert_subs_dropdown.value or ""
+        self._refresh_view()
 
     def _fetch_formats(self) -> None:
         if self.state.is_fetching_formats:

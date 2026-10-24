@@ -102,6 +102,11 @@ class HomeView(
         self.playlist_status_message = "Load playlist to choose items."
         self.active_download_context = "single"
 
+        # Subtitle state
+        self.subtitles_enabled = False
+        self.embed_subtitles = False
+        self.subtitles_langs = ""
+        self.convert_subs = ""
         # Playlist progress tracking
         self.playlist_progress = 0.0
         self.playlist_speed = ""

@@ -120,6 +120,10 @@ class PlaylistMixin:
             quality=self.playlist_selected_quality,
             save_dir=ensure_download_directory(self.state.playlist_save_directory),
             playlist_items=selected_expr,
+            subtitles=self.state.subtitles_enabled,
+            embed_subtitles=self.state.embed_subtitles,
+            subtitles_langs=self.state.subtitles_langs or None,
+            convert_subs=self.state.convert_subs or None,
         )
 
         started = self.downloader.start_download(

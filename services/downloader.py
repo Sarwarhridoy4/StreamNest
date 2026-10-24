@@ -27,6 +27,10 @@ class DownloadRequest:
     quality: str
     save_dir: str
     playlist_items: str | None = None
+    subtitles: bool = False
+    embed_subtitles: bool = False
+    subtitles_langs: str | None = None
+    convert_subs: str | None = None
 
 
 @dataclass
@@ -151,6 +155,13 @@ class DownloaderService:
         if self._ffmpeg_dir:
             opts["ffmpeg_location"] = self._ffmpeg_dir
 
+        if request.subtitles:
+            opts["writesubtitles"] = True
+            if request.subtitles_langs:
+                opts["subtitleslangs"] = request.subtitles_langs
+            if request.convert_subs:
+                opts["convertsubs"] = request.convert_subs
+
         if request.mode == "playlist" and request.playlist_items:
             opts["playlist_items"] = request.playlist_items
 
@@ -168,19 +179,22 @@ class DownloaderService:
                 }
             )
         else:
+            postprocessors: list[dict[str, Any]] = [
+                {
+                    "key": "FFmpegVideoRemuxer",
+                    "preferedformat": "mp4",
+                },
+                {"key": "FFmpegMetadata"},
+            ]
+            if request.embed_subtitles:
+                postprocessors.append({"key": "FFmpegEmbedSubtitle"})
             opts.update(
                 {
                     "format": FormatExtractor.resolve_format_selector(
                         request.quality, request.mode
                     ),
                     "merge_output_format": "mp4",
-                    "postprocessors": [
-                        {
-                            "key": "FFmpegVideoRemuxer",
-                            "preferedformat": "mp4",
-                        },
-                        {"key": "FFmpegMetadata"},
-                    ],
+                    "postprocessors": postprocessors,
                 }
             )
 

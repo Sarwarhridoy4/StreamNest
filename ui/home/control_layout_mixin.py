@@ -75,6 +75,36 @@ class ControlLayoutMixin:
 
         self.download_btn = primary_button("Download", self._on_download, icon=ft.Icons.DOWNLOAD)
         self.cancel_btn = secondary_button("Cancel", self._on_cancel, disabled=True, icon=ft.Icons.CANCEL)
+
+        # Subtitle controls
+        self.subtitles_checkbox = ft.Checkbox(
+            label="Download subtitles",
+            value=False,
+            on_change=self._on_subtitles_change,
+        )
+        self.embed_subtitles_checkbox = ft.Checkbox(
+            label="Embed subtitles in file",
+            value=False,
+            on_change=self._on_subtitles_change,
+        )
+        self.subtitles_langs_field = ft.TextField(
+            label="Languages",
+            hint_text="e.g. en,es,fr (leave empty for all)",
+            width=220,
+            on_change=self._on_subtitles_change,
+        )
+        self.convert_subs_dropdown = ft.Dropdown(
+            label="Convert subtitles",
+            options=[
+                ft.dropdown.Option(key="", text="Keep original"),
+                ft.dropdown.Option(key="srt", text="SRT"),
+                ft.dropdown.Option(key="vtt", text="WebVTT"),
+                ft.dropdown.Option(key="ttml", text="TTML"),
+            ],
+            value="",
+            width=180,
+            on_select=self._on_subtitles_change,
+        )
         self.developer_info_btn = secondary_button("About Developer", self._on_open_developer_dialog, icon=ft.Icons.INFO)
         self.back_to_welcome_btn = ft.TextButton(
             content=ft.Text("Back to Welcome"),

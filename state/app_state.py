@@ -69,6 +69,10 @@ class AppState:
     media_title: str = ""
     media_type_detected: str = "video"
     estimated_size_text: str = ""
+    subtitles_enabled: bool = False
+    embed_subtitles: bool = False
+    subtitles_langs: str = ""
+    convert_subs: str = ""
     history: list[HistoryEntry] = field(default_factory=list)
 
     _lock: Lock = field(default_factory=Lock, init=False, repr=False)
