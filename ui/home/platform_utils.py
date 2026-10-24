@@ -42,4 +42,4 @@ class PlatformUtils:
     def supports_open_folder(self) -> bool:
         """Check if the current platform supports opening folders in the system file manager."""
         system = platform.system().lower()
-        return system.startswith("windows") or system == "darwin" or system.startswith("linux")
+        return system.startswith(("windows", "linux")) or system == "darwin"

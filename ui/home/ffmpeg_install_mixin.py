@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import os
 import platform
 import re
@@ -208,15 +209,15 @@ class FfmpegInstallMixin:
         if os.geteuid() == 0:
             return False
         try:
-            check = subprocess.run(  # noqa: S603
-                ["sudo", "-n", "true"],
+            check = subprocess.run(
+                ["sudo", "-n", "true"],  # noqa: S607
                 capture_output=True,
                 text=True,
                 check=False,
             )
-            return check.returncode != 0
         except Exception:
             return True
+        return check.returncode != 0
 
     def _on_ffmpeg_install_confirmed(self, _: ft.ControlEvent) -> None:
         try:
@@ -278,7 +279,9 @@ class FfmpegInstallMixin:
         # Validate all command binaries before executing anything.
         for command, _ in plan:
             if not command or command[0] not in ALLOWED_INSTALL_BINARIES:
-                self._run_ui(lambda cmd=command: self._set_status(f"FFmpeg install blocked: unauthorized command '{cmd[0] if command else ''}'."))
+                self._run_ui(lambda cmd=command: self._set_status(
+                    f"FFmpeg install blocked: unauthorized command '{cmd[0] if cmd else ''}'."
+                ))
                 self._run_ui(self._complete_ffmpeg_install_attempt)
                 return
         total_steps = len(plan)
@@ -302,7 +305,7 @@ class FfmpegInstallMixin:
         input_data = None
 
         if requires_sudo and os.geteuid() != 0:
-            full_command = ["sudo", "-S"] + command
+            full_command = ["sudo", "-S", *command]
             if password:
                 input_data = f"{password}\n"
 
@@ -326,10 +329,8 @@ class FfmpegInstallMixin:
             except Exception:
                 pass
             finally:
-                try:
+                with contextlib.suppress(Exception):
                     process.stdin.close()
-                except Exception:
-                    pass
 
         if process.stdout is not None:
             for raw_line in process.stdout:

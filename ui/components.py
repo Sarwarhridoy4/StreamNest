@@ -45,7 +45,7 @@ def status_chip(label: str, value_control: ft.Control) -> ft.Container:
     )
 
 
-def primary_button(text: str, on_click, icon: str = None) -> ft.Button:  # type: ignore[no-untyped-def]
+def primary_button(text: str, on_click, icon: str | None = None) -> ft.Button:  # type: ignore[no-untyped-def]
     content = ft.Row(
         controls=[
             ft.Icon(icon, size=18) if icon else None,
@@ -70,7 +70,7 @@ def primary_button(text: str, on_click, icon: str = None) -> ft.Button:  # type:
     )
 
 
-def secondary_button(text: str, on_click, disabled: bool = False, icon: str = None) -> ft.OutlinedButton:  # type: ignore[no-untyped-def]
+def secondary_button(text: str, on_click, disabled: bool = False, icon: str | None = None) -> ft.OutlinedButton:  # type: ignore[no-untyped-def]  # noqa: FBT002
     content = ft.Row(
         controls=[
             ft.Icon(icon, size=16) if icon else None,

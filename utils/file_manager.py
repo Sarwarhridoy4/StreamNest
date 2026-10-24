@@ -10,17 +10,16 @@ MAX_DOWNLOAD_SIZE = 5 * 1024 * 1024 * 1024
 _ALLOWED_ROOTS: list[Path] = []
 
 
-def _initialize_allowed_roots() -> None:
+def _initialize_allowed_roots() -> list[Path]:
     """Populate the set of filesystem roots user paths may resolve within."""
-    global _ALLOWED_ROOTS
     home = Path.home().resolve()
     tmp = Path(os.getenv("TMPDIR", "/tmp")).resolve()
     downloads = (home / "Downloads").resolve()
     roots = {home, tmp, downloads}
-    _ALLOWED_ROOTS = sorted(roots, key=lambda p: str(p))
+    return sorted(roots, key=str)
 
 
-_initialize_allowed_roots()
+_ALLOWED_ROOTS: list[Path] = _initialize_allowed_roots()
 
 
 def is_path_within_allowed_roots(path: Path) -> bool:
@@ -29,9 +28,9 @@ def is_path_within_allowed_roots(path: Path) -> bool:
     for root in _ALLOWED_ROOTS:
         try:
             resolved.relative_to(root)
-            return True
         except ValueError:
             continue
+        return True
     return False
 
 
@@ -60,7 +59,7 @@ def ensure_download_directory(path: str | None) -> str:
     return normalized
 
 
-def format_bytes(num_bytes: int | float | None) -> str:
+def format_bytes(num_bytes: float | None) -> str:
     if not num_bytes or num_bytes <= 0:
         return "Unknown"
 
@@ -93,7 +92,7 @@ def format_eta(seconds: int | None) -> str:
     return f"{sec}s"
 
 
-def is_download_size_allowed(num_bytes: int | float | None) -> bool:
+def is_download_size_allowed(num_bytes: float | None) -> bool:
     """Return True when the download size does not exceed the configured limit."""
     if num_bytes is None:
         return True

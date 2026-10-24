@@ -63,21 +63,21 @@ class FFmpegUtils:
         """Run ``ffmpeg -version`` and return ``(stdout, stderr, returncode)``."""
         try:
             result = subprocess.run(
-                ["ffmpeg", "-version"],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+                ["ffmpeg", "-version"],  # noqa: S607
+                capture_output=True,
                 stdin=subprocess.DEVNULL,
                 timeout=timeout,
+                check=False,
             )
-            stdout_value = result.stdout.decode("utf-8", "replace")
-            stderr_value = result.stderr.decode("utf-8", "replace")
-            return stdout_value, stderr_value, result.returncode
         except FileNotFoundError:
             return "", "ffmpeg executable not found", -1
         except OSError as exc:
             return "", str(exc), -1
-        except subprocess.TimeoutExpired as exc:
+        except subprocess.TimeoutExpired:
             return "", f"ffmpeg -version timed out after {timeout}s", -1
+        stdout_value = result.stdout.decode("utf-8", "replace")
+        stderr_value = result.stderr.decode("utf-8", "replace")
+        return stdout_value, stderr_value, result.returncode
 
     def _parse_ffmpeg_version(self, stdout: str) -> FFmpegVersion | None:
         """Parse the first line of ``ffmpeg -version`` output into a version object."""
@@ -137,7 +137,7 @@ class FFmpegUtils:
         if self.platform_utils.is_android_platform() or self.platform_utils.is_remote_mobile_web_session():
             return False
         system = platform.system().lower()
-        return system.startswith("linux") or system.startswith("windows") or system == "darwin"
+        return system.startswith(("linux", "windows")) or system == "darwin"
 
     def build_ffmpeg_install_hint(self) -> str:
         """Build a platform-specific hint message for FFmpeg installation."""
@@ -153,11 +153,10 @@ class FFmpegUtils:
         """Get platform-specific FFmpeg installation instructions."""
         if system.startswith("linux"):
             return f"{base_message} Install with your package manager, e.g. `sudo apt install ffmpeg`."
-        elif system == "darwin":
+        if system == "darwin":
             return f"{base_message} Install with Homebrew: `brew install ffmpeg`."
-        elif system.startswith("windows"):
+        if system.startswith("windows"):
             return f"{base_message} Install via Winget: `winget install Gyan.FFmpeg`."
-        elif system == "android":
+        if system == "android":
             return f"{base_message} Bundle FFmpeg with the app or include a mobile FFmpeg integration."
-        else:
-            return f"{base_message} Install FFmpeg and ensure it is available in PATH."
+        return f"{base_message} Install FFmpeg and ensure it is available in PATH."

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import flet as ft
 
-from ui.components import PRIMARY_COLOR, SECONDARY_COLOR, build_header, labeled_control, primary_button, status_chip
+from ui.components import PRIMARY_COLOR, build_header, labeled_control, primary_button, status_chip
 
 
 class ViewLayoutMixin:
@@ -374,7 +374,9 @@ class ViewLayoutMixin:
                     ),
                     ft.Text("About StreamNest", theme_style=ft.TextThemeStyle.HEADLINE_SMALL, weight=ft.FontWeight.BOLD),
                     ft.Text(
-                        "A modern desktop media downloader built with Flet and yt-dlp. Download videos and audio from your favorite platforms with an elegant, user-friendly interface.",
+                        "A modern desktop media downloader built with Flet and yt-dlp. "
+                        "Download videos and audio from your favorite platforms with "
+                        "an elegant, user-friendly interface.",
                         color=ft.Colors.ON_SURFACE_VARIANT,
                     ),
                     ft.Divider(height=18),

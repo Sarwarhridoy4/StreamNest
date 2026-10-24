@@ -1,14 +1,17 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import TYPE_CHECKING
 from urllib.parse import urlparse
 from uuid import uuid4
 
 import flet as ft
 
-from services.downloader import DownloadResult
 from state.app_state import HistoryEntry
 from ui.components import PRIMARY_COLOR
+
+if TYPE_CHECKING:
+    from services.downloader import DownloadResult
 
 
 class HistoryMixin:
@@ -22,7 +25,7 @@ class HistoryMixin:
             title = f"Playlist download ({len(self.playlist_selected_indices)} item(s))"
         entry = HistoryEntry(
             id=uuid4().hex,
-            timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            timestamp=datetime.now(datetime.UTC).strftime("%Y-%m-%d %H:%M:%S"),
             title=title,
             url=source_url,
             platform=self._detect_platform_label(source_url),
@@ -40,13 +43,12 @@ class HistoryMixin:
     def _persist_history(self) -> None:
         try:
             self.history_store.save(self.state.history)
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             self._set_status(f"Failed to persist encrypted history: {exc}")
 
     def _detect_platform_label(self, url: str) -> str:
         host = urlparse(url).netloc.lower()
-        if host.startswith("www."):
-            host = host[4:]
+        host = host.removeprefix("www.")
         if "youtube.com" in host or "youtu.be" in host:
             return "YouTube"
         if "facebook.com" in host or "fb.watch" in host:
@@ -135,7 +137,7 @@ class HistoryMixin:
         self.state.clear_history()
         try:
             self.history_store.clear()
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             self._set_status(f"Failed to erase encrypted history: {exc}")
         self._render_history()
         try:

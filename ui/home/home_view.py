@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 import os
-from pathlib import Path
 import platform
 import subprocess
 import webbrowser
-from typing import Callable
+from pathlib import Path
+from typing import TYPE_CHECKING
 
 import flet as ft
 
@@ -16,18 +16,21 @@ from services.format_extractor import (
     QualityOption,
 )
 from state.app_state import AppState
+from ui.home.control_layout_mixin import ControlLayoutMixin
+from ui.home.download_mixin import DownloadMixin
+from ui.home.ffmpeg_install_mixin import FfmpegInstallMixin
+from ui.home.ffmpeg_utils import FFmpegUtils
+from ui.home.history_mixin import HistoryMixin
+from ui.home.platform_utils import PlatformUtils
+from ui.home.playlist_mixin import PlaylistMixin
+from ui.home.theme_manager import ThemeManager
+from ui.home.view_layout_mixin import ViewLayoutMixin
 from utils.file_manager import ensure_download_directory, resolve_download_directory
 from utils.history_store import HistoryStore
 from utils.validators import is_valid_url
-from ui.home.download_mixin import DownloadMixin
-from ui.home.ffmpeg_install_mixin import FfmpegInstallMixin
-from ui.home.history_mixin import HistoryMixin
-from ui.home.playlist_mixin import PlaylistMixin
-from ui.home.control_layout_mixin import ControlLayoutMixin
-from ui.home.view_layout_mixin import ViewLayoutMixin
-from ui.home.platform_utils import PlatformUtils
-from ui.home.ffmpeg_utils import FFmpegUtils
-from ui.home.theme_manager import ThemeManager
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 class HomeView(
@@ -40,7 +43,6 @@ class HomeView(
 ):
     def __init__(self, page: ft.Page) -> None:
         """Initialize the HomeView with all necessary components and state."""
-        import sys
 
         self.page = page
 
@@ -147,10 +149,10 @@ class HomeView(
         """Get the appropriate icon for the current theme mode."""
         if self.page.theme_mode == ft.ThemeMode.DARK:
             return ft.Icons.BRIGHTNESS_4  # Dark theme active
-        elif self.page.theme_mode == ft.ThemeMode.LIGHT:
+        if self.page.theme_mode == ft.ThemeMode.LIGHT:
             return ft.Icons.BRIGHTNESS_7  # Light theme active
-        else:  # SYSTEM
-            return ft.Icons.BRIGHTNESS_AUTO  # System theme (auto)
+        # SYSTEM
+        return ft.Icons.BRIGHTNESS_AUTO  # System theme (auto)
 
     def _on_platform_brightness_change(self, _: ft.ControlEvent) -> None:
         """Handle platform brightness changes to update theme automatically."""
@@ -170,7 +172,7 @@ class HomeView(
                 return
             self._show_popup("Loading formats...", ft.Colors.BLUE_700)
             self._fetch_formats()
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             self._set_status(f"Load formats failed: {exc}")
 
     def _on_mode_change(self, _: ft.ControlEvent) -> None:
@@ -203,9 +205,8 @@ class HomeView(
         folder = ensure_download_directory(path)
 
         # Check if folder exists
-        if not os.path.exists(folder):
+        if not Path(folder).exists():
             status = f"Folder does not exist: {folder}"
-            print(f"DEBUG: {status}")
             if for_playlist:
                 self._set_playlist_status(status)
             else:
@@ -223,14 +224,14 @@ class HomeView(
             system = platform.system().lower()
 
             if system.startswith("windows"):
-                os.startfile(folder)  # type: ignore[attr-defined]
+                os.startfile(folder)  # type: ignore[attr-defined]  # noqa: S606
 
             elif system == "darwin":
                 subprocess.run(["open", folder], check=False)  # noqa: S603,S607
 
             else:  # Linux/Unix
                 # Check if we have a GUI environment
-                has_display = 'DISPLAY' in os.environ or 'WAYLAND_DISPLAY' in os.environ
+                has_display = "DISPLAY" in os.environ or "WAYLAND_DISPLAY" in os.environ
                 if not has_display:
                     status = "Cannot open folder: No GUI display detected"
                     if for_playlist:
@@ -239,7 +240,7 @@ class HomeView(
                         self._set_status(status)
                     return
                 # Check if we have a GUI environment
-                has_display = 'DISPLAY' in os.environ or 'WAYLAND_DISPLAY' in os.environ
+                has_display = "DISPLAY" in os.environ or "WAYLAND_DISPLAY" in os.environ
                 if not has_display:
                     status = "Cannot open folder: No GUI display detected"
                     if for_playlist:
@@ -250,11 +251,12 @@ class HomeView(
 
                 # Try xdg-open first (most standard approach)
                 try:
-                    result = subprocess.run(
-                        ["xdg-open", folder],
+                    result = subprocess.run(  # noqa: S603
+                        ["xdg-open", folder],  # noqa: S607
                         capture_output=True,
                         text=True,
-                        timeout=5
+                        timeout=5,
+                        check=False,
                     )
                     if result.returncode == 0:
                         return  # Success
@@ -272,10 +274,11 @@ class HomeView(
 
                 for cmd in file_managers:
                     try:
-                        result = subprocess.run(
+                        result = subprocess.run(  # noqa: S603
                             cmd,
                             capture_output=True,
-                            timeout=5
+                            timeout=5,
+                            check=False,
                         )
                         if result.returncode == 0:
                             return  # Success
@@ -284,13 +287,15 @@ class HomeView(
 
                 # Last resort: try webbrowser as fallback
                 try:
-                    if os.name == 'nt':
-                        file_url = f"file:///{folder.replace('\\', '/')}"
-                    else:
-                        file_url = f"file://{folder}"
+                    file_url = f"file:///{folder.replace(chr(92), '/')}" if os.name == "nt" else f"file://{folder}"
                     webbrowser.open(file_url)
                 except Exception:
-                    raise Exception("No file manager found and webbrowser fallback failed")
+                    msg = "No file manager found and webbrowser fallback failed"
+
+                    class _NoFileManagerError(Exception):
+                        pass
+
+                    raise _NoFileManagerError(msg) from None
 
         except subprocess.TimeoutExpired:
             error_msg = "Folder opening timed out"
@@ -298,7 +303,7 @@ class HomeView(
                 self._set_playlist_status(f"Open folder failed: {error_msg}")
             else:
                 self._set_status(f"Open folder failed: {error_msg}")
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             error_msg = str(exc)
             if for_playlist:
                 self._set_playlist_status(f"Open folder failed: {error_msg}")
@@ -326,7 +331,7 @@ class HomeView(
                 dialog_title="Select download location",
                 initial_directory=current,
             )
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             self._set_status(f"Directory picker error: {exc}")
             return
 
@@ -432,7 +437,7 @@ class HomeView(
     def _on_close_result_dialog(self, _: ft.ControlEvent) -> None:
         try:
             self.page.pop_dialog()
-        except Exception:  # noqa: BLE001
+        except Exception:
             self.result_dialog.open = False
             self._page_update()
 
@@ -522,7 +527,7 @@ class HomeView(
             self.state.set_history(history)
             self._render_history()
             self._page_update()
-        except Exception:  # noqa: BLE001
+        except Exception:
             # History loading failed, but don't crash the app
             pass
 
@@ -542,7 +547,7 @@ class HomeView(
                 if not self.playlist_status_message:
                     self.playlist_status_message = "Ready."
             self._refresh_view()
-        except Exception:  # noqa: BLE001
+        except Exception:
             self.ffmpeg_missing = True
             self.ffmpeg_install_hint = "Unable to check FFmpeg status."
             self._refresh_view()

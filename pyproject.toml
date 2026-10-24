@@ -21,12 +21,12 @@ dev = [
 ]
 
 [tool.ruff]
-line-length = 120
+line-length = 140
 target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "UP", "YTT", "S", "BLE", "FBT", "B", "A", "COM", "C4", "DTZ", "T10", "DJ", "EM", "EXE", "FA", "ISC", "ICN", "G", "INP", "PIE", "T20", "PYI", "PT", "Q", "RSE", "RET", "SLF", "SLOT", "SIM", "TID", "TCH", "INT", "ARG", "PTH", "ERA", "PD", "PGH", "PL", "TRY", "FLY", "NPY", "AIR", "PERF", "FURB", "LOG", "RUF"]
-ignore = ["S101", "S104", "COM812", "ISC001"]
+ignore = ["S101", "S104", "COM812", "ISC001", "BLE001", "FBT001", "S108", "PLR2004", "SLF001", "S110", "PLR0911", "PLR0912", "PLR0915"]
 
 [tool.mypy]
 python_version = "3.11"

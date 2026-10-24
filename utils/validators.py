@@ -89,10 +89,7 @@ def is_valid_url(url: str) -> bool:
         return False
 
     # Block dangerous port numbers.
-    if parsed.port is not None and parsed.port in BLOCKED_PORTS:
-        return False
-
-    return True
+    return not (parsed.port is not None and parsed.port in BLOCKED_PORTS)
 
 
 def sanitize_filename_component(value: str) -> str:

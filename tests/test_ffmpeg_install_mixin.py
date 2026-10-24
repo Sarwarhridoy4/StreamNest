@@ -77,8 +77,10 @@ class TestFfmpegInstallMixin:
 
     def test_on_recheck_ffmpeg_fallback(self, mixin, ffmpeg_utils):
         # Mock the AttributeError for wrappers
-        with patch.object(mixin, '_is_ffmpeg_missing', side_effect=AttributeError):
-            with patch.object(mixin, '_build_ffmpeg_install_hint', side_effect=AttributeError):
+        with (
+            patch.object(mixin, "_is_ffmpeg_missing", side_effect=AttributeError),
+            patch.object(mixin, "_build_ffmpeg_install_hint", side_effect=AttributeError),
+        ):
                 ffmpeg_utils.is_ffmpeg_missing.return_value = True
                 ffmpeg_utils.build_ffmpeg_install_hint.return_value = "fallback hint"
 

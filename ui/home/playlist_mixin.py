@@ -57,7 +57,7 @@ class PlaylistMixin:
         except ValueError as exc:
             error_msg = str(exc)
             self._run_ui(lambda: self._set_playlist_status(error_msg))
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             error_msg = str(exc)
             self._run_ui(lambda: self._set_playlist_status(f"Playlist load failed: {error_msg}"))
 

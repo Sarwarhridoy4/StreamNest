@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from threading import Lock
-from typing import Optional
 
 
 @dataclass
@@ -35,7 +34,7 @@ class HistoryEntry:
         }
 
     @staticmethod
-    def from_dict(data: dict[str, str]) -> "HistoryEntry":
+    def from_dict(data: dict[str, str]) -> HistoryEntry:
         return HistoryEntry(
             id=str(data.get("id", "")),
             timestamp=str(data.get("timestamp", "")),

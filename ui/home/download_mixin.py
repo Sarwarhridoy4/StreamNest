@@ -5,7 +5,7 @@ from pathlib import Path
 import flet as ft
 
 from services.downloader import DownloadRequest, DownloadResult, ProgressInfo
-from utils.file_manager import ensure_download_directory, format_eta, format_speed, format_bytes
+from utils.file_manager import ensure_download_directory, format_bytes, format_eta, format_speed
 from utils.validators import is_valid_url
 
 
@@ -82,7 +82,7 @@ class DownloadMixin:
                 self._show_popup("Formats loaded successfully.", ft.Colors.GREEN_700)
 
             self._run_ui(_apply)
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             error_msg = str(exc)
             self._run_ui(lambda: self._set_status(f"Format extraction failed: {error_msg}"))
         finally:

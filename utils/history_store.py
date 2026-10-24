@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+import contextlib
 import json
 import os
-from pathlib import Path
 import tempfile
+from pathlib import Path
 
 from cryptography.fernet import Fernet, InvalidToken
 
@@ -18,10 +19,7 @@ class HistoryStore:
             root = base_dir
         else:
             xdg_state = os.getenv("XDG_STATE_HOME")
-            if xdg_state:
-                root = Path(xdg_state) / "streamnest"
-            else:
-                root = Path.home() / ".local" / "state" / "streamnest"
+            root = Path(xdg_state) / "streamnest" if xdg_state else Path.home() / ".local" / "state" / "streamnest"
         self._root = root
         self._key_file = root / ".history.key"
         self._data_file = root / "download_history.enc"
@@ -50,10 +48,9 @@ class HistoryStore:
         raw_entries = json.loads(payload.decode("utf-8"))
         if not isinstance(raw_entries, list):
             return []
-        entries: list[HistoryEntry] = []
-        for item in raw_entries:
-            if isinstance(item, dict):
-                entries.append(HistoryEntry.from_dict(item))
+        entries: list[HistoryEntry] = [
+            HistoryEntry.from_dict(item) for item in raw_entries if isinstance(item, dict)
+        ]
         return entries[:50]
 
     def save(self, entries: list[HistoryEntry]) -> None:
@@ -88,12 +85,10 @@ class HistoryStore:
         try:
             with os.fdopen(fd, "wb") as tmp_file:
                 tmp_file.write(data)
-            os.replace(tmp_name, path)
+            Path(tmp_name).replace(path)
         except Exception:
-            try:
-                os.unlink(tmp_name)
-            except OSError:
-                pass
+            with contextlib.suppress(OSError):
+                Path(tmp_name).unlink()
             raise
 
     def _get_or_create_key(self, key_file: Path | None = None) -> bytes:
@@ -126,6 +121,6 @@ class HistoryStore:
         try:
             current_mode = key_file.stat().st_mode & 0o777
             if current_mode != 0o600:
-                os.chmod(key_file, 0o600)
+                key_file.chmod(0o600)
         except OSError:
             pass

@@ -195,18 +195,22 @@ class FormatExtractor:
             if "-" in token:
                 start_str, end_str = token.split("-", maxsplit=1)
                 if not start_str.isdigit() or not end_str.isdigit():
-                    raise ValueError("Invalid playlist range. Use values like 1-5 or 2,4,8-10.")
+                    msg = "Invalid playlist range. Use values like 1-5 or 2,4,8-10."
+                    raise ValueError(msg)
                 start = int(start_str)
                 end = int(end_str)
                 if start <= 0 or end <= 0 or start > end:
-                    raise ValueError("Playlist range values must be positive and ascending.")
+                    msg = "Playlist range values must be positive and ascending."
+                    raise ValueError(msg)
                 normalized.append(f"{start}-{end}")
             else:
                 if not token.isdigit():
-                    raise ValueError("Invalid playlist range. Use values like 1-5 or 2,4,8-10.")
+                    msg = "Invalid playlist range. Use values like 1-5 or 2,4,8-10."
+                    raise ValueError(msg)
                 value = int(token)
                 if value <= 0:
-                    raise ValueError("Playlist range values must be positive.")
+                    msg = "Playlist range values must be positive."
+                    raise ValueError(msg)
                 normalized.append(str(value))
 
         return ",".join(normalized)

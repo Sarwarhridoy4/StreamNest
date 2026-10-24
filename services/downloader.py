@@ -1,14 +1,14 @@
 from __future__ import annotations
 
-import os
-from dataclasses import dataclass
-from pathlib import Path
 import re
 import shutil
 import subprocess
-from threading import Event, Lock, Thread
 import time
-from typing import Any, Callable, Optional
+from collections.abc import Callable
+from dataclasses import dataclass
+from pathlib import Path
+from threading import Event, Lock, Thread
+from typing import Any
 
 import yt_dlp
 
@@ -59,7 +59,7 @@ class DownloaderService:
     def __init__(self) -> None:
         self._cancel_event = Event()
         self._active_lock = Lock()
-        self._active_thread: Optional[Thread] = None
+        self._active_thread: Thread | None = None
         self._ffmpeg_dir = self._detect_ffmpeg_dir()
 
     def is_busy(self) -> bool:
@@ -117,7 +117,7 @@ class DownloaderService:
         except yt_dlp.utils.DownloadError as exc:
             self._emit_log(on_log, f"yt-dlp download error: {exc}")
             on_error(str(exc))
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             self._emit_log(on_log, f"Unexpected error: {exc}")
             on_error(f"Unexpected error: {exc}")
         finally:
@@ -201,7 +201,7 @@ class DownloaderService:
         def _hook(data: dict[str, Any]) -> None:
             nonlocal last_downloaded, last_ts
             if self._cancel_event.is_set():
-                raise DownloadCancelledError()
+                raise DownloadCancelledError
 
             status = data.get("status", "")
 
@@ -220,8 +220,9 @@ class DownloaderService:
                     )
 
                 if total is not None and not is_download_size_allowed(total):
+                    msg = f"Download size exceeds maximum allowed ({MAX_DOWNLOAD_SIZE // (1024*1024*1024)} GB)."
                     raise DownloadCancelledError(
-                        f"Download size exceeds maximum allowed ({MAX_DOWNLOAD_SIZE // (1024*1024*1024)} GB)."
+                        msg
                     )
 
                 percent = 0.0
@@ -281,12 +282,13 @@ class DownloaderService:
         if not ffmpeg_bin:
             return None
         try:
-            result = subprocess.run(
+            result = subprocess.run(  # noqa: S603
                 [ffmpeg_bin, "-version"],
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
                 stdin=subprocess.DEVNULL,
                 timeout=3,
+                check=False,
             )
             if result.returncode != 0:
                 return None
@@ -297,7 +299,7 @@ class DownloaderService:
     def _postprocessor_hook_factory(self, on_progress: ProgressCallback) -> Callable[[dict[str, Any]], None]:
         def _hook(data: dict[str, Any]) -> None:
             if self._cancel_event.is_set():
-                raise DownloadCancelledError()
+                raise DownloadCancelledError
 
             if data.get("status") in {"started", "processing"}:
                 on_progress(

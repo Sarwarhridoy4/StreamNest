@@ -1,16 +1,19 @@
 from __future__ import annotations
 
+import asyncio
 import traceback
-from typing import Callable
+from typing import TYPE_CHECKING
 
 import flet as ft
 
 from ui.home_view import HomeView
 
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
 
 def create_splash_screen() -> tuple[ft.Control, Callable[[ft.Page], None]]:
     """Create a splash screen and return (root_control, start_animation)."""
-    import asyncio
 
     logo_container = ft.Container(
         content=ft.Image(
@@ -34,7 +37,7 @@ def create_splash_screen() -> tuple[ft.Control, Callable[[ft.Page], None]]:
                 page.update()
                 await asyncio.sleep(0.75)
 
-        asyncio.create_task(pulse())
+        _ = asyncio.create_task(pulse())  # noqa: RUF006  # fire-and-forget splash animation
 
     root = ft.Container(
         expand=True,
@@ -74,7 +77,7 @@ async def initialize_app_async(page: ft.Page) -> None:
         page.controls.clear()
         page.add(main_ui)
         page.update()
-    except Exception:  # noqa: BLE001
+    except Exception:
         traceback.print_exc()
         page.controls.clear()
         page.scroll = ft.ScrollMode.AUTO

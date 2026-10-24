@@ -1,11 +1,9 @@
-import platform
 from subprocess import TimeoutExpired as _TimeoutExpired
-import shutil
 from unittest.mock import Mock, patch
 
 import pytest
 
-from ui.home.ffmpeg_utils import FFmpegUtils, FFmpegVersion, _FFMPEG_MIN_VERSION
+from ui.home.ffmpeg_utils import _FFMPEG_MIN_VERSION, FFmpegUtils, FFmpegVersion
 from ui.home.platform_utils import PlatformUtils
 
 
@@ -23,12 +21,11 @@ class TestFFmpegUtils:
             assert ffmpeg_utils.is_ffmpeg_missing() is True
 
     def test_is_ffmpeg_missing_false(self, ffmpeg_utils):
-        with patch("shutil.which", return_value="/usr/bin/ffmpeg"):
-            with patch("subprocess.run") as run_mock:
-                run_mock.return_value.returncode = 0
-                run_mock.return_value.stdout = b"ffmpeg version 5.1 Copyright ...\n"
-                run_mock.return_value.stderr = b""
-                assert ffmpeg_utils.is_ffmpeg_missing() is False
+        with patch("shutil.which", return_value="/usr/bin/ffmpeg"), patch("subprocess.run") as run_mock:
+            run_mock.return_value.returncode = 0
+            run_mock.return_value.stdout = b"ffmpeg version 5.1 Copyright ...\n"
+            run_mock.return_value.stderr = b""
+            assert ffmpeg_utils.is_ffmpeg_missing() is False
 
     def test_supports_ffmpeg_auto_install_android(self, platform_utils, ffmpeg_utils):
         platform_utils.is_android_platform.return_value = True
@@ -59,7 +56,7 @@ class TestFFmpegUtils:
         assert "Android builds should bundle FFmpeg" in hint
 
     @pytest.mark.parametrize(
-        "system,expected",
+        ("system", "expected"),
         [
             ("linux", "Install with your package manager"),
             ("darwin", "Install with Homebrew"),
@@ -114,68 +111,64 @@ class TestFFmpegDetect:
             assert "not found in PATH" in diagnostic
 
     def test_ffmpeg_fails_execution(self, ffmpeg_utils):
-        with patch("shutil.which", return_value="/usr/bin/ffmpeg"):
-            with patch("subprocess.run", side_effect=OSError("permission denied")):
+        with patch("shutil.which", return_value="/usr/bin/ffmpeg"), patch("subprocess.run", side_effect=OSError("permission denied")):
                 assert ffmpeg_utils.is_ffmpeg_missing() is True
                 diagnostic = ffmpeg_utils.get_ffmpeg_diagnostic()
                 assert "permission denied" in diagnostic
 
     def test_ffmpeg_nonzero_exit(self, ffmpeg_utils):
-        with patch("shutil.which", return_value="/usr/bin/ffmpeg"):
-            with patch("subprocess.run") as run_mock:
-                run_mock.return_value.returncode = 1
-                run_mock.return_value.stdout = b""
-                run_mock.return_value.stderr = b"segfault"
-                assert ffmpeg_utils.is_ffmpeg_missing() is True
-                diagnostic = ffmpeg_utils.get_ffmpeg_diagnostic()
-                assert "failed" in diagnostic
+        with patch("shutil.which", return_value="/usr/bin/ffmpeg"), patch("subprocess.run") as run_mock:
+            run_mock.return_value.returncode = 1
+            run_mock.return_value.stdout = b""
+            run_mock.return_value.stderr = b"segfault"
+            assert ffmpeg_utils.is_ffmpeg_missing() is True
+            diagnostic = ffmpeg_utils.get_ffmpeg_diagnostic()
+            assert "failed" in diagnostic
 
     def test_ffmpeg_version_not_ok(self, ffmpeg_utils):
-        with patch("shutil.which", return_value="/usr/bin/ffmpeg"):
-            with patch("subprocess.run") as run_mock:
-                run_mock.return_value.returncode = 0
-                run_mock.return_value.stdout = b"not ffmpeg\n"
-                run_mock.return_value.stderr = b""
-                assert ffmpeg_utils.is_ffmpeg_missing() is True
-                diagnostic = ffmpeg_utils.get_ffmpeg_diagnostic()
-                assert "failed" in diagnostic
+        with patch("shutil.which", return_value="/usr/bin/ffmpeg"), patch("subprocess.run") as run_mock:
+            run_mock.return_value.returncode = 0
+            run_mock.return_value.stdout = b"not ffmpeg\n"
+            run_mock.return_value.stderr = b""
+            assert ffmpeg_utils.is_ffmpeg_missing() is True
+            diagnostic = ffmpeg_utils.get_ffmpeg_diagnostic()
+            assert "failed" in diagnostic
 
     def test_ffmpeg_valid_old_version(self, ffmpeg_utils):
-        with patch("shutil.which", return_value="/usr/bin/ffmpeg"):
-            with patch("subprocess.run") as run_mock:
-                run_mock.return_value.returncode = 0
-                run_mock.return_value.stdout = b"ffmpeg version 3.4.8 Copyright ...\n"
-                run_mock.return_value.stderr = b""
-                assert ffmpeg_utils.is_ffmpeg_missing() is False
-                assert ffmpeg_utils.is_ffmpeg_version_sufficient() is False
-                diagnostic = ffmpeg_utils.get_ffmpeg_diagnostic()
-                assert f"{'.'.join(str(v) for v in _FFMPEG_MIN_VERSION)}+" in diagnostic
+        with patch("shutil.which", return_value="/usr/bin/ffmpeg"), patch("subprocess.run") as run_mock:
+            run_mock.return_value.returncode = 0
+            run_mock.return_value.stdout = b"ffmpeg version 3.4.8 Copyright ...\n"
+            run_mock.return_value.stderr = b""
+            assert ffmpeg_utils.is_ffmpeg_missing() is False
+            assert ffmpeg_utils.is_ffmpeg_version_sufficient() is False
+            diagnostic = ffmpeg_utils.get_ffmpeg_diagnostic()
+            assert f"{'.'.join(str(v) for v in _FFMPEG_MIN_VERSION)}+" in diagnostic
 
     def test_ffmpeg_valid_new_version(self, ffmpeg_utils):
-        with patch("shutil.which", return_value="/usr/bin/ffmpeg"):
-            with patch("subprocess.run") as run_mock:
-                run_mock.return_value.returncode = 0
-                run_mock.return_value.stdout = b"ffmpeg version 5.1.2 Copyright ...\n"
-                run_mock.return_value.stderr = b""
-                assert ffmpeg_utils.is_ffmpeg_missing() is False
-                assert ffmpeg_utils.is_ffmpeg_version_sufficient() is True
-                assert ffmpeg_utils.get_ffmpeg_diagnostic() is None
+        with patch("shutil.which", return_value="/usr/bin/ffmpeg"), patch("subprocess.run") as run_mock:
+            run_mock.return_value.returncode = 0
+            run_mock.return_value.stdout = b"ffmpeg version 5.1.2 Copyright ...\n"
+            run_mock.return_value.stderr = b""
+            assert ffmpeg_utils.is_ffmpeg_missing() is False
+            assert ffmpeg_utils.is_ffmpeg_version_sufficient() is True
+            assert ffmpeg_utils.get_ffmpeg_diagnostic() is None
 
     def test_get_ffmpeg_version_success(self, ffmpeg_utils):
-        with patch("shutil.which", return_value="/usr/bin/ffmpeg"):
-            with patch("subprocess.run") as run_mock:
-                run_mock.return_value.returncode = 0
-                run_mock.return_value.stdout = b"ffmpeg version 5.1.2 Copyright ...\n"
-                run_mock.return_value.stderr = b""
-                assert ffmpeg_utils.get_ffmpeg_version() == "5.1.2"
+        with patch("shutil.which", return_value="/usr/bin/ffmpeg"), patch("subprocess.run") as run_mock:
+            run_mock.return_value.returncode = 0
+            run_mock.return_value.stdout = b"ffmpeg version 5.1.2 Copyright ...\n"
+            run_mock.return_value.stderr = b""
+            assert ffmpeg_utils.get_ffmpeg_version() == "5.1.2"
 
     def test_get_ffmpeg_version_none_when_missing(self, ffmpeg_utils):
         with patch("shutil.which", return_value=None):
             assert ffmpeg_utils.get_ffmpeg_version() is None
 
     def test_ffmpeg_timeout(self, ffmpeg_utils):
-        with patch("shutil.which", return_value="/usr/bin/ffmpeg"):
-            with patch("subprocess.run", side_effect=_TimeoutExpired("/usr/bin/ffmpeg", 5)):
+        with (
+            patch("shutil.which", return_value="/usr/bin/ffmpeg"),
+            patch("subprocess.run", side_effect=_TimeoutExpired("/usr/bin/ffmpeg", 5)),
+        ):
                 assert ffmpeg_utils.is_ffmpeg_missing() is True
                 diagnostic = ffmpeg_utils.get_ffmpeg_diagnostic()
                 assert "timed out" in diagnostic
