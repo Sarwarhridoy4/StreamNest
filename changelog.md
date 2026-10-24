@@ -4,6 +4,10 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### Added
+- Subtitle download and embed support (`writesubtitles`, `subtitleslangs`, `convertsubs`, `FFmpegEmbedSubtitle`)
+- Subtitle UI controls: download/embed checkboxes, languages field, convert format dropdown
+
 ### Fixed
 - History feature breaks in packaged/installed builds due to read-only application directory.
   - `HistoryStore` now uses XDG state directory (`$XDG_STATE_HOME/streamnest` or `~/.local/state/streamnest`) by default instead of the source tree.
