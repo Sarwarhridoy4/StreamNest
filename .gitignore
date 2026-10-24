@@ -52,3 +52,6 @@ Thumbs.db
 # Local encrypted history artifacts
 state/.history.key
 state/download_history.enc
+
+# Demo media (not bundled into builds)
+assets/demo/

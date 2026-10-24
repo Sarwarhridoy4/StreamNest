@@ -4,9 +4,7 @@ StreamNest is a sleek, professional desktop media downloader built with **Flet**
 
 ## Demo
 
-[![StreamNest demo](assets/demo/demo-preview.gif)](assets/demo/demo.mp4)
-
-Click the preview to open the full demo video.
+Demo media removed to reduce build size.
 
 ## All Screenshots
 
