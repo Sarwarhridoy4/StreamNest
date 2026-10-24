@@ -415,8 +415,15 @@ class HomeView(
     def _on_back_to_welcome(self, _: ft.ControlEvent) -> None:
         self.show_welcome = True
         self.bottom_tab_index = 0
-        self.bottom_nav.selected_index = 0
+        try:
+            self.bottom_nav.selected_index = 0
+        except Exception:
+            pass
         self._set_active_panel()
+        try:
+            self.tab_host.update()
+        except Exception:
+            pass
         self._page_update()
 
     def _on_open_developer_dialog(self, _: ft.ControlEvent) -> None:

@@ -104,6 +104,12 @@ def main(page: ft.Page) -> None:
     page.theme_mode = ft.ThemeMode.SYSTEM
     page.padding = 0
 
+    # Set window icon for desktop builds
+    try:
+        page.window_icon = "assets/icon.png"
+    except Exception:
+        pass
+
     platform_name = str(getattr(page, "platform", "")).lower()
     is_desktop = any(name in platform_name for name in ("windows", "linux", "macos"))
     if is_desktop and getattr(page, "window", None) is not None:
