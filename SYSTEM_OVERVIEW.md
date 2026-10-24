@@ -337,23 +337,20 @@ sequenceDiagram
 
 ```mermaid
 flowchart TD
-    Start([Startup]) --> Detect{FFmpegUtils.is_ffmpeg_missing()}
+    Start([Startup]) --> Detect[FFmpeg missing?]
     
-    Detect -->|Missing| ShowWarning[Show red warning Offer Install FFmpeg button]
-    Detect -->|Found| ShowVersion[Show green: FFmpeg {version} detected]
+    Detect -->|Missing| ShowWarning[Show red warning]
+    Detect -->|Found| ShowVersion[Show FFmpeg version detected]
     
-    ShowVersion --> End1[Ready]
+    ShowWarning --> ClickInstall[Install FFmpeg?]
+    ClickInstall -->|No| End2[Continue without FFmpeg]
+    ClickInstall -->|Yes| Confirm[Confirmation dialog]
     
-    ShowWarning --> ClickInstall{User clicks Install FFmpeg?}
+    Confirm --> InstallPlan[Build OS-specific install command]
+    InstallPlan --> InstallLog[Run install subprocess]
+    InstallLog --> Recheck[Installation successful?]
     
-    ClickInstall -->|No| End2[Continue without FFmpeg merge/extract disabled]
-    
-    ClickInstall -->|Yes| Confirm[Confirmation dialog + privilege prompt Linux]
-    Confirm --> InstallPlan[Build OS-specific install command Linux: apt / macOS: brew / Windows: winget]
-    InstallPlan --> InstallLog[Run subprocess install stream output to FFmpeg Install Log]
-    InstallLog --> Recheck{Installation successful?}
-    
-    Recheck -->|Yes| RecheckUI[Show FFmpeg {version} detected hide install button]
+    Recheck -->|Yes| RecheckUI[Show FFmpeg version detected]
     Recheck -->|No| InstallFail[Show install failure hint]
     
     RecheckUI --> End3[Merge/extract enabled]
@@ -370,25 +367,24 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    Complete([Download completes]) --> CreateEntry[Create HistoryEntry id, timestamp, title, url, platform, mode, quality, save_directory, context, status, message]
+    Complete([Download completes]) --> CreateEntry[Create HistoryEntry]
     
-    CreateEntry --> Append[AppState.append_history(entry) lock-protected, cap at 50]
+    CreateEntry --> Append[Append history lock-protected]
+    Append --> Save[Save encrypted history]
     
-    Append --> Save[HistoryStore.save(entries) Fernet-encrypt JSON payload]
+    Save --> XDG[Write to XDG state dir?]
     
-    Save --> XDG{Write to XDG state dir? $XDG_STATE_HOME/streamnest}
+    XDG -->|Yes| XDGWrite[Write encrypted history file]
+    XDG -->|No| Fallback[Write to temp directory]
     
-    XDG -->|Yes| XDGWrite[Write download_history.enc + .history.key (0o600)]
-    XDG -->|No| Fallback[Fallback to $TMPDIR/streamnest]
-    
-    Fallback --> FBWrite[Write encrypted history to temporary directory]
+    Fallback --> FBWrite[Write encrypted history to temp]
     
     XDGWrite --> End[History persisted]
     FBWrite --> End
     
     subgraph Startup
         Direction TB
-        Load[App startup] --> LoadHistory[HistoryStore.load() decrypt + repopulate AppState.history]
+        Load[App startup] --> LoadHistory[Load history]
     end
     
     style Complete fill:#e1f5fe
