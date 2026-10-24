@@ -51,6 +51,9 @@ jobs:
           clang cmake ninja-build pkg-config g++ \
           desktop-file-utils dpkg-dev imagemagick libgtk-3-dev lld-20 libfuse2
 
+    - name: Create Python virtual environment
+      run: python3 -m venv .venv
+
     - name: Cache uv dependencies
       uses: actions/cache@v4
       with:
@@ -61,8 +64,8 @@ jobs:
 
     - name: Install Python dependencies
       run: |
-        pip install uv
-        uv pip install --system -e .
+        .venv/bin/pip install uv
+        .venv/bin/uv pip install -e .
 
     - name: Make build script executable
       run: chmod +x scripts/build_linux_packages.sh
