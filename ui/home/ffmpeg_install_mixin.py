@@ -2,10 +2,20 @@ from __future__ import annotations
 
 import os
 import platform
+import re
 import shutil
 import subprocess
 
 import flet as ft
+
+# Maximum password length for sudo prompts.
+MAX_PASSWORD_LENGTH = 256
+# Characters not allowed in sudo passwords (prevents injection via stdin).
+PASSWORD_FORBIDDEN_CHARS = re.compile(r"[\x00-\x1f\x7f]")
+# Allowed package-manager binaries for FFmpeg install plans.
+ALLOWED_INSTALL_BINARIES = {
+    "winget", "brew", "apt-get", "dnf", "yum", "pacman", "zypper", "sudo",
+}
 
 
 class FfmpegInstallMixin:
@@ -226,14 +236,26 @@ class FfmpegInstallMixin:
             return
         self._start_ffmpeg_install_worker(password=None)
 
+    def _validate_password(self, password: str) -> str | None:
+        """Validate a sudo password. Returns an error message or None."""
+        if not password:
+            return "Password is required."
+        if len(password) > MAX_PASSWORD_LENGTH:
+            return "Password is too long."
+        if PASSWORD_FORBIDDEN_CHARS.search(password):
+            return "Password contains invalid characters."
+        return None
+
     def _on_ffmpeg_password_submit(self, _: ft.ControlEvent) -> None:
         password = (self.ffmpeg_password_field.value or "").strip()
         try:
             self.page.pop_dialog()
         except Exception:
             self.ffmpeg_password_dialog.open = False
-        if not password:
-            self._set_status("Installation canceled: password is required for privileged commands.")
+        error = self._validate_password(password)
+        if error:
+            self._set_status(f"Installation canceled: {error}")
+            self._show_popup(error, ft.Colors.RED_700)
             return
         self._start_ffmpeg_install_worker(password=password)
 
@@ -253,6 +275,12 @@ class FfmpegInstallMixin:
         self.page.run_thread(self._run_ffmpeg_install_worker, list(self.pending_ffmpeg_install_plan), password)
 
     def _run_ffmpeg_install_worker(self, plan: list[tuple[list[str], bool]], password: str | None) -> None:
+        # Validate all command binaries before executing anything.
+        for command, _ in plan:
+            if not command or command[0] not in ALLOWED_INSTALL_BINARIES:
+                self._run_ui(lambda cmd=command: self._set_status(f"FFmpeg install blocked: unauthorized command '{cmd[0] if command else ''}'."))
+                self._run_ui(self._complete_ffmpeg_install_attempt)
+                return
         total_steps = len(plan)
         for idx, (command, requires_sudo) in enumerate(plan, start=1):
             self._run_ui(lambda idx=idx, total_steps=total_steps: self._set_status(f"Installing FFmpeg ({idx}/{total_steps})..."))

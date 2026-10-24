@@ -3,11 +3,33 @@
 
 This document provides detailed instructions to build the StreamNest Media Downloader as a Linux executable using Flet.
 
+For general installation and usage instructions, see [INSTRUCTION.md](INSTRUCTION.md). For system architecture, see [SYSTEM_OVERVIEW.md](SYSTEM_OVERVIEW.md).
+
 ## Prerequisites
 
 - **Operating System**: Linux (Ubuntu/Debian recommended)
 - **Python**: 3.11.x (recommended)
-- **Flet CLI**: Installed via uv
+- **uv**: Recommended package manager
+
+#### Install uv
+
+If `uv` is not installed:
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+Or via pip:
+
+```bash
+pip install uv
+```
+
+Verify:
+
+```bash
+uv --version
+```
 - **Flutter SDK**: Automatically downloaded by Flet if missing
 - **Build Tools**: Required Linux packages for Flutter desktop builds
 
@@ -36,7 +58,7 @@ sudo apt install -y \
     pkg-config \
     libgtk-3-dev \
     software-properties-common
-````
+```
 
 ## Install Python 3.11
 
@@ -124,9 +146,9 @@ python --version
 
 The project follows the required Flet structure:
 
-* `pyproject.toml` → Project configuration
+* `pyproject.toml` → Project configuration and dependencies
 * `main.py` → Application entry point
-* `requirements.txt` → Python dependencies
+* `uv.lock` → Locked dependency tree
 * `assets/` → Icons, splash screens, etc.
 
 ## Create Virtual Environment
@@ -219,6 +241,16 @@ This command will:
 * Create Flutter desktop shell
 * Package Python dependencies
 * Build the Linux executable
+
+### Build Linux Packages (.deb + .AppImage)
+
+For Debian and AppImage packages, use the packaging script:
+
+```bash
+./scripts/build_linux_packages.sh 2.0.2 amd64
+```
+
+The script handles system dependency installation, Flutter setup, and packaging.
 
 ## Build Output
 
@@ -320,7 +352,7 @@ flet build linux -v
 export CXXFLAGS="-Wno-macro-redefined" && flet build linux
 ```
 
-## Additional Notes# Additional Notes
+## Additional Notes
 
 * First build may take several minutes
 * Flutter SDK is downloaded automatically

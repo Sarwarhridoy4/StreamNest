@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
+import tempfile
 
 from cryptography.fernet import Fernet, InvalidToken
 
@@ -61,7 +62,7 @@ class HistoryStore:
             cipher = Fernet(self._get_or_create_key())
             payload = json.dumps([entry.to_dict() for entry in entries[:50]], ensure_ascii=True).encode("utf-8")
             encrypted = cipher.encrypt(payload)
-            self._data_file.write_bytes(encrypted)
+            self._atomic_write_bytes(self._data_file, encrypted)
         except OSError:
             fallback = Path(os.getenv("TMPDIR", "/tmp")) / "streamnest"
             fallback.mkdir(parents=True, exist_ok=True)
@@ -69,7 +70,7 @@ class HistoryStore:
             cipher = Fernet(self._get_or_create_key(key_file=fallback_key))
             payload = json.dumps([entry.to_dict() for entry in entries[:50]], ensure_ascii=True).encode("utf-8")
             encrypted = cipher.encrypt(payload)
-            Path(fallback / "download_history.enc").write_bytes(encrypted)
+            self._atomic_write_bytes(fallback / "download_history.enc", encrypted)
 
     def clear(self) -> None:
         try:
@@ -78,8 +79,22 @@ class HistoryStore:
             fallback = Path(os.getenv("TMPDIR", "/tmp")) / "streamnest"
             fallback.mkdir(parents=True, exist_ok=True)
             cipher = Fernet(self._get_or_create_key())
-            cipher.encrypt(b"[]")
-            Path(fallback / "download_history.enc").write_bytes(cipher.encrypt(b"[]"))
+            self._atomic_write_bytes(fallback / "download_history.enc", cipher.encrypt(b"[]"))
+
+    def _atomic_write_bytes(self, path: Path, data: bytes) -> None:
+        """Write bytes to ``path`` atomically via a temp file in the same directory."""
+        path.parent.mkdir(parents=True, exist_ok=True)
+        fd, tmp_name = tempfile.mkstemp(dir=str(path.parent), prefix=".tmp_history_")
+        try:
+            with os.fdopen(fd, "wb") as tmp_file:
+                tmp_file.write(data)
+            os.replace(tmp_name, path)
+        except Exception:
+            try:
+                os.unlink(tmp_name)
+            except OSError:
+                pass
+            raise
 
     def _get_or_create_key(self, key_file: Path | None = None) -> bytes:
         target_key_file = key_file or self._key_file
@@ -91,6 +106,7 @@ class HistoryStore:
             try:
                 key = target_key_file.read_bytes().strip()
                 if key:
+                    self._enforce_key_permissions(target_key_file)
                     return key
             except OSError:
                 pass
@@ -99,7 +115,17 @@ class HistoryStore:
         try:
             target_key_file.parent.mkdir(parents=True, exist_ok=True)
             target_key_file.write_bytes(key)
-            os.chmod(target_key_file, 0o600)
+            self._enforce_key_permissions(target_key_file)
         except OSError:
             pass
         return key
+
+    @staticmethod
+    def _enforce_key_permissions(key_file: Path) -> None:
+        """Ensure the key file is readable only by the owner (0o600)."""
+        try:
+            current_mode = key_file.stat().st_mode & 0o777
+            if current_mode != 0o600:
+                os.chmod(key_file, 0o600)
+        except OSError:
+            pass

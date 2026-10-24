@@ -86,6 +86,15 @@ Click the preview to open the full demo video.
 - Download result dialogs and encrypted local download history
 - Recent downloads preview in the main interface
 
+### Security
+
+- URL validation blocks localhost, private IPs, embedded credentials, and dangerous schemes (file://, javascript:, data:)
+- Path traversal protection for save directories (contained within home/$TMPDIR/Downloads)
+- Download size capped at 5 GB per file
+- Encrypted download history (Fernet, key file at 0o600 permissions, atomic writes)
+- FFmpeg install command allowlisting and password validation
+
+
 ## Changelog
 
 - See [Changelog](changelog.md) for release notes and ongoing updates.
@@ -94,6 +103,35 @@ Click the preview to open the full demo video.
 
 - Python 3.11+
 - FFmpeg (recommended for merge/remux/extract quality)
+- uv (recommended package manager)
+
+### Install uv
+
+If `uv` is not installed, install it using one of the following methods:
+
+**Using the official installer (Linux/macOS):**
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+**Using pip:**
+
+```bash
+pip install uv
+```
+
+**Using Homebrew (macOS):**
+
+```bash
+brew install uv
+```
+
+After installation, verify:
+
+```bash
+uv --version
+```
 
 ## Installation
 
@@ -123,6 +161,8 @@ uv venv
 ```bash
 uv pip install -e .
 ```
+
+For detailed build, install, and usage instructions, see [INSTRUCTION.md](INSTRUCTION.md).
 
 ## FFmpeg Setup
 
@@ -271,7 +311,9 @@ Android packaging metadata is configured in `pyproject.toml` under `[tool.flet]`
 StreamNest/
 ├── main.py                     # App entry point and page bootstrapping
 ├── pyproject.toml              # Project configuration and dependencies
-├── README.md                   # Project documentation
+├── README.md                   # User documentation
+├── INSTRUCTION.md              # Build, install, and usage instructions
+├── SYSTEM_OVERVIEW.md          # System architecture and design
 ├── changelog.md                # Project change history
 ├── LICENSE                     # MIT license
 ├── .github/
@@ -300,7 +342,8 @@ StreamNest/
 │       ├── history_mixin.py
 │       └── ffmpeg_install_mixin.py
 └── utils/
-    ├── file_manager.py         # Directory helpers + size/speed/eta formatters
+    ├── file_manager.py         # Directory helpers + size/speed/eta formatters + path traversal protection
+    ├── history_store.py        # Fernet-encrypted download history persistence
     └── validators.py           # URL and input validation helpers
 ```
 

@@ -13,6 +13,7 @@ from typing import Any, Callable, Optional
 import yt_dlp
 
 from services.format_extractor import FormatExtractor
+from utils.file_manager import MAX_DOWNLOAD_SIZE, is_download_size_allowed
 
 
 class DownloadCancelledError(Exception):
@@ -216,6 +217,11 @@ class DownloaderService:
                 if not isinstance(total, (int, float)):
                     total = self._parse_bytes_str(
                         data.get("_total_bytes_str") or data.get("_total_bytes_estimate_str")
+                    )
+
+                if total is not None and not is_download_size_allowed(total):
+                    raise DownloadCancelledError(
+                        f"Download size exceeds maximum allowed ({MAX_DOWNLOAD_SIZE // (1024*1024*1024)} GB)."
                     )
 
                 percent = 0.0

@@ -1,19 +1,57 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
+
+# Maximum size in bytes for a single download (5 GB).
+MAX_DOWNLOAD_SIZE = 5 * 1024 * 1024 * 1024
+
+# Roots that user-provided paths are allowed to resolve within.
+_ALLOWED_ROOTS: list[Path] = []
+
+
+def _initialize_allowed_roots() -> None:
+    """Populate the set of filesystem roots user paths may resolve within."""
+    global _ALLOWED_ROOTS
+    home = Path.home().resolve()
+    tmp = Path(os.getenv("TMPDIR", "/tmp")).resolve()
+    downloads = (home / "Downloads").resolve()
+    roots = {home, tmp, downloads}
+    _ALLOWED_ROOTS = sorted(roots, key=lambda p: str(p))
+
+
+_initialize_allowed_roots()
+
+
+def is_path_within_allowed_roots(path: Path) -> bool:
+    """Return True when ``path`` resolves inside one of the allowed roots."""
+    resolved = path.resolve()
+    for root in _ALLOWED_ROOTS:
+        try:
+            resolved.relative_to(root)
+            return True
+        except ValueError:
+            continue
+    return False
 
 
 def resolve_download_directory(path: str | None) -> tuple[str, bool]:
     """Returns normalized directory path and whether a fallback path was used."""
-    fallback = (Path.home() / "Downloads").expanduser()
+    fallback = (Path.home() / "Downloads").expanduser().resolve()
     target = Path(path).expanduser() if path else fallback
 
     try:
         target.mkdir(parents=True, exist_ok=True)
-        return str(target.resolve()), False
+        resolved = target.resolve()
     except OSError:
         fallback.mkdir(parents=True, exist_ok=True)
-        return str(fallback.resolve()), True
+        return str(fallback), True
+
+    if not is_path_within_allowed_roots(resolved):
+        fallback.mkdir(parents=True, exist_ok=True)
+        return str(fallback), True
+
+    return str(resolved), False
 
 
 def ensure_download_directory(path: str | None) -> str:
@@ -53,3 +91,10 @@ def format_eta(seconds: int | None) -> str:
     if mins > 0:
         return f"{mins}m {sec}s"
     return f"{sec}s"
+
+
+def is_download_size_allowed(num_bytes: int | float | None) -> bool:
+    """Return True when the download size does not exceed the configured limit."""
+    if num_bytes is None:
+        return True
+    return float(num_bytes) <= MAX_DOWNLOAD_SIZE
