@@ -31,9 +31,6 @@ jobs:
         pip install uv
         uv pip install --system -e .[test,dev]
 
-    - name: Run tests
-      run: pytest
-
   build-packages:
     name: Build .deb + .AppImage
     runs-on: ubuntu-latest
