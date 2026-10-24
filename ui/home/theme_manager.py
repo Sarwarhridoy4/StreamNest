@@ -84,17 +84,18 @@ class ThemeManager:
         focused_border_color = PRIMARY_COLOR
 
         inputs = [
-            self.home_view.url_field,
-            self.home_view.playlist_url_field,
-            self.home_view.playlist_range_field,
+            getattr(self.home_view, "url_field", None),
+            getattr(self.home_view, "playlist_url_field", None),
+            getattr(self.home_view, "playlist_range_field", None),
         ]
         dropdowns = [
-            self.home_view.quality_dropdown,
-            self.home_view.playlist_quality_dropdown,
+            getattr(self.home_view, "quality_dropdown", None),
+            getattr(self.home_view, "playlist_quality_dropdown", None),
         ]
 
-        # Style input fields
-        for control in inputs:
+        def style_control(control: object) -> None:
+            if control is None:
+                return
             control.filled = True
             control.fill_color = fill_color
             control.border_radius = 14
@@ -103,12 +104,8 @@ class ThemeManager:
             control.focused_border_color = focused_border_color
             control.focused_border_width = 2
 
-        # Style dropdowns
+        for control in inputs:
+            style_control(control)
+
         for control in dropdowns:
-            control.filled = True
-            control.fill_color = fill_color
-            control.border_radius = 14
-            control.content_padding = ft.Padding.symmetric(horizontal=14, vertical=12)
-            control.border_color = border_color
-            control.focused_border_color = focused_border_color
-            control.focused_border_width = 2
+            style_control(control)
