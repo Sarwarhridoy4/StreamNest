@@ -258,15 +258,10 @@ ensure_python_requirements() {
   fi
 
   log_header "Installing Python dependencies"
-  if [[ -x "$ROOT_DIR/.venv/bin/python" ]]; then
-    UV_ARGS="--editable $ROOT_DIR"
-  else
-    UV_ARGS="--system --editable $ROOT_DIR"
-  fi
   if [[ "$VERBOSE" -eq 1 ]]; then
-    "$UV_BIN" pip install $UV_ARGS
+    "$UV_BIN" pip install --editable "$ROOT_DIR"
   else
-    "$UV_BIN" pip install --quiet $UV_ARGS
+    "$UV_BIN" pip install --quiet --editable "$ROOT_DIR"
   fi
   log_ok "Python dependencies are ready."
 }
@@ -488,8 +483,7 @@ Exec=$exec_cmd
 Icon=$PACKAGE_NAME
 Terminal=false
 Type=Application
-Categories=AudioVideo;Audio;Video;
-MimeType=x-scheme-handler/streamnest;application/x-yt-dlp;
+Categories=AudioVideo;
 StartupNotify=true
 StartupWMClass=$APP_NAME
 DESKTOP
@@ -506,44 +500,6 @@ install_icons() {
   done
 }
 
-create_metainfo_file() {
-  local root="$1"
-  mkdir -p "$root/usr/share/metainfo"
-  cat > "$root/usr/share/metainfo/${PACKAGE_NAME}.metainfo.xml" <<METAINFO
-<?xml version="1.0" encoding="UTF-8"?>
-<component type="desktop">
-  <id>${PACKAGE_NAME}.desktop</id>
-  <name>${APP_NAME}</name>
-  <summary>${DESCRIPTION}</summary>
-  <description>
-    <p>StreamNest is a sleek, professional desktop media downloader built with Flet and yt-dlp.</p>
-    <p>It supports single media downloads and playlist workflows across providers supported by yt-dlp.</p>
-  </description>
-  <developer-name>${COMPANY:-Sarwar Hossain}</developer-name>
-  <url type="homepage">https://github.com/Sarwarhridoy4/StreamNest</url>
-  <categories>
-    <category>AudioVideo</category>
-    <category>Audio</category>
-    <category>Video</category>
-  </categories>
-  <icons>
-    <icon type="stock">${PACKAGE_NAME}</icon>
-  </icons>
-  <launchable type="desktop-id">${PACKAGE_NAME}.desktop</launchable>
-  <provides>
-    <binary>${EXECUTABLE}</binary>
-  </provides>
-  <screenshots>
-    <screenshot type="default">
-      <image>https://raw.githubusercontent.com/Sarwarhridoy4/StreamNest/production/assets/screenshots/welcome_screen.png</image>
-      <caption>Welcome Screen</caption>
-    </screenshot>
-  </screenshots>
-  <content_rating type="oars-1.1" />
-</component>
-METAINFO
-}
-
 # -----------------------------
 # Build .deb package
 # -----------------------------
@@ -554,7 +510,6 @@ cp -a "$BUILD_DIR/." "$DEB_ROOT/opt/$PACKAGE_NAME/"
 ln -sf "/opt/$PACKAGE_NAME/$EXECUTABLE" "$DEB_ROOT/usr/bin/$EXECUTABLE"
 create_desktop_file "$DEB_ROOT/usr/share/applications/${PACKAGE_NAME}.desktop" "/opt/$PACKAGE_NAME/$EXECUTABLE"
 install_icons "$DEB_ROOT"
-create_metainfo_file "$DEB_ROOT"
 
 desktop-file-validate "$DEB_ROOT/usr/share/applications/${PACKAGE_NAME}.desktop"
 
@@ -566,7 +521,7 @@ Section: utils
 Priority: optional
 Architecture: $ARCH
 Maintainer: $MAINTAINER
-Depends: libgtk-3-0, libstdc++6, libgcc-s1, libglib2.0-0, libfuse2, libc6
+Depends: libgtk-3-0, libstdc++6, libgcc-s1, libglib2.0-0
 Installed-Size: $INSTALLED_SIZE
 Description: $DESCRIPTION
 CONTROL
@@ -586,11 +541,11 @@ mkdir -p "$APP_LIB_DIR" "$APP_USR_DIR/bin" "$APP_USR_DIR/share/applications"
 cp -a "$BUILD_DIR/." "$APP_LIB_DIR/"
 ln -sf "../lib/$PACKAGE_NAME/$EXECUTABLE" "$APP_USR_DIR/bin/$EXECUTABLE"
 
-cat > "$APPDIR/AppRun" <<APPRUN
+cat > "$APPDIR/AppRun" <<'APPRUN'
 #!/usr/bin/env bash
 set -e
-HERE="\$(dirname "\$(readlink -f "\$0")")"
-exec "\$HERE/usr/lib/$PACKAGE_NAME/$EXECUTABLE" "\$@"
+HERE="$(dirname "$(readlink -f "$0")")"
+exec "$HERE/usr/lib/streamnest/streamnest" "$@"
 APPRUN
 chmod +x "$APPDIR/AppRun"
 
@@ -598,7 +553,6 @@ create_desktop_file "$APPDIR/${PACKAGE_NAME}.desktop" "$EXECUTABLE"
 cp "$APPDIR/${PACKAGE_NAME}.desktop" "$APP_USR_DIR/share/applications/${PACKAGE_NAME}.desktop"
 install -Dm644 "${ICON_BASE}.png" "$APPDIR/${PACKAGE_NAME}.png"
 install_icons "$APPDIR"
-create_metainfo_file "$APPDIR"
 
 desktop-file-validate "$APPDIR/${PACKAGE_NAME}.desktop"
 
@@ -609,7 +563,7 @@ case "$ARCH" in
 esac
 
 APPIMAGE_OUT="$OUT_DIR/${APP_NAME}-${VERSION}-${APPIMAGE_ARCH}.AppImage"
-APPIMAGE_EXTRACT_AND_RUN=1 ARCH="$APPIMAGE_ARCH" appimagetool "$APPDIR" "$APPIMAGE_OUT" >/dev/null
+APPIMAGE_EXTRACT_AND_RUN=1 ARCH="$APPIMAGE_ARCH" appimagetool --no-appstream "$APPDIR" "$APPIMAGE_OUT" >/dev/null
 chmod +x "$APPIMAGE_OUT"
 log_ok "Created .AppImage package: $APPIMAGE_OUT"
 
