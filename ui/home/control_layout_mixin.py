@@ -77,15 +77,15 @@ class ControlLayoutMixin:
         self.cancel_btn = secondary_button("Cancel", self._on_cancel, disabled=True, icon=ft.Icons.CANCEL)
         self.developer_info_btn = secondary_button("About Developer", self._on_open_developer_dialog, icon=ft.Icons.INFO)
         self.back_to_welcome_btn = ft.TextButton(
-            content="Back to Welcome",
+            content=ft.Text("Back to Welcome"),
             on_click=self._on_back_to_welcome,
         )
         self.playlist_back_btn = ft.TextButton(
-            content="Back to Welcome",
+            content=ft.Text("Back to Welcome"),
             on_click=self._on_back_to_welcome,
         )
         self.about_back_btn = ft.TextButton(
-            content="Back to Welcome",
+            content=ft.Text("Back to Welcome"),
             on_click=self._on_back_to_welcome,
         )
         # Theme toggle is now a floating action button
