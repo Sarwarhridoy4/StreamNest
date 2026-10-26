@@ -34,6 +34,9 @@ class DownloadRequest:
     cookies_from_browser: str | None = None
     cookies_file: str | None = None
     proxy: str | None = None
+    thumbnails: bool = False
+    embed_thumbnail: bool = False
+    convert_thumbnails: str | None = None
     playlist_start: int | None = None
     playlist_end: int | None = None
     skip_unavailable: bool = False

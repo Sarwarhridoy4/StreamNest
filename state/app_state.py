@@ -76,6 +76,9 @@ class AppState:
     cookies_from_browser: str = ""
     cookies_file: str = ""
     proxy: str = ""
+    thumbnails_enabled: bool = False
+    embed_thumbnail: bool = False
+    convert_thumbnails: str = ""
     playlist_start: int | None = None
     playlist_end: int | None = None
     skip_unavailable: bool = False

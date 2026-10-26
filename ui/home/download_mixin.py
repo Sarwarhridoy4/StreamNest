@@ -99,6 +99,12 @@ class DownloadMixin:
         self.state.proxy = (self.proxy_field.value or "").strip()
         self._refresh_view()
 
+    def _on_thumbnails_change(self, _: ft.ControlEvent) -> None:
+        self.state.thumbnails_enabled = bool(self.thumbnails_checkbox.value)
+        self.state.embed_thumbnail = bool(self.embed_thumbnail_checkbox.value)
+        self.state.convert_thumbnails = self.convert_thumbnails_dropdown.value or ""
+        self._refresh_view()
+
     def _on_playlist_options_change(self, _: ft.ControlEvent) -> None:
         start = self._parse_positive_int(self.playlist_start_field.value)
         end = self._parse_positive_int(self.playlist_end_field.value)
