@@ -90,11 +90,24 @@ class DownloadMixin:
         self.state.convert_subs = self.convert_subs_dropdown.value or ""
         self._refresh_view()
 
-    def _on_thumbnails_change(self, _: ft.ControlEvent) -> None:
-        self.state.thumbnails_enabled = bool(self.thumbnails_checkbox.value)
-        self.state.embed_thumbnail = bool(self.embed_thumbnail_checkbox.value)
-        self.state.convert_thumbnails = self.convert_thumbnails_dropdown.value or ""
+    def _on_playlist_options_change(self, _: ft.ControlEvent) -> None:
+        start = self._parse_positive_int(self.playlist_start_field.value)
+        end = self._parse_positive_int(self.playlist_end_field.value)
+        self.state.playlist_start = start
+        self.state.playlist_end = end
+        self.state.skip_unavailable = bool(self.skip_unavailable_checkbox.value)
+        self.state.no_abort_on_error = bool(self.no_abort_on_error_checkbox.value)
         self._refresh_view()
+
+    @staticmethod
+    def _parse_positive_int(value: str | None) -> int | None:
+        if not value or not value.strip():
+            return None
+        try:
+            num = int(value.strip())
+        except ValueError:
+            return None
+        return num if num > 0 else None
 
     def _fetch_formats(self) -> None:
         if self.state.is_fetching_formats:

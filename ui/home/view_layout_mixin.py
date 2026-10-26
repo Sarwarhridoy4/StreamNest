@@ -290,6 +290,23 @@ class ViewLayoutMixin:
                     ),
                     self.playlist_url_field,
                     self.playlist_range_field,
+                    section_divider("Playlist options"),
+                    ft.ResponsiveRow(
+                        controls=[
+                            ft.Container(col={"xs": 12, "sm": 6}, content=self.playlist_start_field),
+                            ft.Container(col={"xs": 12, "sm": 6}, content=self.playlist_end_field),
+                        ],
+                        spacing=8,
+                        run_spacing=8,
+                    ),
+                    ft.Row(
+                        controls=[
+                            self.skip_unavailable_checkbox,
+                            self.no_abort_on_error_checkbox,
+                        ],
+                        wrap=True,
+                        spacing=8,
+                    ),
                     section_divider("Options"),
                     ft.ResponsiveRow(
                         controls=[

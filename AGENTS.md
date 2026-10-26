@@ -169,36 +169,34 @@ flet build apk
 
 ## Recent work (this session)
 
-1. **`features.md`** — yt-dlp-aligned feature improvement proposal across 9 categories (subtitles, thumbnails/metadata, playlist, network/auth/geo, output/file control, quality/format, engine management, UX/history, security). Each item marked ✅ Implemented or ⬜ Pending.
+1. **`features.md`** — yt-dlp-aligned feature improvement proposal across 9 categories. Each item marked ✅ Implemented or ⬜ Pending.
 
-2. **`feature/subtitles` branch (merged to feature/subtitles)** — Subtitles write/embed:
+2. **`feature/subtitles` branch** — Subtitles write/embed:
    - `services/downloader.py`: `DownloadRequest` gains `subtitles`, `embed_subtitles`, `subtitles_langs`, `convert_subs`; `_build_options` sets `writesubtitles`/`subtitleslangs`/`convertsubs` and appends `FFmpegEmbedSubtitle` postprocessor.
-   - `state/app_state.py`: matching state fields.
-   - `ui/home/control_layout_mixin.py`: subtitle checkboxes, languages field, convert dropdown (`on_select`).
-   - `ui/home/download_mixin.py`: `_on_subtitles_change` handler + single-download request wiring.
-   - `ui/home/playlist_mixin.py`: playlist-download request wiring.
-   - `ui/home/view_layout_mixin.py`: "Subtitles" section in left panel.
-   - `ui/home/home_view.py`: subtitle state initialization.
+   - `state/app_state.py`, `ui/home/*`: matching state + UI controls wired into single & playlist downloads.
 
 3. **`feature/thumbnails` branch** — Thumbnail write/embed:
-   - `services/downloader.py`: `DownloadRequest` gains `thumbnails`, `embed_thumbnail`, `convert_thumbnails`; `_build_options` sets `writethumbnail`/`convertthumbnails` and appends `FFmpegEmbedThumbnail` postprocessor (video + audio modes).
-   - `state/app_state.py`: matching state fields.
-   - `ui/home/control_layout_mixin.py`: thumbnail checkboxes, convert dropdown (`on_select`).
-   - `ui/home/download_mixin.py`: `_on_thumbnails_change` handler + single-download request wiring.
-   - `ui/home/playlist_mixin.py`: playlist-download request wiring.
-   - `ui/home/view_layout_mixin.py`: "Thumbnails" section in left panel.
-   - `ui/home/home_view.py`: thumbnail state initialization.
-   - `pyproject.toml`: version `2.0.2` → `2.0.3`.
-   - `scripts/build_linux_packages.sh`: default `VERSION="2.0.2"` → `2.0.3`.
+   - `services/downloader.py`: `DownloadRequest` gains `thumbnails`, `embed_thumbnail`, `convert_thumbnails`; `_build_options` sets `writethumbnail`/`convertthumbnails` and appends `FFmpegEmbedThumbnail` postprocessor (video + audio).
+   - `state/app_state.py`, `ui/home/*`: matching state + UI controls wired into single & playlist downloads.
+   - `pyproject.toml`, `scripts/build_linux_packages.sh`: version `2.0.2` → `2.0.3`.
    - `changelog.md`: subtitle + thumbnail entries under [Unreleased].
 
-4. **AGENTS.md** — this file (project operating instructions).
+4. **`feature/playlist` branch** — Playlist start/end/skip-unavailable/no-abort-on-error:
+   - `services/downloader.py`: `DownloadRequest` gains `playlist_start`, `playlist_end`, `skip_unavailable`, `no_abort_on_error`; `_build_options` sets `playliststart`/`playlistend`/`skipunavailable`/`noabortonerror` (with `ignoreerrors`).
+   - `state/app_state.py`: matching state fields.
+   - `ui/home/control_layout_mixin.py`: start/end text fields, skip-unavailable/no-abort checkboxes.
+   - `ui/home/download_mixin.py`: `_on_playlist_options_change` handler + `_parse_positive_int` helper.
+   - `ui/home/playlist_mixin.py`: playlist download request wiring + start<=end validation.
+   - `ui/home/view_layout_mixin.py`: "Playlist options" section in playlist card.
+
+5. **AGENTS.md** — this file (project operating instructions).
 
 ---
 
 ## Git workflow
 
 - Default branch: `production`
+- Feature work: branch from `production` (e.g. `feature/subtitles`, `feature/thumbnails`, `feature/playlist`)
 - Feature work: branch from `production` (e.g. `feature/subtitles`, `feature/thumbnails`)
 - Commit and push feature branches; open PRs against `production`
 - Do NOT commit unless explicitly asked by the user
@@ -209,20 +207,21 @@ flet build apk
 
 1. ✅ Subtitles write/embed — DONE (`feature/subtitles`)
 2. ✅ Thumbnails write/embed — DONE (`feature/thumbnails`)
+3. ✅ Playlist start/end/skip-unavailable/no-abort-on-error — DONE (`feature/playlist`)
 3. ⬜ Playlist start/end/skip-unavailable/no-abort-on-error
 4. ⬜ Cookies from browser/file + proxy
 5. ⬜ Rate limit + sleep interval
 6. ⬜ Download archive + queue
 7. ⬜ yt-dlp self-update/version + format sort
 
-When implementing a new feature, follow the same pattern as subtitles/thumbnails:
+When implementing a new feature, follow the same pattern as subtitles/thumbnails/playlist:
 1. Add fields to `DownloadRequest` in `services/downloader.py`
 2. Wire yt-dlp options + postprocessors in `_build_options`
 3. Add matching state fields to `state/app_state.py`
 4. Add UI controls to `ui/home/control_layout_mixin.py` (use `on_select` for Dropdown, `on_change` for Checkbox/TextField)
 5. Add change handler to `ui/home/download_mixin.py` + wire into single and playlist `DownloadRequest`
-6. Add section to `ui/home/view_layout_mixin.py` left panel
-7. Initialize state in `ui/home/home_view.py`
+6. Add section to `ui/home/view_layout_mixin.py` relevant panel
+7. Initialize state in `ui/home/home_view.py` (via `AppState` defaults)
 8. Mark feature as ✅ Implemented in `features.md`
 9. Compile-check: `.venv/bin/python -m py_compile <files>`
 10. Lint: `ruff check .` | Type check: `mypy .`

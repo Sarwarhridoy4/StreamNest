@@ -31,9 +31,10 @@ class DownloadRequest:
     embed_subtitles: bool = False
     subtitles_langs: str | None = None
     convert_subs: str | None = None
-    thumbnails: bool = False
-    embed_thumbnail: bool = False
-    convert_thumbnails: str | None = None
+    playlist_start: int | None = None
+    playlist_end: int | None = None
+    skip_unavailable: bool = False
+    no_abort_on_error: bool = False
 
 
 @dataclass
@@ -172,6 +173,17 @@ class DownloaderService:
 
         if request.mode == "playlist" and request.playlist_items:
             opts["playlist_items"] = request.playlist_items
+
+        if request.mode == "playlist":
+            if request.playlist_start:
+                opts["playliststart"] = request.playlist_start
+            if request.playlist_end:
+                opts["playlistend"] = request.playlist_end
+            if request.skip_unavailable:
+                opts["ignoreerrors"] = True
+                opts["skipunavailable"] = True
+            if request.no_abort_on_error:
+                opts["noabortonerror"] = True
 
         if request.mode == "audio":
             postprocessors: list[dict[str, Any]] = [
