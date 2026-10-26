@@ -86,6 +86,7 @@ class AppState:
     rate_limit: str = ""
     sleep_interval: float | None = None
     sleep_requests: float | None = None
+    download_archive: str = ""
     history: list[HistoryEntry] = field(default_factory=list)
 
     _lock: Lock = field(default_factory=Lock, init=False, repr=False)

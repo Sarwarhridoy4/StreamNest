@@ -121,6 +121,7 @@ class HomeView(
         self.rate_limit = ""
         self.sleep_interval = None
         self.sleep_requests = None
+        self.download_archive = ""
         # Playlist progress tracking
         self.playlist_progress = 0.0
         self.playlist_speed = ""

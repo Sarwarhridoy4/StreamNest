@@ -207,7 +207,16 @@ flet build apk
    - `ui/home/view_layout_mixin.py`: "Rate limit / Sleep" section in left panel.
    - `ui/home/home_view.py`: rate limit/sleep state initialization.
 
-7. **AGENTS.md** — this file (project operating instructions).
+7. **`feature/download-archive` branch** — Download archive + queue:
+   - `services/downloader.py`: `DownloadRequest` gains `download_archive`; `_build_options` sets `downloadarchive`; `DownloaderService` gains queue support (sequential processing, `is_queue_empty`, `queue_size`, `_process_queue`).
+   - `state/app_state.py`: matching state field.
+   - `ui/home/control_layout_mixin.py`: download archive file text field.
+   - `ui/home/download_mixin.py`: `_on_archive_change` handler + single and playlist DownloadRequest wiring.
+   - `ui/home/playlist_mixin.py`: playlist download request wiring.
+   - `ui/home/view_layout_mixin.py`: "Download archive" section in left panel.
+   - `ui/home/home_view.py`: download archive state initialization.
+
+8. **AGENTS.md** — this file (project operating instructions).
 
 ---
 
@@ -227,10 +236,10 @@ flet build apk
 3. ✅ Playlist start/end/skip-unavailable/no-abort-on-error — DONE (`feature/playlist`)
 4. ✅ Cookies from browser/file + proxy — DONE (`feature/cookies-proxy`)
 5. ✅ Rate limit + sleep interval — DONE (`feature/rate-limit`)
-6. ⬜ Download archive + queue
+6. ✅ Download archive + queue — DONE (`feature/download-archive`)
 7. ⬜ yt-dlp self-update/version + format sort
 
-When implementing a new feature, follow the same pattern as subtitles/thumbnails/playlist/cookies-proxy:
+When implementing a new feature, follow the same pattern as subtitles/thumbnails/playlist/cookies-proxy/rate-limit/download-archive:
 1. Add fields to `DownloadRequest` in `services/downloader.py`
 2. Wire yt-dlp options + postprocessors in `_build_options`
 3. Add matching state fields to `state/app_state.py`

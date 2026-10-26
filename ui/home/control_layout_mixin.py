@@ -177,6 +177,14 @@ class ControlLayoutMixin:
             width=180,
             on_change=self._on_rate_limit_sleep_change,
         )
+
+        # Download archive controls
+        self.download_archive_field = ft.TextField(
+            label="Download archive file",
+            hint_text="Path to archive file (skip already-downloaded URLs)",
+            width=220,
+            on_change=self._on_archive_change,
+        )
         self.developer_info_btn = secondary_button("About Developer", self._on_open_developer_dialog, icon=ft.Icons.INFO)
         self.back_to_welcome_btn = ft.TextButton(
             content=ft.Text("Back to Welcome"),
