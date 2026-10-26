@@ -107,6 +107,11 @@ class HomeView(
         self.embed_subtitles = False
         self.subtitles_langs = ""
         self.convert_subs = ""
+
+        # Thumbnail state
+        self.thumbnails_enabled = False
+        self.embed_thumbnail = False
+        self.convert_thumbnails = ""
         # Playlist progress tracking
         self.playlist_progress = 0.0
         self.playlist_speed = ""

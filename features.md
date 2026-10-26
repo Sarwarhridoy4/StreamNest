@@ -28,14 +28,14 @@ feature for media archival.
 
 ## 2. Thumbnails & metadata
 
-| # | Feature | yt-dlp option(s) | Why add it | Suggested implementation |
-|---|---------|------------------|------------|--------------------------|
-| 2.1 | Write thumbnail | `--write-thumbnail` | Save cover art / thumbnail image | `writethumbnail: true`; optional image format via `convertthumbnails` |
-| 2.2 | Embed thumbnail | `--embed-thumbnail` | Thumbnail as cover art in audio/video | `FFmpegEmbedThumbnail` postprocessor (especially useful for MP3) |
-| 2.3 | Write info JSON | `--write-info-json` | Sidecar metadata for archival | `writeinfojson: true` |
-| 2.4 | Write description | `--write-description` | Save video description text | `writedescription: true` |
-| 2.5 | Write annotations | `--write-annotations` | Save platform annotations | `writeannotations: true` |
-| 2.6 | Add metadata (already partial) | `--add-metadata` | FFmpegMetadata already used | Extend with `metadatafromtitle` parsing options |
+| # | Feature | Status | yt-dlp option(s) | Suggested implementation |
+|---|---------|--------|------------------|--------------------------|
+| 2.1 | Write thumbnail | ✅ Implemented | `--write-thumbnail` | `writethumbnail: true` in `_build_options` |
+| 2.2 | Embed thumbnail | ✅ Implemented | `--embed-thumbnail` | `FFmpegEmbedThumbnail` postprocessor |
+| 2.3 | Write info JSON | ⬜ Pending | `--write-info-json` | `writeinfojson: true` |
+| 2.4 | Write description | ⬜ Pending | `--write-description` | `writedescription: true` |
+| 2.5 | Write annotations | ⬜ Pending | `--write-annotations` | `writeannotations: true` |
+| 2.6 | Add metadata (already partial) | ⬜ Pending | `--add-metadata` | FFmpegMetadata already used; extend with `metadatafromtitle` parsing options |
 
 ---
 

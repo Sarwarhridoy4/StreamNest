@@ -73,6 +73,9 @@ class AppState:
     embed_subtitles: bool = False
     subtitles_langs: str = ""
     convert_subs: str = ""
+    thumbnails_enabled: bool = False
+    embed_thumbnail: bool = False
+    convert_thumbnails: str = ""
     history: list[HistoryEntry] = field(default_factory=list)
 
     _lock: Lock = field(default_factory=Lock, init=False, repr=False)

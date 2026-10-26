@@ -58,6 +58,9 @@ class DownloadMixin:
             embed_subtitles=self.state.embed_subtitles,
             subtitles_langs=self.state.subtitles_langs or None,
             convert_subs=self.state.convert_subs or None,
+            thumbnails=self.state.thumbnails_enabled,
+            embed_thumbnail=self.state.embed_thumbnail,
+            convert_thumbnails=self.state.convert_thumbnails or None,
         )
 
         started = self.downloader.start_download(
@@ -85,6 +88,12 @@ class DownloadMixin:
         self.state.embed_subtitles = bool(self.embed_subtitles_checkbox.value)
         self.state.subtitles_langs = (self.subtitles_langs_field.value or "").strip()
         self.state.convert_subs = self.convert_subs_dropdown.value or ""
+        self._refresh_view()
+
+    def _on_thumbnails_change(self, _: ft.ControlEvent) -> None:
+        self.state.thumbnails_enabled = bool(self.thumbnails_checkbox.value)
+        self.state.embed_thumbnail = bool(self.embed_thumbnail_checkbox.value)
+        self.state.convert_thumbnails = self.convert_thumbnails_dropdown.value or ""
         self._refresh_view()
 
     def _fetch_formats(self) -> None:
