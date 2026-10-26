@@ -133,6 +133,7 @@ class ControlLayoutMixin:
             hint_text="e.g. socks5://127.0.0.1:1080",
             width=220,
             on_change=self._on_cookies_proxy_change,
+        )
         # Thumbnail controls
         self.thumbnails_checkbox = ft.Checkbox(
             label="Download thumbnail",
