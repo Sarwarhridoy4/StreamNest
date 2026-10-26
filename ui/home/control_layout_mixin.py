@@ -146,6 +146,30 @@ class ControlLayoutMixin:
             expand=True,
         )
 
+        # Playlist option controls
+        self.playlist_start_field = ft.TextField(
+            label="Start index",
+            hint_text="Start at item N (--playlist-start)",
+            width=150,
+            on_change=self._on_playlist_options_change,
+        )
+        self.playlist_end_field = ft.TextField(
+            label="End index",
+            hint_text="Stop at item N (--playlist-end)",
+            width=150,
+            on_change=self._on_playlist_options_change,
+        )
+        self.skip_unavailable_checkbox = ft.Checkbox(
+            label="Skip unavailable",
+            value=False,
+            on_change=self._on_playlist_options_change,
+        )
+        self.no_abort_on_error_checkbox = ft.Checkbox(
+            label="No abort on error",
+            value=False,
+            on_change=self._on_playlist_options_change,
+        )
+
         self.playlist_quality_dropdown = ft.Dropdown(
             label="Quality",
             value="best",

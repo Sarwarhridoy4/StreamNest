@@ -44,16 +44,16 @@ feature for media archival.
 StreamNest supports ranges (`1-5`, `1,3,7-10`) and selection, but lacks several yt-dlp playlist
 controls.
 
-| # | Feature | yt-dlp option(s) | Why add it | Suggested implementation |
-|---|---------|------------------|------------|--------------------------|
-| 3.1 | Playlist start index | `--playlist-start` | Begin download at item N | `playliststart` int field |
-| 3.2 | Playlist end index | `--playlist-end` | Stop download at item N | `playlistend` int field |
-| 3.3 | Reverse playlist order | `--playlist-reverse` | Download newest/oldest first | `playlistreverse: true` checkbox |
-| 3.4 | Random playlist order | `--playlist-random` | Shuffled download order | `playlistrandom: true` checkbox |
-| 3.5 | Skip unavailable items | `--skip-unavailable` | Continue when some items fail | `skipunavailable: true` (pair with `ignoreerrors`) |
-| 3.6 | No abort on error | `--no-abort-on-error` | Keep going after download errors | `noabortonerror: true` |
-| 3.7 | Max downloads | `--max-downloads` | Cap number of items per job | `maxdownloads` int field |
-| 3.8 | Download archive | `--download-archive` | Skip already-downloaded URLs | Persist a text archive file; `downloadarchive` path |
+| # | Feature | Status | yt-dlp option(s) | Suggested implementation |
+|---|---------|--------|------------------|--------------------------|
+| 3.1 | Playlist start index | ✅ Implemented | `--playlist-start` | `playliststart` int field |
+| 3.2 | Playlist end index | ✅ Implemented | `--playlist-end` | `playlistend` int field |
+| 3.3 | Reverse playlist order | ⬜ Pending | `--playlist-reverse` | `playlistreverse: true` checkbox |
+| 3.4 | Random playlist order | ⬜ Pending | `--playlist-random` | `playlistrandom: true` checkbox |
+| 3.5 | Skip unavailable items | ✅ Implemented | `--skip-unavailable` | `skipunavailable: true` (pair with `ignoreerrors`) |
+| 3.6 | No abort on error | ✅ Implemented | `--no-abort-on-error` | `noabortonerror: true` |
+| 3.7 | Max downloads | ⬜ Pending | `--max-downloads` | `maxdownloads` int field |
+| 3.8 | Download archive | ⬜ Pending | `--download-archive` | Persist a text archive file; `downloadarchive` path |
 
 ---
 

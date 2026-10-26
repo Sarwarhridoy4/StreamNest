@@ -73,6 +73,10 @@ class AppState:
     embed_subtitles: bool = False
     subtitles_langs: str = ""
     convert_subs: str = ""
+    playlist_start: int | None = None
+    playlist_end: int | None = None
+    skip_unavailable: bool = False
+    no_abort_on_error: bool = False
     history: list[HistoryEntry] = field(default_factory=list)
 
     _lock: Lock = field(default_factory=Lock, init=False, repr=False)
