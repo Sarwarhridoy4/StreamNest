@@ -166,6 +166,11 @@ class DownloaderService:
             if request.convert_subs:
                 opts["convertsubs"] = request.convert_subs
 
+        if request.thumbnails:
+            opts["writethumbnail"] = True
+            if request.convert_thumbnails:
+                opts["convertthumbnails"] = request.convert_thumbnails
+
         if request.mode == "playlist" and request.playlist_items:
             opts["playlist_items"] = request.playlist_items
 
@@ -181,16 +186,19 @@ class DownloaderService:
                 opts["noabortonerror"] = True
 
         if request.mode == "audio":
+            postprocessors: list[dict[str, Any]] = [
+                {
+                    "key": "FFmpegExtractAudio",
+                    "preferredcodec": "mp3",
+                    "preferredquality": "192",
+                },
+            ]
+            if request.embed_thumbnail:
+                postprocessors.append({"key": "FFmpegEmbedThumbnail"})
             opts.update(
                 {
                     "format": "bestaudio/best",
-                    "postprocessors": [
-                        {
-                            "key": "FFmpegExtractAudio",
-                            "preferredcodec": "mp3",
-                            "preferredquality": "192",
-                        }
-                    ],
+                    "postprocessors": postprocessors,
                 }
             )
         else:
@@ -203,6 +211,8 @@ class DownloaderService:
             ]
             if request.embed_subtitles:
                 postprocessors.append({"key": "FFmpegEmbedSubtitle"})
+            if request.embed_thumbnail:
+                postprocessors.append({"key": "FFmpegEmbedThumbnail"})
             opts.update(
                 {
                     "format": FormatExtractor.resolve_format_selector(

@@ -58,6 +58,9 @@ class DownloadMixin:
             embed_subtitles=self.state.embed_subtitles,
             subtitles_langs=self.state.subtitles_langs or None,
             convert_subs=self.state.convert_subs or None,
+            thumbnails=self.state.thumbnails_enabled,
+            embed_thumbnail=self.state.embed_thumbnail,
+            convert_thumbnails=self.state.convert_thumbnails or None,
         )
 
         started = self.downloader.start_download(

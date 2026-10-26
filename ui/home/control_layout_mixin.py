@@ -105,6 +105,30 @@ class ControlLayoutMixin:
             width=180,
             on_select=self._on_subtitles_change,
         )
+
+        # Thumbnail controls
+        self.thumbnails_checkbox = ft.Checkbox(
+            label="Download thumbnail",
+            value=False,
+            on_change=self._on_thumbnails_change,
+        )
+        self.embed_thumbnail_checkbox = ft.Checkbox(
+            label="Embed thumbnail in file",
+            value=False,
+            on_change=self._on_thumbnails_change,
+        )
+        self.convert_thumbnails_dropdown = ft.Dropdown(
+            label="Convert thumbnail",
+            options=[
+                ft.dropdown.Option(key="", text="Keep original"),
+                ft.dropdown.Option(key="jpg", text="JPEG"),
+                ft.dropdown.Option(key="png", text="PNG"),
+                ft.dropdown.Option(key="webp", text="WebP"),
+            ],
+            value="",
+            width=180,
+            on_select=self._on_thumbnails_change,
+        )
         self.developer_info_btn = secondary_button("About Developer", self._on_open_developer_dialog, icon=ft.Icons.INFO)
         self.back_to_welcome_btn = ft.TextButton(
             content=ft.Text("Back to Welcome"),

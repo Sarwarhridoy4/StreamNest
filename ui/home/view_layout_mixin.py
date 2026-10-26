@@ -117,6 +117,22 @@ class ViewLayoutMixin:
                         spacing=8,
                         run_spacing=8,
                     ),
+                    section_divider("Thumbnails"),
+                    ft.Row(
+                        controls=[
+                            self.thumbnails_checkbox,
+                            self.embed_thumbnail_checkbox,
+                        ],
+                        wrap=True,
+                        spacing=8,
+                    ),
+                    ft.Row(
+                        controls=[
+                            labeled_control("Convert", self.convert_thumbnails_dropdown),
+                        ],
+                        spacing=8,
+                        run_spacing=8,
+                    ),
                     section_divider("Progress"),
                     self.progress_bar,
                     self.status_text,

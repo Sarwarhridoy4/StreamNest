@@ -197,6 +197,7 @@ flet build apk
 
 - Default branch: `production`
 - Feature work: branch from `production` (e.g. `feature/subtitles`, `feature/thumbnails`, `feature/playlist`)
+- Feature work: branch from `production` (e.g. `feature/subtitles`, `feature/thumbnails`)
 - Commit and push feature branches; open PRs against `production`
 - Do NOT commit unless explicitly asked by the user
 
@@ -207,6 +208,7 @@ flet build apk
 1. ✅ Subtitles write/embed — DONE (`feature/subtitles`)
 2. ✅ Thumbnails write/embed — DONE (`feature/thumbnails`)
 3. ✅ Playlist start/end/skip-unavailable/no-abort-on-error — DONE (`feature/playlist`)
+3. ⬜ Playlist start/end/skip-unavailable/no-abort-on-error
 4. ⬜ Cookies from browser/file + proxy
 5. ⬜ Rate limit + sleep interval
 6. ⬜ Download archive + queue
