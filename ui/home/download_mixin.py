@@ -68,6 +68,7 @@ class DownloadMixin:
             sleep_interval=self.state.sleep_interval,
             sleep_requests=self.state.sleep_requests,
             download_archive=self.state.download_archive or None,
+            format_sort=self.state.format_sort or None,
         )
 
         started = self.downloader.start_download(
@@ -126,6 +127,16 @@ class DownloadMixin:
 
     def _on_archive_change(self, _: ft.ControlEvent) -> None:
         self.state.download_archive = (self.download_archive_field.value or "").strip()
+        self._refresh_view()
+
+    def _on_format_sort_change(self, _: ft.ControlEvent) -> None:
+        self.state.format_sort = (self.format_sort_field.value or "").strip()
+        self._refresh_view()
+
+    def _on_update_yt_dlp(self, _: ft.ControlEvent) -> None:
+        success, message = self.downloader.update_yt_dlp()
+        self.state.yt_dlp_version = self.downloader.get_yt_dlp_version() or ""
+        self._set_status("yt-dlp updated successfully." if success else message)
         self._refresh_view()
 
     @staticmethod

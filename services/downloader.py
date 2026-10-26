@@ -45,6 +45,7 @@ class DownloadRequest:
     sleep_interval: float | None = None
     sleep_requests: float | None = None
     download_archive: str | None = None
+    format_sort: str | None = None
 
 
 @dataclass
@@ -241,6 +242,8 @@ class DownloaderService:
             opts["sleep_requests"] = request.sleep_requests
         if request.download_archive:
             opts["downloadarchive"] = request.download_archive
+        if request.format_sort:
+            opts["format_sort"] = request.format_sort
 
         if request.mode == "audio":
             postprocessors: list[dict[str, Any]] = [
@@ -281,6 +284,37 @@ class DownloaderService:
             )
 
         return opts
+
+    @staticmethod
+    def get_yt_dlp_version() -> str | None:
+        """Return installed yt-dlp version string, or None if unavailable."""
+        try:
+            version = yt_dlp.version.__version__
+        except Exception:
+            return None
+        else:
+            return version
+
+    def update_yt_dlp(self) -> tuple[bool, str]:
+        """Self-update yt-dlp via pip. Returns (success, message)."""
+        pip_path = shutil.which("pip")
+        if not pip_path:
+            return False, "pip not found; cannot update yt-dlp."
+        try:
+            result = subprocess.run(  # noqa: S603 - pip_path resolved from system, not user input
+                [pip_path, "install", "-U", "yt-dlp"],
+                capture_output=True,
+                text=True,
+                timeout=120,
+                check=False,
+            )
+            if result.returncode == 0:
+                return True, "yt-dlp updated successfully."
+            return False, f"yt-dlp update failed: {result.stderr.strip() or result.stdout.strip()}"
+        except subprocess.TimeoutExpired:
+            return False, "yt-dlp update timed out."
+        except Exception as exc:
+            return False, f"yt-dlp update error: {exc}"
 
     @staticmethod
     def _emit_log(on_log: LogCallback | None, message: str) -> None:

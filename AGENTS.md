@@ -216,7 +216,16 @@ flet build apk
    - `ui/home/view_layout_mixin.py`: "Download archive" section in left panel.
    - `ui/home/home_view.py`: download archive state initialization.
 
-8. **AGENTS.md** — this file (project operating instructions).
+8. **`feature/yt-dlp-update` branch** — yt-dlp self-update/version + format sort:
+   - `services/downloader.py`: `DownloadRequest` gains `format_sort`; `_build_options` sets `format_sort`; added `get_yt_dlp_version()` and `update_yt_dlp()` methods.
+   - `state/app_state.py`: matching `format_sort` and `yt_dlp_version` state fields.
+   - `ui/home/control_layout_mixin.py`: format sort text field + Update yt-dlp button.
+   - `ui/home/download_mixin.py`: `_on_format_sort_change` + `_on_update_yt_dlp` handlers; single-download request wiring.
+   - `ui/home/playlist_mixin.py`: playlist download request wiring.
+   - `ui/home/view_layout_mixin.py`: "yt-dlp engine" section in left panel.
+   - `ui/home/home_view.py`: format_sort/yt_dlp_version state initialization.
+
+9. **AGENTS.md** — this file (project operating instructions).
 
 ---
 
@@ -237,9 +246,9 @@ flet build apk
 4. ✅ Cookies from browser/file + proxy — DONE (`feature/cookies-proxy`)
 5. ✅ Rate limit + sleep interval — DONE (`feature/rate-limit`)
 6. ✅ Download archive + queue — DONE (`feature/download-archive`)
-7. ⬜ yt-dlp self-update/version + format sort
+7. ✅ yt-dlp self-update/version + format sort — DONE (`feature/yt-dlp-update`)
 
-When implementing a new feature, follow the same pattern as subtitles/thumbnails/playlist/cookies-proxy/rate-limit/download-archive:
+When implementing a new feature, follow the same pattern as subtitles/thumbnails/playlist/cookies-proxy/rate-limit/download-archive/yt-dlp-update:
 1. Add fields to `DownloadRequest` in `services/downloader.py`
 2. Wire yt-dlp options + postprocessors in `_build_options`
 3. Add matching state fields to `state/app_state.py`

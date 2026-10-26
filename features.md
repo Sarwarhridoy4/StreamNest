@@ -109,12 +109,12 @@ controls.
 
 ## 7. yt-dlp engine management
 
-| # | Feature | yt-dlp option(s) | Why add it | Suggested implementation |
-|---|---------|------------------|------------|--------------------------|
-| 7.1 | Self-update | `yt-dlp -U` | Keep yt-dlp current for site fixes | "Update yt-dlp" button running `yt-dlp --update` via subprocess (allowlisted) |
-| 7.2 | Version check | `yt-dlp --version` | Surface engine version | Show yt-dlp version alongside FFmpeg version |
-| 7.3 | Verbose mode | `--verbose` | Debug failing extractions | Toggle for `verbose: true` in yt-dlp opts |
-| 7.4 | No warnings | `--no-warnings` | Reduce log noise | Already partly used; expose toggle |
+| # | Feature | Status | yt-dlp option(s) | Suggested implementation |
+|---|---------|--------|------------------|--------------------------|
+| 7.1 | Self-update | ✅ Implemented | `yt-dlp -U` | "Update yt-dlp" button running `pip install -U yt-dlp` |
+| 7.2 | Version check | ✅ Implemented | `yt-dlp --version` | Show yt-dlp version alongside FFmpeg version |
+| 7.3 | Verbose mode | ⬜ Pending | `--verbose` | Toggle for `verbose: true` in yt-dlp opts |
+| 7.4 | No warnings | ⬜ Pending | `--no-warnings` | Already partly used; expose toggle |
 
 ---
 

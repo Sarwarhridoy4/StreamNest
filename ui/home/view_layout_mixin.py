@@ -173,6 +173,15 @@ class ViewLayoutMixin:
                         spacing=8,
                         run_spacing=8,
                     ),
+                    section_divider("yt-dlp engine"),
+                    ft.Row(
+                        controls=[
+                            labeled_control("Format sort", self.format_sort_field),
+                            self.update_yt_dlp_btn,
+                        ],
+                        spacing=8,
+                        run_spacing=8,
+                    ),
                     section_divider("Progress"),
                     self.progress_bar,
                     self.status_text,

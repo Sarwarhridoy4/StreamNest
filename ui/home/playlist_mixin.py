@@ -146,6 +146,7 @@ class PlaylistMixin:
             sleep_interval=self.state.sleep_interval,
             sleep_requests=self.state.sleep_requests,
             download_archive=self.state.download_archive or None,
+            format_sort=self.state.format_sort or None,
         )
 
         started = self.downloader.start_download(

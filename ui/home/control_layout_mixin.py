@@ -185,6 +185,15 @@ class ControlLayoutMixin:
             width=220,
             on_change=self._on_archive_change,
         )
+
+        # yt-dlp format sort control
+        self.format_sort_field = ft.TextField(
+            label="Format sort",
+            hint_text="e.g. res,ext:mp4:mime, fps",
+            width=220,
+            on_change=self._on_format_sort_change,
+        )
+        self.update_yt_dlp_btn = secondary_button("Update yt-dlp", self._on_update_yt_dlp, icon=ft.Icons.UPDATE)
         self.developer_info_btn = secondary_button("About Developer", self._on_open_developer_dialog, icon=ft.Icons.INFO)
         self.back_to_welcome_btn = ft.TextButton(
             content=ft.Text("Back to Welcome"),
