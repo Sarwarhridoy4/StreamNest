@@ -117,6 +117,22 @@ class ViewLayoutMixin:
                         spacing=8,
                         run_spacing=8,
                     ),
+                    section_divider("Cookies / Proxy"),
+                    ft.Row(
+                        controls=[
+                            self.cookies_browser_dropdown,
+                            self.proxy_field,
+                        ],
+                        spacing=8,
+                        run_spacing=8,
+                    ),
+                    ft.Row(
+                        controls=[
+                            labeled_control("Cookies file", self.cookies_file_field),
+                        ],
+                        spacing=8,
+                        run_spacing=8,
+                    ),
                     section_divider("Progress"),
                     self.progress_bar,
                     self.status_text,

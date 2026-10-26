@@ -31,6 +31,9 @@ class DownloadRequest:
     embed_subtitles: bool = False
     subtitles_langs: str | None = None
     convert_subs: str | None = None
+    cookies_from_browser: str | None = None
+    cookies_file: str | None = None
+    proxy: str | None = None
 
 
 @dataclass
@@ -161,6 +164,13 @@ class DownloaderService:
                 opts["subtitleslangs"] = request.subtitles_langs
             if request.convert_subs:
                 opts["convertsubs"] = request.convert_subs
+
+        if request.cookies_from_browser:
+            opts["cookiesfrombrowser"] = request.cookies_from_browser
+        if request.cookies_file:
+            opts["cookies"] = request.cookies_file
+        if request.proxy:
+            opts["proxy"] = request.proxy
 
         if request.mode == "playlist" and request.playlist_items:
             opts["playlist_items"] = request.playlist_items

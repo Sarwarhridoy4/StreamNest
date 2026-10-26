@@ -105,6 +105,35 @@ class ControlLayoutMixin:
             width=180,
             on_select=self._on_subtitles_change,
         )
+
+        # Cookie / proxy controls
+        self.cookies_browser_dropdown = ft.Dropdown(
+            label="Cookies from browser",
+            options=[
+                ft.dropdown.Option(key="", text="None"),
+                ft.dropdown.Option(key="chrome", text="Chrome"),
+                ft.dropdown.Option(key="firefox", text="Firefox"),
+                ft.dropdown.Option(key="edge", text="Edge"),
+                ft.dropdown.Option(key="safari", text="Safari"),
+                ft.dropdown.Option(key="opera", text="Opera"),
+                ft.dropdown.Option(key="brave", text="Brave"),
+            ],
+            value="",
+            width=180,
+            on_select=self._on_cookies_proxy_change,
+        )
+        self.cookies_file_field = ft.TextField(
+            label="Cookies file",
+            hint_text="Path to cookies.txt",
+            width=220,
+            on_change=self._on_cookies_proxy_change,
+        )
+        self.proxy_field = ft.TextField(
+            label="Proxy",
+            hint_text="e.g. socks5://127.0.0.1:1080",
+            width=220,
+            on_change=self._on_cookies_proxy_change,
+        )
         self.developer_info_btn = secondary_button("About Developer", self._on_open_developer_dialog, icon=ft.Icons.INFO)
         self.back_to_welcome_btn = ft.TextButton(
             content=ft.Text("Back to Welcome"),

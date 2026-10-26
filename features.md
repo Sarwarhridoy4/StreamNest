@@ -59,21 +59,21 @@ controls.
 
 ## 4. Network, auth & geo
 
-| # | Feature | yt-dlp option(s) | Why add it | Suggested implementation |
-|---|---------|------------------|------------|--------------------------|
-| 4.1 | Cookies from browser | `--cookies-from-browser` | Auth to age/region-restricted content | Dropdown (chrome, firefox, edge, safari, …) + profile; `cookiesfrombrowser` |
-| 4.2 | Cookies file | `--cookies` | Use exported `cookies.txt` | File picker; `cookies` path |
-| 4.3 | Proxy | `--proxy` | Route through SOCKS/HTTP proxy | Text field; `proxy` URL |
-| 4.4 | Geo-bypass | `--geo-bypass` | Fake X-Forwarded-For to bypass geo | `geobypass: true` checkbox |
-| 4.5 | Geo verification proxy | `--geo-verification-proxy` | Proxy for geo verification only | `geoverificationproxy` |
-| 4.6 | User-Agent / Referer | `--user-agent`, `--referer` | Mimic browser, avoid blocks | Text fields; `useragent`, `referer` |
-| 4.7 | Socket timeout | `--socket-timeout` | Fail fast on unresponsive hosts | `socket timeout` seconds field |
-| 4.8 | Rate limit | `--limit-rate` | Cap download speed (bandwidth) | `limit rate` field (e.g. `50K`, `2M`) |
-| 4.9 | Sleep interval | `--sleep-interval`, `--sleep-requests` | Be polite between downloads | `sleep interval` / `sleep requests` fields |
-| 4.10 | Concurrent fragments | `--concurrent-fragment-downloads` | Faster HLS/DASH fragment fetch | `concurrent fragment downloads` int field |
-| 4.11 | External downloader | `--external-downloader` (aria2c) | Use aria2c for segmented downloads | Detect aria2c; `external downloader` + args |
-| 4.12 | Retry on HTTP errors | `--retry-on-http-errors` | Retry 4xx/5xx where sensible | `retryonhttperrors` list |
-| 4.13 | Fragment retries | `--fragment-retries` | Retry failed HLS fragments | `fragmentretries` int field |
+| # | Feature | Status | yt-dlp option(s) | Suggested implementation |
+|---|---------|--------|------------------|--------------------------|
+| 4.1 | Cookies from browser | ✅ Implemented | `--cookies-from-browser` | `cookiesfrombrowser` dropdown |
+| 4.2 | Cookies file | ✅ Implemented | `--cookies` | `cookies` text field |
+| 4.3 | Proxy | ✅ Implemented | `--proxy` | `proxy` text field |
+| 4.4 | Geo-bypass | ⬜ Pending | `--geo-bypass` | `geobypass: true` checkbox |
+| 4.5 | Geo verification proxy | ⬜ Pending | `--geo-verification-proxy` | `geoverificationproxy` |
+| 4.6 | User-Agent / Referer | ⬜ Pending | `--user-agent`, `--referer` | Text fields; `useragent`, `referer` |
+| 4.7 | Socket timeout | ⬜ Pending | `--socket-timeout` | Fail fast on unresponsive hosts |
+| 4.8 | Rate limit | ⬜ Pending | `--limit-rate` | Cap download speed (bandwidth) |
+| 4.9 | Sleep interval | ⬜ Pending | `--sleep-interval`, `--sleep-requests` | Be polite between downloads |
+| 4.10 | Concurrent fragments | ⬜ Pending | `--concurrent-fragment-downloads` | Faster HLS/DASH fragment fetch |
+| 4.11 | External downloader | ⬜ Pending | `--external-downloader` (aria2c) | Detect aria2c; `external downloader` + args |
+| 4.12 | Retry on HTTP errors | ⬜ Pending | `--retry-on-http-errors` | Retry 4xx/5xx where sensible |
+| 4.13 | Fragment retries | ⬜ Pending | `--fragment-retries` | Retry failed HLS fragments |
 
 ---
 

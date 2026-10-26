@@ -73,6 +73,9 @@ class AppState:
     embed_subtitles: bool = False
     subtitles_langs: str = ""
     convert_subs: str = ""
+    cookies_from_browser: str = ""
+    cookies_file: str = ""
+    proxy: str = ""
     history: list[HistoryEntry] = field(default_factory=list)
 
     _lock: Lock = field(default_factory=Lock, init=False, repr=False)

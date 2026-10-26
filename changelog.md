@@ -7,6 +7,8 @@ All notable changes to this project are documented in this file.
 ### Added
 - Subtitle download and embed support (`writesubtitles`, `subtitleslangs`, `convertsubs`, `FFmpegEmbedSubtitle`)
 - Subtitle UI controls: download/embed checkboxes, languages field, convert format dropdown
+- Cookies from browser/file and proxy support (`cookiesfrombrowser`, `cookies`, `proxy`)
+- Cookies/proxy UI controls: browser dropdown, cookies file field, proxy field
 
 ### Fixed
 - History feature breaks in packaged/installed builds due to read-only application directory.

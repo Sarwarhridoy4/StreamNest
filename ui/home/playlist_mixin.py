@@ -124,6 +124,9 @@ class PlaylistMixin:
             embed_subtitles=self.state.embed_subtitles,
             subtitles_langs=self.state.subtitles_langs or None,
             convert_subs=self.state.convert_subs or None,
+            cookies_from_browser=self.state.cookies_from_browser or None,
+            cookies_file=self.state.cookies_file or None,
+            proxy=self.state.proxy or None,
         )
 
         started = self.downloader.start_download(
