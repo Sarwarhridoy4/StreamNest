@@ -165,6 +165,14 @@ class ViewLayoutMixin:
                         spacing=8,
                         run_spacing=8,
                     ),
+                    section_divider("Download archive"),
+                    ft.Row(
+                        controls=[
+                            labeled_control("Archive file", self.download_archive_field),
+                        ],
+                        spacing=8,
+                        run_spacing=8,
+                    ),
                     section_divider("Progress"),
                     self.progress_bar,
                     self.status_text,

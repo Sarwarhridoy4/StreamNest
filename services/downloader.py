@@ -44,6 +44,7 @@ class DownloadRequest:
     rate_limit: str | None = None
     sleep_interval: float | None = None
     sleep_requests: float | None = None
+    download_archive: str | None = None
 
 
 @dataclass
@@ -71,20 +72,27 @@ LogCallback = Callable[[str], None]
 
 
 class DownloaderService:
-    """Threaded yt-dlp wrapper with progress and cancel support."""
+    """Threaded yt-dlp wrapper with progress, cancel, and queue support."""
 
     def __init__(self) -> None:
         self._cancel_event = Event()
         self._active_lock = Lock()
         self._active_thread: Thread | None = None
         self._ffmpeg_dir = self._detect_ffmpeg_dir()
+        self._queue: list[tuple] = []
+        self._queue_lock = Lock()
 
     def is_busy(self) -> bool:
         with self._active_lock:
             return self._active_thread is not None and self._active_thread.is_alive()
 
-    def cancel(self) -> None:
-        self._cancel_event.set()
+    def is_queue_empty(self) -> bool:
+        with self._queue_lock:
+            return len(self._queue) == 0
+
+    def queue_size(self) -> int:
+        with self._queue_lock:
+            return len(self._queue)
 
     def start_download(
         self,
@@ -96,7 +104,8 @@ class DownloaderService:
     ) -> bool:
         with self._active_lock:
             if self._active_thread is not None and self._active_thread.is_alive():
-                return False
+                self._queue.append((request, on_progress, on_done, on_error, on_log))
+                return True
 
             self._cancel_event.clear()
             thread = Thread(
@@ -107,6 +116,11 @@ class DownloaderService:
             self._active_thread = thread
             thread.start()
             return True
+
+    def cancel(self) -> None:
+        self._cancel_event.set()
+        with self._queue_lock:
+            self._queue.clear()
 
     def _download_worker(
         self,
@@ -140,6 +154,25 @@ class DownloaderService:
         finally:
             with self._active_lock:
                 self._active_thread = None
+            self._process_queue()
+
+    def _process_queue(self) -> None:
+        with self._queue_lock:
+            if not self._queue:
+                return
+            next_item = self._queue.pop(0)
+
+        with self._active_lock:
+            if self._active_thread is not None and self._active_thread.is_alive():
+                return
+            self._cancel_event.clear()
+            thread = Thread(
+                target=self._download_worker,
+                args=next_item,
+                daemon=True,
+            )
+            self._active_thread = thread
+            thread.start()
 
     def _build_options(
         self,
@@ -206,6 +239,8 @@ class DownloaderService:
             opts["sleep_interval"] = request.sleep_interval
         if request.sleep_requests is not None:
             opts["sleep_requests"] = request.sleep_requests
+        if request.download_archive:
+            opts["downloadarchive"] = request.download_archive
 
         if request.mode == "audio":
             postprocessors: list[dict[str, Any]] = [

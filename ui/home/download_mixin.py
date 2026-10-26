@@ -67,6 +67,7 @@ class DownloadMixin:
             rate_limit=self.state.rate_limit or None,
             sleep_interval=self.state.sleep_interval,
             sleep_requests=self.state.sleep_requests,
+            download_archive=self.state.download_archive or None,
         )
 
         started = self.downloader.start_download(
@@ -121,6 +122,10 @@ class DownloadMixin:
         self.state.rate_limit = (self.rate_limit_field.value or "").strip()
         self.state.sleep_interval = self._parse_optional_float(self.sleep_interval_field.value)
         self.state.sleep_requests = self._parse_optional_float(self.sleep_requests_field.value)
+        self._refresh_view()
+
+    def _on_archive_change(self, _: ft.ControlEvent) -> None:
+        self.state.download_archive = (self.download_archive_field.value or "").strip()
         self._refresh_view()
 
     @staticmethod
