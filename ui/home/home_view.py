@@ -112,6 +112,10 @@ class HomeView(
         self.cookies_from_browser = ""
         self.cookies_file = ""
         self.proxy = ""
+        # Thumbnail state
+        self.thumbnails_enabled = False
+        self.embed_thumbnail = False
+        self.convert_thumbnails = ""
         # Playlist progress tracking
         self.playlist_progress = 0.0
         self.playlist_speed = ""

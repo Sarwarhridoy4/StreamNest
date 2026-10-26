@@ -34,6 +34,10 @@ class DownloadRequest:
     cookies_from_browser: str | None = None
     cookies_file: str | None = None
     proxy: str | None = None
+    playlist_start: int | None = None
+    playlist_end: int | None = None
+    skip_unavailable: bool = False
+    no_abort_on_error: bool = False
 
 
 @dataclass
@@ -171,21 +175,39 @@ class DownloaderService:
             opts["cookies"] = request.cookies_file
         if request.proxy:
             opts["proxy"] = request.proxy
+        if request.thumbnails:
+            opts["writethumbnail"] = True
+            if request.convert_thumbnails:
+                opts["convertthumbnails"] = request.convert_thumbnails
 
         if request.mode == "playlist" and request.playlist_items:
             opts["playlist_items"] = request.playlist_items
 
+        if request.mode == "playlist":
+            if request.playlist_start:
+                opts["playliststart"] = request.playlist_start
+            if request.playlist_end:
+                opts["playlistend"] = request.playlist_end
+            if request.skip_unavailable:
+                opts["ignoreerrors"] = True
+                opts["skipunavailable"] = True
+            if request.no_abort_on_error:
+                opts["noabortonerror"] = True
+
         if request.mode == "audio":
+            postprocessors: list[dict[str, Any]] = [
+                {
+                    "key": "FFmpegExtractAudio",
+                    "preferredcodec": "mp3",
+                    "preferredquality": "192",
+                },
+            ]
+            if request.embed_thumbnail:
+                postprocessors.append({"key": "FFmpegEmbedThumbnail"})
             opts.update(
                 {
                     "format": "bestaudio/best",
-                    "postprocessors": [
-                        {
-                            "key": "FFmpegExtractAudio",
-                            "preferredcodec": "mp3",
-                            "preferredquality": "192",
-                        }
-                    ],
+                    "postprocessors": postprocessors,
                 }
             )
         else:
@@ -198,6 +220,8 @@ class DownloaderService:
             ]
             if request.embed_subtitles:
                 postprocessors.append({"key": "FFmpegEmbedSubtitle"})
+            if request.embed_thumbnail:
+                postprocessors.append({"key": "FFmpegEmbedThumbnail"})
             opts.update(
                 {
                     "format": FormatExtractor.resolve_format_selector(

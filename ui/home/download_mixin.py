@@ -61,6 +61,9 @@ class DownloadMixin:
             cookies_from_browser=self.state.cookies_from_browser or None,
             cookies_file=self.state.cookies_file or None,
             proxy=self.state.proxy or None,
+            thumbnails=self.state.thumbnails_enabled,
+            embed_thumbnail=self.state.embed_thumbnail,
+            convert_thumbnails=self.state.convert_thumbnails or None,
         )
 
         started = self.downloader.start_download(
@@ -95,6 +98,25 @@ class DownloadMixin:
         self.state.cookies_file = (self.cookies_file_field.value or "").strip()
         self.state.proxy = (self.proxy_field.value or "").strip()
         self._refresh_view()
+
+    def _on_playlist_options_change(self, _: ft.ControlEvent) -> None:
+        start = self._parse_positive_int(self.playlist_start_field.value)
+        end = self._parse_positive_int(self.playlist_end_field.value)
+        self.state.playlist_start = start
+        self.state.playlist_end = end
+        self.state.skip_unavailable = bool(self.skip_unavailable_checkbox.value)
+        self.state.no_abort_on_error = bool(self.no_abort_on_error_checkbox.value)
+        self._refresh_view()
+
+    @staticmethod
+    def _parse_positive_int(value: str | None) -> int | None:
+        if not value or not value.strip():
+            return None
+        try:
+            num = int(value.strip())
+        except ValueError:
+            return None
+        return num if num > 0 else None
 
     def _fetch_formats(self) -> None:
         if self.state.is_fetching_formats:

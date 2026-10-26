@@ -99,6 +99,14 @@ class PlaylistMixin:
             self._set_playlist_status("Select at least one playlist item.")
             return
 
+        if (
+            self.state.playlist_start is not None
+            and self.state.playlist_end is not None
+            and self.state.playlist_start > self.state.playlist_end
+        ):
+            self._set_playlist_status("Playlist start index must be <= end index.")
+            return
+
         selected_expr = ",".join(str(i) for i in sorted(self.playlist_selected_indices))
 
         self.state.set_downloading(True)
@@ -127,6 +135,10 @@ class PlaylistMixin:
             cookies_from_browser=self.state.cookies_from_browser or None,
             cookies_file=self.state.cookies_file or None,
             proxy=self.state.proxy or None,
+            playlist_start=self.state.playlist_start,
+            playlist_end=self.state.playlist_end,
+            skip_unavailable=self.state.skip_unavailable,
+            no_abort_on_error=self.state.no_abort_on_error,
         )
 
         started = self.downloader.start_download(
