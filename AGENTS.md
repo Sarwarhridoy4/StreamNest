@@ -205,7 +205,7 @@ flet build apk
 ## Git workflow
 
 - Default branch: `production`
-- Feature work: branch from `production` (e.g. `feature/subtitles`, `feature/thumbnails`, `feature/playlist`, `feature/cookies-proxy`)
+- Feature work: create a new branch from the **current workbranch** (e.g. `feature/cookies-proxy` → `feature/rate-limit`) rather than switching back to `production` and branching from there. Branching from production after local feature work has diverged can cause merge conflicts; branching from the current workbranch keeps history linear and avoids conflict resolution.
 - Commit and push feature branches; open PRs against `production`
 - Do NOT commit unless explicitly asked by the user
 
