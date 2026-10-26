@@ -189,15 +189,23 @@ flet build apk
    - `ui/home/playlist_mixin.py`: playlist download request wiring + start<=end validation.
    - `ui/home/view_layout_mixin.py`: "Playlist options" section in playlist card.
 
-5. **AGENTS.md** — this file (project operating instructions).
+5. **`feature/cookies-proxy` branch** — Cookies from browser/file + proxy:
+   - `services/downloader.py`: `DownloadRequest` gains `cookies_from_browser`, `cookies_file`, `proxy`; `_build_options` sets `cookiesfrombrowser`/`cookies`/`proxy`.
+   - `state/app_state.py`: matching state fields.
+   - `ui/home/control_layout_mixin.py`: browser dropdown, cookies file field, proxy field.
+   - `ui/home/download_mixin.py`: `_on_cookies_proxy_change` handler.
+   - `ui/home/playlist_mixin.py`: playlist download request wiring.
+   - `ui/home/view_layout_mixin.py`: "Cookies / Proxy" section in left panel.
+   - `ui/home/home_view.py`: cookie/proxy state initialization.
+
+6. **AGENTS.md** — this file (project operating instructions).
 
 ---
 
 ## Git workflow
 
 - Default branch: `production`
-- Feature work: branch from `production` (e.g. `feature/subtitles`, `feature/thumbnails`, `feature/playlist`)
-- Feature work: branch from `production` (e.g. `feature/subtitles`, `feature/thumbnails`)
+- Feature work: create a new branch from the **current workbranch** (e.g. `feature/cookies-proxy` → `feature/rate-limit`) rather than switching back to `production` and branching from there. Branching from production after local feature work has diverged can cause merge conflicts; branching from the current workbranch keeps history linear and avoids conflict resolution.
 - Commit and push feature branches; open PRs against `production`
 - Do NOT commit unless explicitly asked by the user
 
@@ -208,13 +216,12 @@ flet build apk
 1. ✅ Subtitles write/embed — DONE (`feature/subtitles`)
 2. ✅ Thumbnails write/embed — DONE (`feature/thumbnails`)
 3. ✅ Playlist start/end/skip-unavailable/no-abort-on-error — DONE (`feature/playlist`)
-3. ⬜ Playlist start/end/skip-unavailable/no-abort-on-error
-4. ⬜ Cookies from browser/file + proxy
+4. ✅ Cookies from browser/file + proxy — DONE (`feature/cookies-proxy`)
 5. ⬜ Rate limit + sleep interval
 6. ⬜ Download archive + queue
 7. ⬜ yt-dlp self-update/version + format sort
 
-When implementing a new feature, follow the same pattern as subtitles/thumbnails/playlist:
+When implementing a new feature, follow the same pattern as subtitles/thumbnails/playlist/cookies-proxy:
 1. Add fields to `DownloadRequest` in `services/downloader.py`
 2. Wire yt-dlp options + postprocessors in `_build_options`
 3. Add matching state fields to `state/app_state.py`

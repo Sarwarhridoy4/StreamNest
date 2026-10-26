@@ -108,6 +108,10 @@ class HomeView(
         self.subtitles_langs = ""
         self.convert_subs = ""
 
+        # Cookie / proxy state
+        self.cookies_from_browser = ""
+        self.cookies_file = ""
+        self.proxy = ""
         # Thumbnail state
         self.thumbnails_enabled = False
         self.embed_thumbnail = False

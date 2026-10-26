@@ -58,6 +58,9 @@ class DownloadMixin:
             embed_subtitles=self.state.embed_subtitles,
             subtitles_langs=self.state.subtitles_langs or None,
             convert_subs=self.state.convert_subs or None,
+            cookies_from_browser=self.state.cookies_from_browser or None,
+            cookies_file=self.state.cookies_file or None,
+            proxy=self.state.proxy or None,
             thumbnails=self.state.thumbnails_enabled,
             embed_thumbnail=self.state.embed_thumbnail,
             convert_thumbnails=self.state.convert_thumbnails or None,
@@ -88,6 +91,12 @@ class DownloadMixin:
         self.state.embed_subtitles = bool(self.embed_subtitles_checkbox.value)
         self.state.subtitles_langs = (self.subtitles_langs_field.value or "").strip()
         self.state.convert_subs = self.convert_subs_dropdown.value or ""
+        self._refresh_view()
+
+    def _on_cookies_proxy_change(self, _: ft.ControlEvent) -> None:
+        self.state.cookies_from_browser = self.cookies_browser_dropdown.value or ""
+        self.state.cookies_file = (self.cookies_file_field.value or "").strip()
+        self.state.proxy = (self.proxy_field.value or "").strip()
         self._refresh_view()
 
     def _on_playlist_options_change(self, _: ft.ControlEvent) -> None:

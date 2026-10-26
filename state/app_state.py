@@ -73,6 +73,9 @@ class AppState:
     embed_subtitles: bool = False
     subtitles_langs: str = ""
     convert_subs: str = ""
+    cookies_from_browser: str = ""
+    cookies_file: str = ""
+    proxy: str = ""
     playlist_start: int | None = None
     playlist_end: int | None = None
     skip_unavailable: bool = False
