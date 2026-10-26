@@ -1,8 +1,6 @@
 name: CI
 
 on:
-  push:
-    branches: [ production ]
   pull_request:
     branches: [ production ]
 
@@ -71,7 +69,7 @@ jobs:
       run: chmod +x scripts/build_linux_packages.sh
 
     - name: Build .deb and .AppImage packages
-      run: ./scripts/build_linux_packages.sh 2.0.2 amd64
+      run: ./scripts/build_linux_packages.sh 2.0.3 amd64
 
     - name: Upload .deb artifact
       uses: actions/upload-artifact@v4

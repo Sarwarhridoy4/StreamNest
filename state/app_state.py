@@ -83,6 +83,9 @@ class AppState:
     playlist_end: int | None = None
     skip_unavailable: bool = False
     no_abort_on_error: bool = False
+    rate_limit: str = ""
+    sleep_interval: float | None = None
+    sleep_requests: float | None = None
     history: list[HistoryEntry] = field(default_factory=list)
 
     _lock: Lock = field(default_factory=Lock, init=False, repr=False)

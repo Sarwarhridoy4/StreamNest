@@ -157,6 +157,26 @@ class ControlLayoutMixin:
             width=180,
             on_select=self._on_thumbnails_change,
         )
+
+        # Rate limit / sleep controls
+        self.rate_limit_field = ft.TextField(
+            label="Rate limit",
+            hint_text="e.g. 50K, 2M (bytes/sec)",
+            width=180,
+            on_change=self._on_rate_limit_sleep_change,
+        )
+        self.sleep_interval_field = ft.TextField(
+            label="Sleep interval",
+            hint_text="Seconds before each download",
+            width=180,
+            on_change=self._on_rate_limit_sleep_change,
+        )
+        self.sleep_requests_field = ft.TextField(
+            label="Sleep requests",
+            hint_text="Seconds between extraction requests",
+            width=180,
+            on_change=self._on_rate_limit_sleep_change,
+        )
         self.developer_info_btn = secondary_button("About Developer", self._on_open_developer_dialog, icon=ft.Icons.INFO)
         self.back_to_welcome_btn = ft.TextButton(
             content=ft.Text("Back to Welcome"),
