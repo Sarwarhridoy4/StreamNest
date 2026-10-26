@@ -198,7 +198,16 @@ flet build apk
    - `ui/home/view_layout_mixin.py`: "Cookies / Proxy" section in left panel.
    - `ui/home/home_view.py`: cookie/proxy state initialization.
 
-6. **AGENTS.md** — this file (project operating instructions).
+6. **`feature/rate-limit` branch** — Rate limit + sleep interval:
+   - `services/downloader.py`: `DownloadRequest` gains `rate_limit`, `sleep_interval`, `sleep_requests`; `_build_options` sets `limit_rate`/`sleep_interval`/`sleep_requests`.
+   - `state/app_state.py`: matching state fields.
+   - `ui/home/control_layout_mixin.py`: rate limit, sleep interval, sleep requests text fields.
+   - `ui/home/download_mixin.py`: `_on_rate_limit_sleep_change` handler + `_parse_optional_float` helper.
+   - `ui/home/playlist_mixin.py`: playlist download request wiring.
+   - `ui/home/view_layout_mixin.py`: "Rate limit / Sleep" section in left panel.
+   - `ui/home/home_view.py`: rate limit/sleep state initialization.
+
+7. **AGENTS.md** — this file (project operating instructions).
 
 ---
 
@@ -217,7 +226,7 @@ flet build apk
 2. ✅ Thumbnails write/embed — DONE (`feature/thumbnails`)
 3. ✅ Playlist start/end/skip-unavailable/no-abort-on-error — DONE (`feature/playlist`)
 4. ✅ Cookies from browser/file + proxy — DONE (`feature/cookies-proxy`)
-5. ⬜ Rate limit + sleep interval
+5. ✅ Rate limit + sleep interval — DONE (`feature/rate-limit`)
 6. ⬜ Download archive + queue
 7. ⬜ yt-dlp self-update/version + format sort
 

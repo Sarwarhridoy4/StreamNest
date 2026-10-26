@@ -116,6 +116,11 @@ class HomeView(
         self.thumbnails_enabled = False
         self.embed_thumbnail = False
         self.convert_thumbnails = ""
+
+        # Rate limit / sleep state
+        self.rate_limit = ""
+        self.sleep_interval = None
+        self.sleep_requests = None
         # Playlist progress tracking
         self.playlist_progress = 0.0
         self.playlist_speed = ""

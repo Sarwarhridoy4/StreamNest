@@ -142,6 +142,9 @@ class PlaylistMixin:
             playlist_end=self.state.playlist_end,
             skip_unavailable=self.state.skip_unavailable,
             no_abort_on_error=self.state.no_abort_on_error,
+            rate_limit=self.state.rate_limit or None,
+            sleep_interval=self.state.sleep_interval,
+            sleep_requests=self.state.sleep_requests,
         )
 
         started = self.downloader.start_download(

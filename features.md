@@ -68,8 +68,8 @@ controls.
 | 4.5 | Geo verification proxy | ⬜ Pending | `--geo-verification-proxy` | `geoverificationproxy` |
 | 4.6 | User-Agent / Referer | ⬜ Pending | `--user-agent`, `--referer` | Text fields; `useragent`, `referer` |
 | 4.7 | Socket timeout | ⬜ Pending | `--socket-timeout` | Fail fast on unresponsive hosts |
-| 4.8 | Rate limit | ⬜ Pending | `--limit-rate` | Cap download speed (bandwidth) |
-| 4.9 | Sleep interval | ⬜ Pending | `--sleep-interval`, `--sleep-requests` | Be polite between downloads |
+| 4.8 | Rate limit | ✅ Implemented | `--limit-rate` | Cap download speed (bandwidth) |
+| 4.9 | Sleep interval | ✅ Implemented | `--sleep-interval`, `--sleep-requests` | Sleep interval / sleep requests text fields |
 | 4.10 | Concurrent fragments | ⬜ Pending | `--concurrent-fragment-downloads` | Faster HLS/DASH fragment fetch |
 | 4.11 | External downloader | ⬜ Pending | `--external-downloader` (aria2c) | Detect aria2c; `external downloader` + args |
 | 4.12 | Retry on HTTP errors | ⬜ Pending | `--retry-on-http-errors` | Retry 4xx/5xx where sensible |

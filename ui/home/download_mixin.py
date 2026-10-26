@@ -64,6 +64,9 @@ class DownloadMixin:
             thumbnails=self.state.thumbnails_enabled,
             embed_thumbnail=self.state.embed_thumbnail,
             convert_thumbnails=self.state.convert_thumbnails or None,
+            rate_limit=self.state.rate_limit or None,
+            sleep_interval=self.state.sleep_interval,
+            sleep_requests=self.state.sleep_requests,
         )
 
         started = self.downloader.start_download(
@@ -113,6 +116,21 @@ class DownloadMixin:
         self.state.skip_unavailable = bool(self.skip_unavailable_checkbox.value)
         self.state.no_abort_on_error = bool(self.no_abort_on_error_checkbox.value)
         self._refresh_view()
+
+    def _on_rate_limit_sleep_change(self, _: ft.ControlEvent) -> None:
+        self.state.rate_limit = (self.rate_limit_field.value or "").strip()
+        self.state.sleep_interval = self._parse_optional_float(self.sleep_interval_field.value)
+        self.state.sleep_requests = self._parse_optional_float(self.sleep_requests_field.value)
+        self._refresh_view()
+
+    @staticmethod
+    def _parse_optional_float(value: str | None) -> float | None:
+        if not value or not value.strip():
+            return None
+        try:
+            return float(value.strip())
+        except ValueError:
+            return None
 
     @staticmethod
     def _parse_positive_int(value: str | None) -> int | None:

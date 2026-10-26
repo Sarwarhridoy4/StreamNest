@@ -41,6 +41,9 @@ class DownloadRequest:
     playlist_end: int | None = None
     skip_unavailable: bool = False
     no_abort_on_error: bool = False
+    rate_limit: str | None = None
+    sleep_interval: float | None = None
+    sleep_requests: float | None = None
 
 
 @dataclass
@@ -196,6 +199,13 @@ class DownloaderService:
                 opts["skipunavailable"] = True
             if request.no_abort_on_error:
                 opts["noabortonerror"] = True
+
+        if request.rate_limit:
+            opts["limit_rate"] = request.rate_limit
+        if request.sleep_interval is not None:
+            opts["sleep_interval"] = request.sleep_interval
+        if request.sleep_requests is not None:
+            opts["sleep_requests"] = request.sleep_requests
 
         if request.mode == "audio":
             postprocessors: list[dict[str, Any]] = [

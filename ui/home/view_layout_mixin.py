@@ -149,6 +149,22 @@ class ViewLayoutMixin:
                         spacing=8,
                         run_spacing=8,
                     ),
+                    section_divider("Rate limit / Sleep"),
+                    ft.Row(
+                        controls=[
+                            labeled_control("Rate limit", self.rate_limit_field),
+                            labeled_control("Sleep interval", self.sleep_interval_field),
+                        ],
+                        spacing=8,
+                        run_spacing=8,
+                    ),
+                    ft.Row(
+                        controls=[
+                            labeled_control("Sleep requests", self.sleep_requests_field),
+                        ],
+                        spacing=8,
+                        run_spacing=8,
+                    ),
                     section_divider("Progress"),
                     self.progress_bar,
                     self.status_text,
