@@ -185,6 +185,7 @@ class ViewLayoutMixin:
                             self.playlist_reverse_checkbox,
                             self.embed_chapters_checkbox,
                             self.split_chapters_checkbox,
+                            self.write_info_json_checkbox,
                         ],
                         spacing=8,
                         run_spacing=8,

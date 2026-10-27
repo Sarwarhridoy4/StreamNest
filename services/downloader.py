@@ -53,6 +53,7 @@ class DownloadRequest:
     playlist_reverse: bool = False
     embed_chapters: bool = False
     split_chapters: bool = False
+    write_info_json: bool = False
 
 
 @dataclass
@@ -294,6 +295,8 @@ class DownloaderService:
                 postprocessors.append({"key": "FFmpegEmbedChapter"})
             if request.split_chapters:
                 postprocessors.append({"key": "SplitChaptersFFmpeg"})
+            if request.write_info_json:
+                opts["writeinfojson"] = True
             opts.update(
                 {
                     "format": FormatExtractor.resolve_format_selector(

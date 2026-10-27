@@ -154,6 +154,7 @@ class PlaylistMixin:
             playlist_reverse=self.state.playlist_reverse,
             embed_chapters=self.state.embed_chapters,
             split_chapters=self.state.split_chapters,
+            write_info_json=self.state.write_info_json,
         )
 
         started = self.downloader.start_download(

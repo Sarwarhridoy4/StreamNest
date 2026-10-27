@@ -32,7 +32,7 @@ feature for media archival.
 |---|---------|--------|------------------|--------------------------|
 | 2.1 | Write thumbnail | ✅ Implemented | `--write-thumbnail` | `writethumbnail: true` in `_build_options` |
 | 2.2 | Embed thumbnail | ✅ Implemented | `--embed-thumbnail` | `FFmpegEmbedThumbnail` postprocessor |
-| 2.3 | Write info JSON | ⬜ Pending | `--write-info-json` | `writeinfojson: true` |
+| 2.3 | Write info JSON | ✅ Implemented | `--write-info-json` | `writeinfojson: true` |
 | 2.4 | Write description | ⬜ Pending | `--write-description` | `writedescription: true` |
 | 2.5 | Write annotations | ⬜ Pending | `--write-annotations` | `writeannotations: true` |
 | 2.6 | Add metadata (already partial) | ⬜ Pending | `--add-metadata` | FFmpegMetadata already used; extend with `metadatafromtitle` parsing options |
