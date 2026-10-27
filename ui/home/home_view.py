@@ -17,7 +17,7 @@ from services.format_extractor import (
     QualityOption,
 )
 from state.app_state import AppState
-from ui.components import ToastManager
+from ui.components import PRIMARY_COLOR, ToastManager
 from ui.home.control_layout_mixin import ControlLayoutMixin
 from ui.home.download_mixin import DownloadMixin
 from ui.home.ffmpeg_install_mixin import FfmpegInstallMixin
@@ -188,6 +188,23 @@ class HomeView(
             width=size,
             height=size,
             fit=ft.BoxFit.CONTAIN,
+        )
+
+    def _about_feature_chip(self, icon: str, label: str) -> ft.Control:
+        """Create a feature chip for the About tab."""
+        return ft.Container(
+            padding=ft.Padding.symmetric(horizontal=12, vertical=10),
+            border_radius=10,
+            border=ft.Border.all(1, ft.Colors.with_opacity(0.2, PRIMARY_COLOR)),
+            content=ft.Row(
+                controls=[
+                    ft.Icon(icon, size=18, color=PRIMARY_COLOR),
+                    ft.Container(width=8),
+                    ft.Text(label, weight=ft.FontWeight.W_500, size=13),
+                ],
+                spacing=0,
+                vertical_alignment=ft.CrossAxisAlignment.CENTER,
+            ),
         )
 
     def _get_theme_icon(self) -> str:
@@ -434,6 +451,8 @@ class HomeView(
             self.tab_host.content = self.history_tab_panel
         elif self.bottom_tab_index == 3:
             self.tab_host.content = self.about_tab_panel
+        elif self.bottom_tab_index == 4:
+            self.tab_host.content = self.settings_tab_panel
         else:
             self.tab_host.content = self.root_container
 

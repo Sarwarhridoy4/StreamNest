@@ -100,142 +100,6 @@ class ViewLayoutMixin:
                         ],
                     ),
                     self.size_text,
-                    section_divider("Subtitles"),
-                    ft.Row(
-                        controls=[
-                            self.subtitles_checkbox,
-                            self.embed_subtitles_checkbox,
-                        ],
-                        wrap=True,
-                        spacing=8,
-                    ),
-                    ft.Row(
-                        controls=[
-                            labeled_control("Languages", self.subtitles_langs_field),
-                            labeled_control("Convert", self.convert_subs_dropdown),
-                        ],
-                        spacing=8,
-                        run_spacing=8,
-                    ),
-                    section_divider("Cookies / Proxy"),
-                    ft.Row(
-                        controls=[
-                            self.cookies_browser_dropdown,
-                            self.proxy_field,
-                        ],
-                        spacing=8,
-                        run_spacing=8,
-                    ),
-                    ft.Row(
-                        controls=[
-                            labeled_control("Cookies file", self.cookies_file_field),
-                        ],
-                        spacing=8,
-                        run_spacing=8,
-                    ),
-                    section_divider("Thumbnails"),
-                    ft.Row(
-                        controls=[
-                            self.thumbnails_checkbox,
-                            self.embed_thumbnail_checkbox,
-                        ],
-                        wrap=True,
-                        spacing=8,
-                    ),
-                    ft.Row(
-                        controls=[
-                            labeled_control("Convert", self.convert_thumbnails_dropdown),
-                        ],
-                        spacing=8,
-                        run_spacing=8,
-                    ),
-                    section_divider("Rate limit / Sleep"),
-                    ft.Row(
-                        controls=[
-                            labeled_control("Rate limit", self.rate_limit_field),
-                            labeled_control("Sleep interval", self.sleep_interval_field),
-                        ],
-                        spacing=8,
-                        run_spacing=8,
-                    ),
-                    ft.Row(
-                        controls=[
-                            labeled_control("Sleep requests", self.sleep_requests_field),
-                        ],
-                        spacing=8,
-                        run_spacing=8,
-                    ),
-                    section_divider("Download archive"),
-                    ft.Row(
-                        controls=[
-                            labeled_control("Archive file", self.download_archive_field),
-                        ],
-                        spacing=8,
-                        run_spacing=8,
-                    ),
-                    section_divider("yt-dlp engine"),
-                    ft.Row(
-                        controls=[
-                            labeled_control("Format sort", self.format_sort_field),
-                            self.update_yt_dlp_btn,
-                        ],
-                        spacing=8,
-                        run_spacing=8,
-                    ),
-                    ft.Row(
-                        controls=[
-                            self.verbose_checkbox,
-                            self.no_warnings_checkbox,
-                            self.geobypass_checkbox,
-                        ],
-                        spacing=8,
-                        run_spacing=8,
-                    ),
-                    ft.Row(
-                        controls=[
-                            labeled_control("Max downloads", self.max_downloads_field),
-                        ],
-                        spacing=8,
-                        run_spacing=8,
-                    ),
-                    ft.Row(
-                        controls=[
-                            self.playlist_reverse_checkbox,
-                            self.playlist_random_checkbox,
-                        ],
-                        spacing=8,
-                        run_spacing=8,
-                    ),
-                    ft.Row(
-                        controls=[
-                            self.embed_chapters_checkbox,
-                            self.split_chapters_checkbox,
-                            self.write_info_json_checkbox,
-                            self.write_description_checkbox,
-                            self.write_annotations_checkbox,
-                            self.add_metadata_checkbox,
-                        ],
-                        spacing=8,
-                        run_spacing=8,
-                    ),
-                    ft.Row(
-                        controls=[
-                            labeled_control("User-Agent", self.user_agent_field),
-                            labeled_control("Referer", self.referer_field),
-                            labeled_control("Socket timeout", self.socket_timeout_field),
-                        ],
-                        spacing=8,
-                        run_spacing=8,
-                    ),
-                    ft.Row(
-                        controls=[
-                            self.no_overwrites_checkbox,
-                            self.force_overwrites_checkbox,
-                            self.no_part_checkbox,
-                        ],
-                        spacing=8,
-                        run_spacing=8,
-                    ),
                     section_divider("Progress"),
                     self.progress_bar,
                     self.status_text,
@@ -567,41 +431,306 @@ class ViewLayoutMixin:
             content=ft.Column(
                 controls=[
                     self.about_back_btn,
+                    ft.Container(
+                        alignment=ft.Alignment(0, 0),
+                        content=ft.Column(
+                            controls=[
+                                ft.Row(
+                                    controls=[self._brand_logo(48), ft.Text("StreamNest", weight=ft.FontWeight.BOLD, size=26)],
+                                    spacing=12,
+                                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                                ),
+                                ft.Container(height=10),
+                                ft.Text(
+                                    "StreamNest",
+                                    theme_style=ft.TextThemeStyle.HEADLINE_MEDIUM,
+                                    weight=ft.FontWeight.BOLD,
+                                    text_align=ft.TextAlign.CENTER,
+                                ),
+                                ft.Text(
+                                    "v2.0.3",
+                                    color=ft.Colors.ON_SURFACE_VARIANT,
+                                    text_align=ft.TextAlign.CENTER,
+                                ),
+                                ft.Container(height=16),
+                                ft.Text(
+                                    "A modern desktop media downloader built with Flet and yt-dlp.",
+                                    color=ft.Colors.ON_SURFACE_VARIANT,
+                                    text_align=ft.TextAlign.CENTER,
+                                ),
+                                ft.Text(
+                                    "Download videos and audio from your favorite platforms with an elegant, user-friendly interface.",
+                                    color=ft.Colors.ON_SURFACE_VARIANT,
+                                    text_align=ft.TextAlign.CENTER,
+                                ),
+                            ],
+                            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                            spacing=6,
+                        ),
+                    ),
+                    ft.Divider(height=24),
                     ft.Row(
-                        controls=[self._brand_logo(34), ft.Text("StreamNest", weight=ft.FontWeight.BOLD, size=18)],
+                        controls=[
+                            self._about_feature_chip(ft.Icons.DOWNLOAD, "Single Downloads"),
+                            self._about_feature_chip(ft.Icons.PLAYLIST_PLAY, "Playlist Support"),
+                            self._about_feature_chip(ft.Icons.SPEED, "Live Progress & ETA"),
+                        ],
+                        wrap=True,
+                        spacing=10,
+                    ),
+                    ft.Row(
+                        controls=[
+                            self._about_feature_chip(ft.Icons.HISTORY, "Encrypted History"),
+                            self._about_feature_chip(ft.Icons.LOCK, "Secure & Validated"),
+                            self._about_feature_chip(ft.Icons.DARK_MODE, "Dark & Light Themes"),
+                        ],
+                        wrap=True,
+                        spacing=10,
+                    ),
+                    ft.Divider(height=24),
+                    ft.Row(
+                        controls=[
+                            ft.Column(
+                                controls=[
+                                    ft.Text("Official Website", theme_style=ft.TextThemeStyle.TITLE_MEDIUM, weight=ft.FontWeight.W_600),
+                                    ft.Container(height=6),
+                                    ft.Text("https://streamnest-puce.vercel.app", color=ft.Colors.ON_SURFACE_VARIANT, selectable=True),
+                                    ft.Container(height=10),
+                                    ft.TextButton(content="Open Website", url="https://streamnest-puce.vercel.app"),
+                                ],
+                                spacing=4,
+                            ),
+                            ft.VerticalDivider(width=1),
+                            ft.Column(
+                                controls=[
+                                    ft.Text("Source Code", theme_style=ft.TextThemeStyle.TITLE_MEDIUM, weight=ft.FontWeight.W_600),
+                                    ft.Container(height=6),
+                                    ft.Text(
+                                        "https://github.com/Sarwarhridoy4/StreamNest",
+                                        color=ft.Colors.ON_SURFACE_VARIANT,
+                                        selectable=True,
+                                    ),
+                                    ft.Container(height=10),
+                                    ft.TextButton(content="View on GitHub", url="https://github.com/Sarwarhridoy4/StreamNest"),
+                                ],
+                                spacing=4,
+                            ),
+                            ft.VerticalDivider(width=1),
+                            ft.Column(
+                                controls=[
+                                    ft.Text("Developer", theme_style=ft.TextThemeStyle.TITLE_MEDIUM, weight=ft.FontWeight.W_600),
+                                    ft.Container(height=6),
+                                    ft.Text("Sarwar Hossain", weight=ft.FontWeight.W_500),
+                                    ft.Container(height=10),
+                                    ft.TextButton(content="Open GitHub Profile", url="https://github.com/Sarwarhridoy4"),
+                                ],
+                                spacing=4,
+                            ),
+                        ],
+                        spacing=16,
+                    ),
+                    ft.Divider(height=24),
+                    ft.Container(
+                        content=ft.Text(
+                            "Built with Flet, yt-dlp, FFmpeg, and Python. "
+                            "Licensed under MIT. Use lawfully and in compliance with platform terms and local regulations.",
+                            color=ft.Colors.ON_SURFACE_VARIANT,
+                            size=12,
+                            text_align=ft.TextAlign.CENTER,
+                        ),
+                        alignment=ft.Alignment(0, 0),
+                    ),
+                ],
+                spacing=10,
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+            ),
+        )
+        self.settings_card = ft.Container(
+            padding=24,
+            border_radius=24,
+            gradient=ft.LinearGradient(
+                begin=ft.Alignment(-1, -1),
+                end=ft.Alignment(1, 1),
+                colors=[ft.Colors.SURFACE, ft.Colors.with_opacity(0.9, ft.Colors.SURFACE)],
+            ),
+            border=ft.Border.all(1, ft.Colors.with_opacity(0.2, PRIMARY_COLOR)),
+            shadow=ft.BoxShadow(
+                spread_radius=0,
+                blur_radius=32,
+                color=ft.Colors.with_opacity(0.15, ft.Colors.BLACK),
+                offset=ft.Offset(0, 12),
+            ),
+            content=ft.Column(
+                controls=[
+                    self.about_back_btn,
+                    ft.Row(
+                        controls=[self._brand_logo(34), ft.Text("Settings", weight=ft.FontWeight.BOLD, size=18)],
                         spacing=10,
                         vertical_alignment=ft.CrossAxisAlignment.CENTER,
                     ),
-                    ft.Text("About StreamNest", theme_style=ft.TextThemeStyle.HEADLINE_SMALL, weight=ft.FontWeight.BOLD),
                     ft.Text(
-                        "A modern desktop media downloader built with Flet and yt-dlp. "
-                        "Download videos and audio from your favorite platforms with "
-                        "an elegant, user-friendly interface.",
+                        "Advanced yt-dlp engine options and download behavior. These apply to both single and playlist downloads.",
                         color=ft.Colors.ON_SURFACE_VARIANT,
                     ),
-                    ft.Divider(height=18),
-                    ft.Text("Official Website", theme_style=ft.TextThemeStyle.TITLE_MEDIUM),
-                    ft.Text("https://streamnest-puce.vercel.app", selectable=True),
-                    ft.TextButton(content="Open Website", url="https://streamnest-puce.vercel.app"),
-                    ft.Divider(height=18),
-                    ft.Text("Source Code", theme_style=ft.TextThemeStyle.TITLE_MEDIUM),
-                    ft.Text("https://github.com/Sarwarhridoy4/StreamNest", selectable=True),
-                    ft.TextButton(content="View on GitHub", url="https://github.com/Sarwarhridoy4/StreamNest"),
-                    ft.Divider(height=18),
-                    ft.Text("Developer", theme_style=ft.TextThemeStyle.TITLE_MEDIUM),
-                    ft.Text("Sarwar Hossain", weight=ft.FontWeight.W_500),
-                    ft.Text("https://github.com/Sarwarhridoy4", selectable=True),
-                    ft.TextButton(content="Open GitHub Profile", url="https://github.com/Sarwarhridoy4"),
-                    ft.Divider(height=18),
-                    ft.Text("Features", theme_style=ft.TextThemeStyle.TITLE_MEDIUM),
-                    ft.Text("• Single video and audio downloads (MP4/MP3)"),
-                    ft.Text("• Playlist support with item selection and range picker"),
-                    ft.Text("• Live progress tracking with speed and ETA"),
-                    ft.Text("• Download history with encrypted storage"),
-                    ft.Text("• FFmpeg auto-detection and installation"),
-                    ft.Text("• Dark and light theme support"),
+                    section_divider("Subtitles"),
+                    ft.Row(
+                        controls=[
+                            self.subtitles_checkbox,
+                            self.embed_subtitles_checkbox,
+                        ],
+                        wrap=True,
+                        spacing=8,
+                    ),
+                    ft.Row(
+                        controls=[
+                            labeled_control("Languages", self.subtitles_langs_field),
+                            labeled_control("Convert", self.convert_subs_dropdown),
+                        ],
+                        spacing=8,
+                        run_spacing=8,
+                    ),
+                    section_divider("Cookies / Proxy"),
+                    ft.Row(
+                        controls=[
+                            self.cookies_browser_dropdown,
+                            self.proxy_field,
+                        ],
+                        spacing=8,
+                        run_spacing=8,
+                    ),
+                    ft.Row(
+                        controls=[
+                            labeled_control("Cookies file", self.cookies_file_field),
+                        ],
+                        spacing=8,
+                        run_spacing=8,
+                    ),
+                    section_divider("Thumbnails"),
+                    ft.Row(
+                        controls=[
+                            self.thumbnails_checkbox,
+                            self.embed_thumbnail_checkbox,
+                        ],
+                        wrap=True,
+                        spacing=8,
+                    ),
+                    ft.Row(
+                        controls=[
+                            labeled_control("Convert", self.convert_thumbnails_dropdown),
+                        ],
+                        spacing=8,
+                        run_spacing=8,
+                    ),
+                    section_divider("Rate limit / Sleep"),
+                    ft.Row(
+                        controls=[
+                            labeled_control("Rate limit", self.rate_limit_field),
+                            labeled_control("Sleep interval", self.sleep_interval_field),
+                        ],
+                        spacing=8,
+                        run_spacing=8,
+                    ),
+                    ft.Row(
+                        controls=[
+                            labeled_control("Sleep requests", self.sleep_requests_field),
+                        ],
+                        spacing=8,
+                        run_spacing=8,
+                    ),
+                    section_divider("Download archive"),
+                    ft.Row(
+                        controls=[
+                            labeled_control("Archive file", self.download_archive_field),
+                        ],
+                        spacing=8,
+                        run_spacing=8,
+                    ),
+                    section_divider("yt-dlp engine"),
+                    ft.Row(
+                        controls=[
+                            labeled_control("Format sort", self.format_sort_field),
+                            self.update_yt_dlp_btn,
+                        ],
+                        spacing=8,
+                        run_spacing=8,
+                    ),
+                    ft.Row(
+                        controls=[
+                            self.verbose_checkbox,
+                            self.no_warnings_checkbox,
+                            self.geobypass_checkbox,
+                        ],
+                        spacing=8,
+                        run_spacing=8,
+                    ),
+                    ft.Row(
+                        controls=[
+                            labeled_control("Max downloads", self.max_downloads_field),
+                        ],
+                        spacing=8,
+                        run_spacing=8,
+                    ),
+                    ft.Row(
+                        controls=[
+                            self.playlist_reverse_checkbox,
+                            self.playlist_random_checkbox,
+                        ],
+                        spacing=8,
+                        run_spacing=8,
+                    ),
+                    ft.Row(
+                        controls=[
+                            self.embed_chapters_checkbox,
+                            self.split_chapters_checkbox,
+                            self.write_info_json_checkbox,
+                            self.write_description_checkbox,
+                            self.write_annotations_checkbox,
+                            self.add_metadata_checkbox,
+                        ],
+                        spacing=8,
+                        run_spacing=8,
+                    ),
+                    ft.Row(
+                        controls=[
+                            labeled_control("User-Agent", self.user_agent_field),
+                            labeled_control("Referer", self.referer_field),
+                            labeled_control("Socket timeout", self.socket_timeout_field),
+                        ],
+                        spacing=8,
+                        run_spacing=8,
+                    ),
+                    ft.Row(
+                        controls=[
+                            self.no_overwrites_checkbox,
+                            self.force_overwrites_checkbox,
+                            self.no_part_checkbox,
+                        ],
+                        spacing=8,
+                        run_spacing=8,
+                    ),
                 ],
-                spacing=8,
+                spacing=12,
+            ),
+        )
+        self.settings_tab_panel = ft.Container(
+            expand=True,
+            padding=16,
+            content=ft.Column(
+                controls=[
+                    ft.ResponsiveRow(
+                        controls=[
+                            ft.Container(
+                                col={"xs": 12, "sm": 11, "md": 10, "lg": 9, "xl": 8},
+                                content=self.settings_card,
+                            )
+                        ],
+                        alignment=ft.MainAxisAlignment.CENTER,
+                    ),
+                ],
+                spacing=10,
+                expand=True,
+                alignment=ft.MainAxisAlignment.CENTER,
+                scroll=ft.ScrollMode.AUTO,
             ),
         )
         self.about_tab_panel = ft.Container(
@@ -637,6 +766,7 @@ class ViewLayoutMixin:
                 ft.NavigationBarDestination(icon=ft.Icons.PLAYLIST_PLAY, label="Playlist"),
                 ft.NavigationBarDestination(icon=ft.Icons.HISTORY, label="History"),
                 ft.NavigationBarDestination(icon=ft.Icons.INFO_OUTLINE, label="About"),
+                ft.NavigationBarDestination(icon=ft.Icons.SETTINGS, label="Settings"),
             ],
         )
         self.page.navigation_bar = self.bottom_nav
