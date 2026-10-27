@@ -69,6 +69,7 @@ class DownloadMixin:
             sleep_requests=self.state.sleep_requests,
             download_archive=self.state.download_archive or None,
             format_sort=self.state.format_sort or None,
+            verbose=self.state.verbose,
         )
 
         started = self.downloader.start_download(
@@ -131,6 +132,10 @@ class DownloadMixin:
 
     def _on_format_sort_change(self, _: ft.ControlEvent) -> None:
         self.state.format_sort = (self.format_sort_field.value or "").strip()
+        self._refresh_view()
+
+    def _on_verbose_change(self, _: ft.ControlEvent) -> None:
+        self.state.verbose = bool(self.verbose_checkbox.value)
         self._refresh_view()
 
     def _on_update_yt_dlp(self, _: ft.ControlEvent) -> None:

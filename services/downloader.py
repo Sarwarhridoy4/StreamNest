@@ -46,6 +46,7 @@ class DownloadRequest:
     sleep_requests: float | None = None
     download_archive: str | None = None
     format_sort: str | None = None
+    verbose: bool = False
 
 
 @dataclass
@@ -244,6 +245,8 @@ class DownloaderService:
             opts["downloadarchive"] = request.download_archive
         if request.format_sort:
             opts["format_sort"] = request.format_sort
+        if request.verbose:
+            opts["verbose"] = True
 
         if request.mode == "audio":
             postprocessors: list[dict[str, Any]] = [

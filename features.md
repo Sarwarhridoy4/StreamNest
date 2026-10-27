@@ -113,7 +113,7 @@ controls.
 |---|---------|--------|------------------|--------------------------|
 | 7.1 | Self-update | ✅ Implemented | `yt-dlp -U` | "Update yt-dlp" button running `pip install -U yt-dlp` |
 | 7.2 | Version check | ✅ Implemented | `yt-dlp --version` | Show yt-dlp version alongside FFmpeg version |
-| 7.3 | Verbose mode | ⬜ Pending | `--verbose` | Toggle for `verbose: true` in yt-dlp opts |
+| 7.3 | Verbose mode | ✅ Implemented | `--verbose` | Toggle for `verbose: true` in yt-dlp opts |
 | 7.4 | No warnings | ⬜ Pending | `--no-warnings` | Already partly used; expose toggle |
 
 ---

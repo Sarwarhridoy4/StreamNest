@@ -178,6 +178,7 @@ class ViewLayoutMixin:
                         controls=[
                             labeled_control("Format sort", self.format_sort_field),
                             self.update_yt_dlp_btn,
+                            self.verbose_checkbox,
                         ],
                         spacing=8,
                         run_spacing=8,

@@ -124,6 +124,7 @@ class HomeView(
         self.download_archive = ""
         self.format_sort = ""
         self.yt_dlp_version = ""
+        self.verbose = False
         # Playlist progress tracking
         self.playlist_progress = 0.0
         self.playlist_speed = ""
