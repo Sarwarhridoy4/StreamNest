@@ -75,6 +75,7 @@ class DownloadMixin:
             max_downloads=self.state.max_downloads,
             playlist_reverse=self.state.playlist_reverse,
             embed_chapters=self.state.embed_chapters,
+            split_chapters=self.state.split_chapters,
         )
 
         started = self.downloader.start_download(
@@ -161,6 +162,10 @@ class DownloadMixin:
 
     def _on_embed_chapters_change(self, _: ft.ControlEvent) -> None:
         self.state.embed_chapters = bool(self.embed_chapters_checkbox.value)
+        self._refresh_view()
+
+    def _on_split_chapters_change(self, _: ft.ControlEvent) -> None:
+        self.state.split_chapters = bool(self.split_chapters_checkbox.value)
         self._refresh_view()
 
     def _on_update_yt_dlp(self, _: ft.ControlEvent) -> None:

@@ -153,6 +153,7 @@ class PlaylistMixin:
             max_downloads=self.state.max_downloads,
             playlist_reverse=self.state.playlist_reverse,
             embed_chapters=self.state.embed_chapters,
+            split_chapters=self.state.split_chapters,
         )
 
         started = self.downloader.start_download(

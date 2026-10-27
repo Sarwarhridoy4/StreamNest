@@ -22,7 +22,7 @@ feature for media archival.
 | 1.3 | Subtitle languages | ✅ Implemented | `--sub-langs` | `subtitleslangs` text field |
 | 1.4 | Subtitle format conversion | ✅ Implemented | `--convert-subs` | `convertsubs` dropdown (SRT/VTT/TTML) |
 | 1.5 | Embed chapters | ✅ Implemented | `--embed-chapters` | `FFmpegEmbedChapter` postprocessor |
-| 1.6 | Split by chapters | ⬜ Pending | `--split-chapters` | `SplitChaptersFFmpeg` postprocessor |
+| 1.6 | Split by chapters | ✅ Implemented | `--split-chapters` | `SplitChaptersFFmpeg` postprocessor |
 
 ---
 

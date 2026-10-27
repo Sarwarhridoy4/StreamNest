@@ -184,6 +184,7 @@ class ViewLayoutMixin:
                             self.max_downloads_field,
                             self.playlist_reverse_checkbox,
                             self.embed_chapters_checkbox,
+                            self.split_chapters_checkbox,
                         ],
                         spacing=8,
                         run_spacing=8,

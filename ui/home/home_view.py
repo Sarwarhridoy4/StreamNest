@@ -131,6 +131,7 @@ class HomeView(
         self.max_downloads = None
         self.playlist_reverse = False
         self.embed_chapters = False
+        self.split_chapters = False
         # Playlist progress tracking
         self.playlist_progress = 0.0
         self.playlist_speed = ""

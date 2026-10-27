@@ -52,6 +52,7 @@ class DownloadRequest:
     max_downloads: int | None = None
     playlist_reverse: bool = False
     embed_chapters: bool = False
+    split_chapters: bool = False
 
 
 @dataclass
@@ -291,6 +292,8 @@ class DownloaderService:
                 postprocessors.append({"key": "FFmpegEmbedThumbnail"})
             if request.embed_chapters:
                 postprocessors.append({"key": "FFmpegEmbedChapter"})
+            if request.split_chapters:
+                postprocessors.append({"key": "SplitChaptersFFmpeg"})
             opts.update(
                 {
                     "format": FormatExtractor.resolve_format_selector(
