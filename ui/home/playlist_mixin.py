@@ -155,6 +155,7 @@ class PlaylistMixin:
             embed_chapters=self.state.embed_chapters,
             split_chapters=self.state.split_chapters,
             write_info_json=self.state.write_info_json,
+            write_description=self.state.write_description,
         )
 
         started = self.downloader.start_download(

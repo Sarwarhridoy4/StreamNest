@@ -77,6 +77,7 @@ class DownloadMixin:
             embed_chapters=self.state.embed_chapters,
             split_chapters=self.state.split_chapters,
             write_info_json=self.state.write_info_json,
+            write_description=self.state.write_description,
         )
 
         started = self.downloader.start_download(
@@ -171,6 +172,10 @@ class DownloadMixin:
 
     def _on_write_info_json_change(self, _: ft.ControlEvent) -> None:
         self.state.write_info_json = bool(self.write_info_json_checkbox.value)
+        self._refresh_view()
+
+    def _on_write_description_change(self, _: ft.ControlEvent) -> None:
+        self.state.write_description = bool(self.write_description_checkbox.value)
         self._refresh_view()
 
     def _on_update_yt_dlp(self, _: ft.ControlEvent) -> None:

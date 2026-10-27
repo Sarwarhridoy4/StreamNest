@@ -133,6 +133,7 @@ class HomeView(
         self.embed_chapters = False
         self.split_chapters = False
         self.write_info_json = False
+        self.write_description = False
         # Playlist progress tracking
         self.playlist_progress = 0.0
         self.playlist_speed = ""

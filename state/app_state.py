@@ -97,6 +97,7 @@ class AppState:
     embed_chapters: bool = False
     split_chapters: bool = False
     write_info_json: bool = False
+    write_description: bool = False
     history: list[HistoryEntry] = field(default_factory=list)
 
     _lock: Lock = field(default_factory=Lock, init=False, repr=False)

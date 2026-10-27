@@ -54,6 +54,7 @@ class DownloadRequest:
     embed_chapters: bool = False
     split_chapters: bool = False
     write_info_json: bool = False
+    write_description: bool = False
 
 
 @dataclass
@@ -297,6 +298,8 @@ class DownloaderService:
                 postprocessors.append({"key": "SplitChaptersFFmpeg"})
             if request.write_info_json:
                 opts["writeinfojson"] = True
+            if request.write_description:
+                opts["writedescription"] = True
             opts.update(
                 {
                     "format": FormatExtractor.resolve_format_selector(
