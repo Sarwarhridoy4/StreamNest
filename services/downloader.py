@@ -51,6 +51,7 @@ class DownloadRequest:
     geobypass: bool = False
     max_downloads: int | None = None
     playlist_reverse: bool = False
+    embed_chapters: bool = False
 
 
 @dataclass
@@ -288,6 +289,8 @@ class DownloaderService:
                 postprocessors.append({"key": "FFmpegEmbedSubtitle"})
             if request.embed_thumbnail:
                 postprocessors.append({"key": "FFmpegEmbedThumbnail"})
+            if request.embed_chapters:
+                postprocessors.append({"key": "FFmpegEmbedChapter"})
             opts.update(
                 {
                     "format": FormatExtractor.resolve_format_selector(

@@ -152,6 +152,7 @@ class PlaylistMixin:
             geobypass=self.state.geobypass,
             max_downloads=self.state.max_downloads,
             playlist_reverse=self.state.playlist_reverse,
+            embed_chapters=self.state.embed_chapters,
         )
 
         started = self.downloader.start_download(

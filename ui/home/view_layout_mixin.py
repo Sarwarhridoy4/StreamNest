@@ -182,6 +182,8 @@ class ViewLayoutMixin:
                             self.no_warnings_checkbox,
                             self.geobypass_checkbox,
                             self.max_downloads_field,
+                            self.playlist_reverse_checkbox,
+                            self.embed_chapters_checkbox,
                         ],
                         spacing=8,
                         run_spacing=8,
