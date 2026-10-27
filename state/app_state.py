@@ -93,6 +93,7 @@ class AppState:
     no_warnings: bool = False
     geobypass: bool = False
     max_downloads: int | None = None
+    playlist_reverse: bool = False
     history: list[HistoryEntry] = field(default_factory=list)
 
     _lock: Lock = field(default_factory=Lock, init=False, repr=False)

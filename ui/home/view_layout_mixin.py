@@ -360,6 +360,13 @@ class ViewLayoutMixin:
                         wrap=True,
                         spacing=8,
                     ),
+                    ft.Row(
+                        controls=[
+                            self.playlist_reverse_checkbox,
+                        ],
+                        spacing=8,
+                        run_spacing=8,
+                    ),
                     section_divider("Options"),
                     ft.ResponsiveRow(
                         controls=[

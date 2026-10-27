@@ -48,7 +48,7 @@ controls.
 |---|---------|--------|------------------|--------------------------|
 | 3.1 | Playlist start index | ✅ Implemented | `--playlist-start` | `playliststart` int field |
 | 3.2 | Playlist end index | ✅ Implemented | `--playlist-end` | `playlistend` int field |
-| 3.3 | Reverse playlist order | ⬜ Pending | `--playlist-reverse` | `playlistreverse: true` checkbox |
+| 3.3 | Reverse playlist order | ✅ Implemented | `--playlist-reverse` | `playlistreverse: true` checkbox |
 | 3.4 | Random playlist order | ⬜ Pending | `--playlist-random` | `playlistrandom: true` checkbox |
 | 3.5 | Skip unavailable items | ✅ Implemented | `--skip-unavailable` | `skipunavailable: true` (pair with `ignoreerrors`) |
 | 3.6 | No abort on error | ✅ Implemented | `--no-abort-on-error` | `noabortonerror: true` |

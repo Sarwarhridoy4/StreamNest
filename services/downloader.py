@@ -50,6 +50,7 @@ class DownloadRequest:
     no_warnings: bool = False
     geobypass: bool = False
     max_downloads: int | None = None
+    playlist_reverse: bool = False
 
 
 @dataclass
@@ -256,6 +257,8 @@ class DownloaderService:
             opts["geobypass"] = True
         if request.max_downloads:
             opts["maxdownloads"] = request.max_downloads
+        if request.playlist_reverse:
+            opts["playlistreverse"] = True
 
         if request.mode == "audio":
             postprocessors: list[dict[str, Any]] = [
