@@ -84,6 +84,7 @@ class DownloadMixin:
             user_agent=self.state.user_agent or None,
             referer=self.state.referer or None,
             socket_timeout=self.state.socket_timeout,
+            no_overwrites=self.state.no_overwrites,
         )
 
         started = self.downloader.start_download(
@@ -203,6 +204,10 @@ class DownloadMixin:
 
     def _on_socket_timeout_change(self, _: ft.ControlEvent) -> None:
         self.state.socket_timeout = self._parse_optional_float(self.socket_timeout_field.value)
+        self._refresh_view()
+
+    def _on_no_overwrites_change(self, _: ft.ControlEvent) -> None:
+        self.state.no_overwrites = bool(self.no_overwrites_checkbox.value)
         self._refresh_view()
 
     def _on_update_yt_dlp(self, _: ft.ControlEvent) -> None:

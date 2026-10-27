@@ -61,6 +61,7 @@ class DownloadRequest:
     user_agent: str | None = None
     referer: str | None = None
     socket_timeout: float | None = None
+    no_overwrites: bool = False
 
 
 @dataclass
@@ -277,6 +278,10 @@ class DownloaderService:
             opts["maxdownloads"] = request.max_downloads
         if request.playlist_reverse:
             opts["playlistreverse"] = True
+        if request.socket_timeout is not None:
+            opts["socket_timeout"] = request.socket_timeout
+        if request.no_overwrites:
+            opts["nooverwrites"] = True
 
         if request.mode == "audio":
             postprocessors: list[dict[str, Any]] = [
