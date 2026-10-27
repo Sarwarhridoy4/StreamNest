@@ -70,6 +70,7 @@ class DownloadMixin:
             download_archive=self.state.download_archive or None,
             format_sort=self.state.format_sort or None,
             verbose=self.state.verbose,
+            no_warnings=self.state.no_warnings,
         )
 
         started = self.downloader.start_download(
@@ -136,6 +137,10 @@ class DownloadMixin:
 
     def _on_verbose_change(self, _: ft.ControlEvent) -> None:
         self.state.verbose = bool(self.verbose_checkbox.value)
+        self._refresh_view()
+
+    def _on_no_warnings_change(self, _: ft.ControlEvent) -> None:
+        self.state.no_warnings = bool(self.no_warnings_checkbox.value)
         self._refresh_view()
 
     def _on_update_yt_dlp(self, _: ft.ControlEvent) -> None:

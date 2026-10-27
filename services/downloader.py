@@ -47,6 +47,7 @@ class DownloadRequest:
     download_archive: str | None = None
     format_sort: str | None = None
     verbose: bool = False
+    no_warnings: bool = False
 
 
 @dataclass
@@ -247,6 +248,8 @@ class DownloaderService:
             opts["format_sort"] = request.format_sort
         if request.verbose:
             opts["verbose"] = True
+        if request.no_warnings:
+            opts["nowarnings"] = True
 
         if request.mode == "audio":
             postprocessors: list[dict[str, Any]] = [
