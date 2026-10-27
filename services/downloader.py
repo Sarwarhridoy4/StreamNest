@@ -58,6 +58,8 @@ class DownloadRequest:
     write_annotations: bool = False
     add_metadata: bool = False
     playlist_random: bool = False
+    user_agent: str | None = None
+    referer: str | None = None
 
 
 @dataclass
@@ -258,6 +260,10 @@ class DownloaderService:
             opts["downloadarchive"] = request.download_archive
         if request.format_sort:
             opts["format_sort"] = request.format_sort
+        if request.user_agent:
+            opts["useragent"] = request.user_agent
+        if request.referer:
+            opts["referer"] = request.referer
         if request.verbose:
             opts["verbose"] = True
         if request.no_warnings:

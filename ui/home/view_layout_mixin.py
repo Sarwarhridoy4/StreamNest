@@ -189,6 +189,8 @@ class ViewLayoutMixin:
                             self.write_description_checkbox,
                             self.write_annotations_checkbox,
                             self.add_metadata_checkbox,
+                            self.user_agent_field,
+                            self.referer_field,
                         ],
                         spacing=8,
                         run_spacing=8,

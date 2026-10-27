@@ -81,6 +81,8 @@ class DownloadMixin:
             write_annotations=self.state.write_annotations,
             add_metadata=self.state.add_metadata,
             playlist_random=self.state.playlist_random,
+            user_agent=self.state.user_agent or None,
+            referer=self.state.referer or None,
         )
 
         started = self.downloader.start_download(
@@ -191,6 +193,11 @@ class DownloadMixin:
 
     def _on_playlist_random_change(self, _: ft.ControlEvent) -> None:
         self.state.playlist_random = bool(self.playlist_random_checkbox.value)
+        self._refresh_view()
+
+    def _on_user_agent_referer_change(self, _: ft.ControlEvent) -> None:
+        self.state.user_agent = (self.user_agent_field.value or "").strip()
+        self.state.referer = (self.referer_field.value or "").strip()
         self._refresh_view()
 
     def _on_update_yt_dlp(self, _: ft.ControlEvent) -> None:

@@ -254,6 +254,18 @@ class ControlLayoutMixin:
             value=False,
             on_change=self._on_playlist_random_change,
         )
+        self.user_agent_field = ft.TextField(
+            label="User-Agent",
+            hint_text="Custom User-Agent string",
+            width=220,
+            on_change=self._on_user_agent_referer_change,
+        )
+        self.referer_field = ft.TextField(
+            label="Referer",
+            hint_text="Referer URL",
+            width=220,
+            on_change=self._on_user_agent_referer_change,
+        )
         self.update_yt_dlp_btn = secondary_button("Update yt-dlp", self._on_update_yt_dlp, icon=ft.Icons.UPDATE)
         self.developer_info_btn = secondary_button("About Developer", self._on_open_developer_dialog, icon=ft.Icons.INFO)
         self.back_to_welcome_btn = ft.TextButton(

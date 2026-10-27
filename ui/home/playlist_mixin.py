@@ -159,6 +159,8 @@ class PlaylistMixin:
             write_annotations=self.state.write_annotations,
             add_metadata=self.state.add_metadata,
             playlist_random=self.state.playlist_random,
+            user_agent=self.state.user_agent or None,
+            referer=self.state.referer or None,
         )
 
         started = self.downloader.start_download(
