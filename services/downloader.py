@@ -55,6 +55,7 @@ class DownloadRequest:
     split_chapters: bool = False
     write_info_json: bool = False
     write_description: bool = False
+    write_annotations: bool = False
 
 
 @dataclass
@@ -300,6 +301,8 @@ class DownloaderService:
                 opts["writeinfojson"] = True
             if request.write_description:
                 opts["writedescription"] = True
+            if request.write_annotations:
+                opts["writeannotations"] = True
             opts.update(
                 {
                     "format": FormatExtractor.resolve_format_selector(

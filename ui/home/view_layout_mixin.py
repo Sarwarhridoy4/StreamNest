@@ -187,6 +187,7 @@ class ViewLayoutMixin:
                             self.split_chapters_checkbox,
                             self.write_info_json_checkbox,
                             self.write_description_checkbox,
+                            self.write_annotations_checkbox,
                         ],
                         spacing=8,
                         run_spacing=8,
