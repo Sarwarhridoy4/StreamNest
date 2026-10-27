@@ -7,6 +7,7 @@ from ui.components import (
     build_header,
     labeled_control,
     primary_button,
+    secondary_button,
     section_divider,
     status_chip,
 )
@@ -704,6 +705,17 @@ class ViewLayoutMixin:
                             self.no_overwrites_checkbox,
                             self.force_overwrites_checkbox,
                             self.no_part_checkbox,
+                        ],
+                        spacing=8,
+                        run_spacing=8,
+                    ),
+                    ft.Row(
+                        controls=[
+                            secondary_button(
+                                "Reset settings",
+                                self._on_reset_settings,
+                                icon=ft.Icons.REFRESH,
+                            ),
                         ],
                         spacing=8,
                         run_spacing=8,
