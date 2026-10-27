@@ -229,7 +229,7 @@ classDiagram
     HistoryStore --> HistoryEntry
 ```
 
-- Project: `streamnest`, version `2.0.2`, Python `>=3.11`.
+- Project: `streamnest`, version `2.1.0`, Python `>=3.11`.
 - Runtime deps: `flet[all]>=0.82.0,<2.0.0`, `yt-dlp>=2026.3.10,<2027.0.0`, `cryptography>=45.0.0,<51.0.0`.
 - Optional: `test` (pytest, pytest-mock), `dev` (ruff, mypy).
 - Ruff: line-length 120, py311, extensive rule set (see `pyproject.toml`).

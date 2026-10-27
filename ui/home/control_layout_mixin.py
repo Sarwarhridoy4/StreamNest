@@ -185,6 +185,109 @@ class ControlLayoutMixin:
             width=220,
             on_change=self._on_archive_change,
         )
+
+        # yt-dlp format sort control
+        self.format_sort_field = ft.TextField(
+            label="Format sort",
+            hint_text="e.g. res,ext:mp4:mime, fps",
+            width=220,
+            on_change=self._on_format_sort_change,
+        )
+        self.verbose_checkbox = ft.Checkbox(
+            label="Verbose output",
+            value=False,
+            on_change=self._on_verbose_change,
+        )
+        self.no_warnings_checkbox = ft.Checkbox(
+            label="No warnings",
+            value=False,
+            on_change=self._on_no_warnings_change,
+        )
+        self.geobypass_checkbox = ft.Checkbox(
+            label="Geo bypass",
+            value=False,
+            on_change=self._on_geo_bypass_change,
+        )
+        self.max_downloads_field = ft.TextField(
+            label="Max downloads",
+            hint_text="Max number of items to download",
+            width=180,
+            on_change=self._on_max_downloads_change,
+        )
+        self.playlist_reverse_checkbox = ft.Checkbox(
+            label="Reverse playlist order",
+            value=False,
+            on_change=self._on_playlist_reverse_change,
+        )
+        self.embed_chapters_checkbox = ft.Checkbox(
+            label="Embed chapters",
+            value=False,
+            on_change=self._on_embed_chapters_change,
+        )
+        self.split_chapters_checkbox = ft.Checkbox(
+            label="Split by chapters",
+            value=False,
+            on_change=self._on_split_chapters_change,
+        )
+        self.write_info_json_checkbox = ft.Checkbox(
+            label="Write info JSON",
+            value=False,
+            on_change=self._on_write_info_json_change,
+        )
+        self.write_description_checkbox = ft.Checkbox(
+            label="Write description",
+            value=False,
+            on_change=self._on_write_description_change,
+        )
+        self.write_annotations_checkbox = ft.Checkbox(
+            label="Write annotations",
+            value=False,
+            on_change=self._on_write_annotations_change,
+        )
+        self.add_metadata_checkbox = ft.Checkbox(
+            label="Add metadata",
+            value=False,
+            on_change=self._on_add_metadata_change,
+        )
+        self.playlist_random_checkbox = ft.Checkbox(
+            label="Random playlist order",
+            value=False,
+            on_change=self._on_playlist_random_change,
+        )
+        self.user_agent_field = ft.TextField(
+            label="User-Agent",
+            hint_text="Custom User-Agent string",
+            width=220,
+            on_change=self._on_user_agent_referer_change,
+        )
+        self.referer_field = ft.TextField(
+            label="Referer",
+            hint_text="Referer URL",
+            width=220,
+            on_change=self._on_user_agent_referer_change,
+        )
+        self.socket_timeout_field = ft.TextField(
+            label="Socket timeout",
+            hint_text="Seconds before failing on unresponsive host",
+            width=180,
+            on_change=self._on_socket_timeout_change,
+        )
+        self.no_overwrites_checkbox = ft.Checkbox(
+            label="No overwrites",
+            value=False,
+            on_change=self._on_no_overwrites_change,
+        )
+        self.force_overwrites_checkbox = ft.Checkbox(
+            label="Force overwrites",
+            value=False,
+            on_change=self._on_force_overwrites_change,
+        )
+        self.no_part_checkbox = ft.Checkbox(
+            label="No .part files",
+            value=False,
+            on_change=self._on_no_part_change,
+        )
+        self.update_yt_dlp_btn = secondary_button("Update yt-dlp", self._on_update_yt_dlp, icon=ft.Icons.UPDATE)
         self.developer_info_btn = secondary_button("About Developer", self._on_open_developer_dialog, icon=ft.Icons.INFO)
         self.back_to_welcome_btn = ft.TextButton(
             content=ft.Text("Back to Welcome"),

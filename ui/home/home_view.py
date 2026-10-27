@@ -1,11 +1,12 @@
 from __future__ import annotations
 
+import contextlib
 import os
 import platform
 import subprocess
 import webbrowser
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import flet as ft
 
@@ -16,7 +17,7 @@ from services.format_extractor import (
     QualityOption,
 )
 from state.app_state import AppState
-from ui.components import ToastManager
+from ui.components import PRIMARY_COLOR, ToastManager
 from ui.home.control_layout_mixin import ControlLayoutMixin
 from ui.home.download_mixin import DownloadMixin
 from ui.home.ffmpeg_install_mixin import FfmpegInstallMixin
@@ -28,6 +29,7 @@ from ui.home.theme_manager import ThemeManager
 from ui.home.view_layout_mixin import ViewLayoutMixin
 from utils.file_manager import ensure_download_directory, resolve_download_directory
 from utils.history_store import HistoryStore
+from utils.settings_store import SettingsStore
 from utils.validators import is_valid_url
 
 if TYPE_CHECKING:
@@ -76,6 +78,9 @@ class HomeView(
         self.history_store = HistoryStore()
         self.state.set_history([])  # Start with empty history
 
+        # Initialize settings storage but defer loading
+        self.settings_store = SettingsStore()
+
     def _initialize_services(self) -> None:
         """Initialize core services for downloading and format extraction."""
         self.downloader = DownloaderService()
@@ -122,6 +127,26 @@ class HomeView(
         self.sleep_interval = None
         self.sleep_requests = None
         self.download_archive = ""
+        self.format_sort = ""
+        self.yt_dlp_version = ""
+        self.verbose = False
+        self.no_warnings = False
+        self.geobypass = False
+        self.max_downloads = None
+        self.playlist_reverse = False
+        self.embed_chapters = False
+        self.split_chapters = False
+        self.write_info_json = False
+        self.write_description = False
+        self.write_annotations = False
+        self.add_metadata = False
+        self.playlist_random = False
+        self.user_agent = ""
+        self.referer = ""
+        self.socket_timeout = None
+        self.no_overwrites = False
+        self.force_overwrites = False
+        self.no_part = False
         # Playlist progress tracking
         self.playlist_progress = 0.0
         self.playlist_speed = ""
@@ -158,6 +183,7 @@ class HomeView(
 
         # Load history and check FFmpeg asynchronously after UI is ready
         self.page.run_task(self._load_history_async)
+        self.page.run_task(self._load_settings_async)
         self.page.run_task(self._check_ffmpeg_async)
 
     def _brand_logo(self, size: int) -> ft.Image:
@@ -167,6 +193,23 @@ class HomeView(
             width=size,
             height=size,
             fit=ft.BoxFit.CONTAIN,
+        )
+
+    def _about_feature_chip(self, icon: str, label: str) -> ft.Control:
+        """Create a feature chip for the About tab."""
+        return ft.Container(
+            padding=ft.Padding.symmetric(horizontal=12, vertical=10),
+            border_radius=10,
+            border=ft.Border.all(1, ft.Colors.with_opacity(0.2, PRIMARY_COLOR)),
+            content=ft.Row(
+                controls=[
+                    ft.Icon(icon, size=18, color=PRIMARY_COLOR),
+                    ft.Container(width=8),
+                    ft.Text(label, weight=ft.FontWeight.W_500, size=13),
+                ],
+                spacing=0,
+                vertical_alignment=ft.CrossAxisAlignment.CENTER,
+            ),
         )
 
     def _get_theme_icon(self) -> str:
@@ -413,6 +456,8 @@ class HomeView(
             self.tab_host.content = self.history_tab_panel
         elif self.bottom_tab_index == 3:
             self.tab_host.content = self.about_tab_panel
+        elif self.bottom_tab_index == 4:
+            self.tab_host.content = self.settings_tab_panel
         else:
             self.tab_host.content = self.root_container
 
@@ -439,15 +484,11 @@ class HomeView(
     def _on_back_to_welcome(self, _: ft.ControlEvent) -> None:
         self.show_welcome = True
         self.bottom_tab_index = 0
-        try:
+        with contextlib.suppress(Exception):
             self.bottom_nav.selected_index = 0
-        except Exception:
-            pass
         self._set_active_panel()
-        try:
+        with contextlib.suppress(Exception):
             self.tab_host.update()
-        except Exception:
-            pass
         self._page_update()
 
     def _on_open_developer_dialog(self, _: ft.ControlEvent) -> None:
@@ -561,6 +602,103 @@ class HomeView(
         except Exception:
             # History loading failed, but don't crash the app
             pass
+
+    def _get_settings_dict(self) -> dict[str, Any]:
+        """Extract all persistable settings from AppState into a plain dict."""
+        return {
+            "subtitles_enabled": self.state.subtitles_enabled,
+            "embed_subtitles": self.state.embed_subtitles,
+            "subtitles_langs": self.state.subtitles_langs,
+            "convert_subs": self.state.convert_subs,
+            "cookies_from_browser": self.state.cookies_from_browser,
+            "cookies_file": self.state.cookies_file,
+            "proxy": self.state.proxy,
+            "thumbnails_enabled": self.state.thumbnails_enabled,
+            "embed_thumbnail": self.state.embed_thumbnail,
+            "convert_thumbnails": self.state.convert_thumbnails,
+            "playlist_start": self.state.playlist_start,
+            "playlist_end": self.state.playlist_end,
+            "skip_unavailable": self.state.skip_unavailable,
+            "no_abort_on_error": self.state.no_abort_on_error,
+            "rate_limit": self.state.rate_limit,
+            "sleep_interval": self.state.sleep_interval,
+            "sleep_requests": self.state.sleep_requests,
+            "download_archive": self.state.download_archive,
+            "format_sort": self.state.format_sort,
+            "yt_dlp_version": self.state.yt_dlp_version,
+            "verbose": self.state.verbose,
+            "no_warnings": self.state.no_warnings,
+            "geobypass": self.state.geobypass,
+            "max_downloads": self.state.max_downloads,
+            "playlist_reverse": self.state.playlist_reverse,
+            "embed_chapters": self.state.embed_chapters,
+            "split_chapters": self.state.split_chapters,
+            "write_info_json": self.state.write_info_json,
+            "write_description": self.state.write_description,
+            "write_annotations": self.state.write_annotations,
+            "add_metadata": self.state.add_metadata,
+            "playlist_random": self.state.playlist_random,
+            "user_agent": self.state.user_agent,
+            "referer": self.state.referer,
+            "socket_timeout": self.state.socket_timeout,
+            "no_overwrites": self.state.no_overwrites,
+            "force_overwrites": self.state.force_overwrites,
+            "no_part": self.state.no_part,
+        }
+
+    def _apply_settings_dict(self, settings: dict[str, Any]) -> None:
+        """Apply loaded settings dict to AppState."""
+        self.state.subtitles_enabled = bool(settings.get("subtitles_enabled", False))
+        self.state.embed_subtitles = bool(settings.get("embed_subtitles", False))
+        self.state.subtitles_langs = str(settings.get("subtitles_langs", "") or "")
+        self.state.convert_subs = str(settings.get("convert_subs", "") or "")
+        self.state.cookies_from_browser = str(settings.get("cookies_from_browser", "") or "")
+        self.state.cookies_file = str(settings.get("cookies_file", "") or "")
+        self.state.proxy = str(settings.get("proxy", "") or "")
+        self.state.thumbnails_enabled = bool(settings.get("thumbnails_enabled", False))
+        self.state.embed_thumbnail = bool(settings.get("embed_thumbnail", False))
+        self.state.convert_thumbnails = str(settings.get("convert_thumbnails", "") or "")
+        self.state.playlist_start = settings.get("playlist_start")
+        self.state.playlist_end = settings.get("playlist_end")
+        self.state.skip_unavailable = bool(settings.get("skip_unavailable", False))
+        self.state.no_abort_on_error = bool(settings.get("no_abort_on_error", False))
+        self.state.rate_limit = str(settings.get("rate_limit", "") or "")
+        self.state.sleep_interval = settings.get("sleep_interval")
+        self.state.sleep_requests = settings.get("sleep_requests")
+        self.state.download_archive = str(settings.get("download_archive", "") or "")
+        self.state.format_sort = str(settings.get("format_sort", "") or "")
+        self.state.yt_dlp_version = str(settings.get("yt_dlp_version", "") or "")
+        self.state.verbose = bool(settings.get("verbose", False))
+        self.state.no_warnings = bool(settings.get("no_warnings", False))
+        self.state.geobypass = bool(settings.get("geobypass", False))
+        self.state.max_downloads = settings.get("max_downloads")
+        self.state.playlist_reverse = bool(settings.get("playlist_reverse", False))
+        self.state.embed_chapters = bool(settings.get("embed_chapters", False))
+        self.state.split_chapters = bool(settings.get("split_chapters", False))
+        self.state.write_info_json = bool(settings.get("write_info_json", False))
+        self.state.write_description = bool(settings.get("write_description", False))
+        self.state.write_annotations = bool(settings.get("write_annotations", False))
+        self.state.add_metadata = bool(settings.get("add_metadata", False))
+        self.state.playlist_random = bool(settings.get("playlist_random", False))
+        self.state.user_agent = str(settings.get("user_agent", "") or "")
+        self.state.referer = str(settings.get("referer", "") or "")
+        self.state.socket_timeout = settings.get("socket_timeout")
+        self.state.no_overwrites = bool(settings.get("no_overwrites", False))
+        self.state.force_overwrites = bool(settings.get("force_overwrites", False))
+        self.state.no_part = bool(settings.get("no_part", False))
+
+    def _save_settings(self) -> None:
+        """Persist current settings to encrypted local storage."""
+        with contextlib.suppress(Exception):
+            self.settings_store.save(self._get_settings_dict())
+
+    async def _load_settings_async(self) -> None:
+        """Load settings in background after UI initialization."""
+        with contextlib.suppress(Exception):
+            settings = self.settings_store.load()
+            if settings:
+                self._apply_settings_dict(settings)
+                self._refresh_view()
 
     async def _check_ffmpeg_async(self) -> None:
         """Check FFmpeg availability in background after UI initialization."""

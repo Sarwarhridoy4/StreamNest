@@ -21,8 +21,8 @@ feature for media archival.
 | 1.2 | Embed subtitles in file | ✅ Implemented | `--embed-subs` | `FFmpegEmbedSubtitle` postprocessor |
 | 1.3 | Subtitle languages | ✅ Implemented | `--sub-langs` | `subtitleslangs` text field |
 | 1.4 | Subtitle format conversion | ✅ Implemented | `--convert-subs` | `convertsubs` dropdown (SRT/VTT/TTML) |
-| 1.5 | Embed chapters | ⬜ Pending | `--embed-chapters` | `FFmpegEmbedChapter` postprocessor |
-| 1.6 | Split by chapters | ⬜ Pending | `--split-chapters` | `SplitChaptersFFmpeg` postprocessor |
+| 1.5 | Embed chapters | ✅ Implemented | `--embed-chapters` | `FFmpegEmbedChapter` postprocessor |
+| 1.6 | Split by chapters | ✅ Implemented | `--split-chapters` | `SplitChaptersFFmpeg` postprocessor |
 
 ---
 
@@ -32,10 +32,10 @@ feature for media archival.
 |---|---------|--------|------------------|--------------------------|
 | 2.1 | Write thumbnail | ✅ Implemented | `--write-thumbnail` | `writethumbnail: true` in `_build_options` |
 | 2.2 | Embed thumbnail | ✅ Implemented | `--embed-thumbnail` | `FFmpegEmbedThumbnail` postprocessor |
-| 2.3 | Write info JSON | ⬜ Pending | `--write-info-json` | `writeinfojson: true` |
-| 2.4 | Write description | ⬜ Pending | `--write-description` | `writedescription: true` |
-| 2.5 | Write annotations | ⬜ Pending | `--write-annotations` | `writeannotations: true` |
-| 2.6 | Add metadata (already partial) | ⬜ Pending | `--add-metadata` | FFmpegMetadata already used; extend with `metadatafromtitle` parsing options |
+| 2.3 | Write info JSON | ✅ Implemented | `--write-info-json` | `writeinfojson: true` |
+| 2.4 | Write description | ✅ Implemented | `--write-description` | `writedescription: true` |
+| 2.5 | Write annotations | ✅ Implemented | `--write-annotations` | `writeannotations: true` |
+| 2.6 | Add metadata (already partial) | ✅ Implemented | `--add-metadata` | `addmetadata: true` |
 
 ---
 
@@ -48,11 +48,11 @@ controls.
 |---|---------|--------|------------------|--------------------------|
 | 3.1 | Playlist start index | ✅ Implemented | `--playlist-start` | `playliststart` int field |
 | 3.2 | Playlist end index | ✅ Implemented | `--playlist-end` | `playlistend` int field |
-| 3.3 | Reverse playlist order | ⬜ Pending | `--playlist-reverse` | `playlistreverse: true` checkbox |
-| 3.4 | Random playlist order | ⬜ Pending | `--playlist-random` | `playlistrandom: true` checkbox |
+| 3.3 | Reverse playlist order | ✅ Implemented | `--playlist-reverse` | `playlistreverse: true` checkbox |
+| 3.4 | Random playlist order | ✅ Implemented | `--playlist-random` | `playlistrandom: true` checkbox |
 | 3.5 | Skip unavailable items | ✅ Implemented | `--skip-unavailable` | `skipunavailable: true` (pair with `ignoreerrors`) |
 | 3.6 | No abort on error | ✅ Implemented | `--no-abort-on-error` | `noabortonerror: true` |
-| 3.7 | Max downloads | ⬜ Pending | `--max-downloads` | `maxdownloads` int field |
+| 3.7 | Max downloads | ✅ Implemented | `--max-downloads` | `maxdownloads` int field |
 | 3.8 | Download archive | ✅ Implemented | `--download-archive` | `downloadarchive` path field |
 
 ---
@@ -64,10 +64,10 @@ controls.
 | 4.1 | Cookies from browser | ✅ Implemented | `--cookies-from-browser` | `cookiesfrombrowser` dropdown |
 | 4.2 | Cookies file | ✅ Implemented | `--cookies` | `cookies` text field |
 | 4.3 | Proxy | ✅ Implemented | `--proxy` | `proxy` text field |
-| 4.4 | Geo-bypass | ⬜ Pending | `--geo-bypass` | `geobypass: true` checkbox |
+| 4.4 | Geo-bypass | ✅ Implemented | `--geo-bypass` | `geobypass: true` checkbox |
 | 4.5 | Geo verification proxy | ⬜ Pending | `--geo-verification-proxy` | `geoverificationproxy` |
-| 4.6 | User-Agent / Referer | ⬜ Pending | `--user-agent`, `--referer` | Text fields; `useragent`, `referer` |
-| 4.7 | Socket timeout | ⬜ Pending | `--socket-timeout` | Fail fast on unresponsive hosts |
+| 4.6 | User-Agent / Referer | ✅ Implemented | `--user-agent`, `--referer` | Text fields; `useragent`, `referer` |
+| 4.7 | Socket timeout | ✅ Implemented | `--socket-timeout` | Fail fast on unresponsive hosts |
 | 4.8 | Rate limit | ✅ Implemented | `--limit-rate` | Cap download speed (bandwidth) |
 | 4.9 | Sleep interval | ✅ Implemented | `--sleep-interval`, `--sleep-requests` | Sleep interval / sleep requests text fields |
 | 4.10 | Concurrent fragments | ⬜ Pending | `--concurrent-fragment-downloads` | Faster HLS/DASH fragment fetch |
@@ -109,12 +109,12 @@ controls.
 
 ## 7. yt-dlp engine management
 
-| # | Feature | yt-dlp option(s) | Why add it | Suggested implementation |
-|---|---------|------------------|------------|--------------------------|
-| 7.1 | Self-update | `yt-dlp -U` | Keep yt-dlp current for site fixes | "Update yt-dlp" button running `yt-dlp --update` via subprocess (allowlisted) |
-| 7.2 | Version check | `yt-dlp --version` | Surface engine version | Show yt-dlp version alongside FFmpeg version |
-| 7.3 | Verbose mode | `--verbose` | Debug failing extractions | Toggle for `verbose: true` in yt-dlp opts |
-| 7.4 | No warnings | `--no-warnings` | Reduce log noise | Already partly used; expose toggle |
+| # | Feature | Status | yt-dlp option(s) | Suggested implementation |
+|---|---------|--------|------------------|--------------------------|
+| 7.1 | Self-update | ✅ Implemented | `yt-dlp -U` | "Update yt-dlp" button running `pip install -U yt-dlp` |
+| 7.2 | Version check | ✅ Implemented | `yt-dlp --version` | Show yt-dlp version alongside FFmpeg version |
+| 7.3 | Verbose mode | ✅ Implemented | `--verbose` | Toggle for `verbose: true` in yt-dlp opts |
+| 7.4 | No warnings | ✅ Implemented | `--no-warnings` | Already partly used; expose toggle |
 
 ---
 

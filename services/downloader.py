@@ -45,6 +45,25 @@ class DownloadRequest:
     sleep_interval: float | None = None
     sleep_requests: float | None = None
     download_archive: str | None = None
+    format_sort: str | None = None
+    verbose: bool = False
+    no_warnings: bool = False
+    geobypass: bool = False
+    max_downloads: int | None = None
+    playlist_reverse: bool = False
+    embed_chapters: bool = False
+    split_chapters: bool = False
+    write_info_json: bool = False
+    write_description: bool = False
+    write_annotations: bool = False
+    add_metadata: bool = False
+    playlist_random: bool = False
+    user_agent: str | None = None
+    referer: str | None = None
+    socket_timeout: float | None = None
+    no_overwrites: bool = False
+    force_overwrites: bool = False
+    no_part: bool = False
 
 
 @dataclass
@@ -232,6 +251,8 @@ class DownloaderService:
                 opts["skipunavailable"] = True
             if request.no_abort_on_error:
                 opts["noabortonerror"] = True
+            if request.playlist_random:
+                opts["playlistrandom"] = True
 
         if request.rate_limit:
             opts["limit_rate"] = request.rate_limit
@@ -241,6 +262,32 @@ class DownloaderService:
             opts["sleep_requests"] = request.sleep_requests
         if request.download_archive:
             opts["downloadarchive"] = request.download_archive
+        if request.format_sort:
+            opts["format_sort"] = request.format_sort
+        if request.user_agent:
+            opts["useragent"] = request.user_agent
+        if request.referer:
+            opts["referer"] = request.referer
+        if request.socket_timeout is not None:
+            opts["socket_timeout"] = request.socket_timeout
+        if request.verbose:
+            opts["verbose"] = True
+        if request.no_warnings:
+            opts["nowarnings"] = True
+        if request.geobypass:
+            opts["geobypass"] = True
+        if request.max_downloads:
+            opts["maxdownloads"] = request.max_downloads
+        if request.playlist_reverse:
+            opts["playlistreverse"] = True
+        if request.socket_timeout is not None:
+            opts["socket_timeout"] = request.socket_timeout
+        if request.no_overwrites:
+            opts["nooverwrites"] = True
+        if request.force_overwrites:
+            opts["forceoverwrites"] = True
+        if request.no_part:
+            opts["nopart"] = True
 
         if request.mode == "audio":
             postprocessors: list[dict[str, Any]] = [
@@ -270,6 +317,18 @@ class DownloaderService:
                 postprocessors.append({"key": "FFmpegEmbedSubtitle"})
             if request.embed_thumbnail:
                 postprocessors.append({"key": "FFmpegEmbedThumbnail"})
+            if request.embed_chapters:
+                postprocessors.append({"key": "FFmpegEmbedChapter"})
+            if request.split_chapters:
+                postprocessors.append({"key": "SplitChaptersFFmpeg"})
+            if request.write_info_json:
+                opts["writeinfojson"] = True
+            if request.write_description:
+                opts["writedescription"] = True
+            if request.write_annotations:
+                opts["writeannotations"] = True
+            if request.add_metadata:
+                opts["addmetadata"] = True
             opts.update(
                 {
                     "format": FormatExtractor.resolve_format_selector(
@@ -281,6 +340,37 @@ class DownloaderService:
             )
 
         return opts
+
+    @staticmethod
+    def get_yt_dlp_version() -> str | None:
+        """Return installed yt-dlp version string, or None if unavailable."""
+        try:
+            version = yt_dlp.version.__version__
+        except Exception:
+            return None
+        else:
+            return version
+
+    def update_yt_dlp(self) -> tuple[bool, str]:
+        """Self-update yt-dlp via pip. Returns (success, message)."""
+        pip_path = shutil.which("pip")
+        if not pip_path:
+            return False, "pip not found; cannot update yt-dlp."
+        try:
+            result = subprocess.run(  # noqa: S603 - pip_path resolved from system, not user input
+                [pip_path, "install", "-U", "yt-dlp"],
+                capture_output=True,
+                text=True,
+                timeout=120,
+                check=False,
+            )
+            if result.returncode == 0:
+                return True, "yt-dlp updated successfully."
+            return False, f"yt-dlp update failed: {result.stderr.strip() or result.stdout.strip()}"
+        except subprocess.TimeoutExpired:
+            return False, "yt-dlp update timed out."
+        except Exception as exc:
+            return False, f"yt-dlp update error: {exc}"
 
     @staticmethod
     def _emit_log(on_log: LogCallback | None, message: str) -> None:

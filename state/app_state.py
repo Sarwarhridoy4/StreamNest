@@ -87,6 +87,26 @@ class AppState:
     sleep_interval: float | None = None
     sleep_requests: float | None = None
     download_archive: str = ""
+    format_sort: str = ""
+    yt_dlp_version: str = ""
+    verbose: bool = False
+    no_warnings: bool = False
+    geobypass: bool = False
+    max_downloads: int | None = None
+    playlist_reverse: bool = False
+    embed_chapters: bool = False
+    split_chapters: bool = False
+    write_info_json: bool = False
+    write_description: bool = False
+    write_annotations: bool = False
+    add_metadata: bool = False
+    playlist_random: bool = False
+    user_agent: str = ""
+    referer: str = ""
+    socket_timeout: float | None = None
+    no_overwrites: bool = False
+    force_overwrites: bool = False
+    no_part: bool = False
     history: list[HistoryEntry] = field(default_factory=list)
 
     _lock: Lock = field(default_factory=Lock, init=False, repr=False)

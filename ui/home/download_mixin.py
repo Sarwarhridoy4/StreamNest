@@ -68,6 +68,25 @@ class DownloadMixin:
             sleep_interval=self.state.sleep_interval,
             sleep_requests=self.state.sleep_requests,
             download_archive=self.state.download_archive or None,
+            format_sort=self.state.format_sort or None,
+            verbose=self.state.verbose,
+            no_warnings=self.state.no_warnings,
+            geobypass=self.state.geobypass,
+            max_downloads=self.state.max_downloads,
+            playlist_reverse=self.state.playlist_reverse,
+            embed_chapters=self.state.embed_chapters,
+            split_chapters=self.state.split_chapters,
+            write_info_json=self.state.write_info_json,
+            write_description=self.state.write_description,
+            write_annotations=self.state.write_annotations,
+            add_metadata=self.state.add_metadata,
+            playlist_random=self.state.playlist_random,
+            user_agent=self.state.user_agent or None,
+            referer=self.state.referer or None,
+            socket_timeout=self.state.socket_timeout,
+            no_overwrites=self.state.no_overwrites,
+            force_overwrites=self.state.force_overwrites,
+            no_part=self.state.no_part,
         )
 
         started = self.downloader.start_download(
@@ -96,18 +115,21 @@ class DownloadMixin:
         self.state.subtitles_langs = (self.subtitles_langs_field.value or "").strip()
         self.state.convert_subs = self.convert_subs_dropdown.value or ""
         self._refresh_view()
+        self._save_settings()
 
     def _on_cookies_proxy_change(self, _: ft.ControlEvent) -> None:
         self.state.cookies_from_browser = self.cookies_browser_dropdown.value or ""
         self.state.cookies_file = (self.cookies_file_field.value or "").strip()
         self.state.proxy = (self.proxy_field.value or "").strip()
         self._refresh_view()
+        self._save_settings()
 
     def _on_thumbnails_change(self, _: ft.ControlEvent) -> None:
         self.state.thumbnails_enabled = bool(self.thumbnails_checkbox.value)
         self.state.embed_thumbnail = bool(self.embed_thumbnail_checkbox.value)
         self.state.convert_thumbnails = self.convert_thumbnails_dropdown.value or ""
         self._refresh_view()
+        self._save_settings()
 
     def _on_playlist_options_change(self, _: ft.ControlEvent) -> None:
         start = self._parse_positive_int(self.playlist_start_field.value)
@@ -117,16 +139,201 @@ class DownloadMixin:
         self.state.skip_unavailable = bool(self.skip_unavailable_checkbox.value)
         self.state.no_abort_on_error = bool(self.no_abort_on_error_checkbox.value)
         self._refresh_view()
+        self._save_settings()
 
     def _on_rate_limit_sleep_change(self, _: ft.ControlEvent) -> None:
         self.state.rate_limit = (self.rate_limit_field.value or "").strip()
         self.state.sleep_interval = self._parse_optional_float(self.sleep_interval_field.value)
         self.state.sleep_requests = self._parse_optional_float(self.sleep_requests_field.value)
         self._refresh_view()
+        self._save_settings()
 
     def _on_archive_change(self, _: ft.ControlEvent) -> None:
         self.state.download_archive = (self.download_archive_field.value or "").strip()
         self._refresh_view()
+        self._save_settings()
+
+    def _on_format_sort_change(self, _: ft.ControlEvent) -> None:
+        self.state.format_sort = (self.format_sort_field.value or "").strip()
+        self._refresh_view()
+        self._save_settings()
+
+    def _on_verbose_change(self, _: ft.ControlEvent) -> None:
+        self.state.verbose = bool(self.verbose_checkbox.value)
+        self._refresh_view()
+        self._save_settings()
+
+    def _on_no_warnings_change(self, _: ft.ControlEvent) -> None:
+        self.state.no_warnings = bool(self.no_warnings_checkbox.value)
+        self._refresh_view()
+        self._save_settings()
+
+    def _on_geo_bypass_change(self, _: ft.ControlEvent) -> None:
+        self.state.geobypass = bool(self.geobypass_checkbox.value)
+        self._refresh_view()
+        self._save_settings()
+
+    def _on_max_downloads_change(self, _: ft.ControlEvent) -> None:
+        self.state.max_downloads = self._parse_positive_int(self.max_downloads_field.value)
+        self._refresh_view()
+        self._save_settings()
+
+    def _on_playlist_reverse_change(self, _: ft.ControlEvent) -> None:
+        self.state.playlist_reverse = bool(self.playlist_reverse_checkbox.value)
+        self._refresh_view()
+        self._save_settings()
+
+    def _on_embed_chapters_change(self, _: ft.ControlEvent) -> None:
+        self.state.embed_chapters = bool(self.embed_chapters_checkbox.value)
+        self._refresh_view()
+        self._save_settings()
+
+    def _on_split_chapters_change(self, _: ft.ControlEvent) -> None:
+        self.state.split_chapters = bool(self.split_chapters_checkbox.value)
+        self._refresh_view()
+        self._save_settings()
+
+    def _on_write_info_json_change(self, _: ft.ControlEvent) -> None:
+        self.state.write_info_json = bool(self.write_info_json_checkbox.value)
+        self._refresh_view()
+        self._save_settings()
+
+    def _on_write_description_change(self, _: ft.ControlEvent) -> None:
+        self.state.write_description = bool(self.write_description_checkbox.value)
+        self._refresh_view()
+        self._save_settings()
+
+    def _on_write_annotations_change(self, _: ft.ControlEvent) -> None:
+        self.state.write_annotations = bool(self.write_annotations_checkbox.value)
+        self._refresh_view()
+        self._save_settings()
+
+    def _on_add_metadata_change(self, _: ft.ControlEvent) -> None:
+        self.state.add_metadata = bool(self.add_metadata_checkbox.value)
+        self._refresh_view()
+        self._save_settings()
+
+    def _on_playlist_random_change(self, _: ft.ControlEvent) -> None:
+        self.state.playlist_random = bool(self.playlist_random_checkbox.value)
+        self._refresh_view()
+        self._save_settings()
+
+    def _on_user_agent_referer_change(self, _: ft.ControlEvent) -> None:
+        self.state.user_agent = (self.user_agent_field.value or "").strip()
+        self.state.referer = (self.referer_field.value or "").strip()
+        self._refresh_view()
+        self._save_settings()
+
+    def _on_socket_timeout_change(self, _: ft.ControlEvent) -> None:
+        self.state.socket_timeout = self._parse_optional_float(self.socket_timeout_field.value)
+        self._refresh_view()
+        self._save_settings()
+
+    def _on_no_overwrites_change(self, _: ft.ControlEvent) -> None:
+        self.state.no_overwrites = bool(self.no_overwrites_checkbox.value)
+        self._refresh_view()
+        self._save_settings()
+
+    def _on_force_overwrites_change(self, _: ft.ControlEvent) -> None:
+        self.state.force_overwrites = bool(self.force_overwrites_checkbox.value)
+        self._refresh_view()
+        self._save_settings()
+
+    def _on_no_part_change(self, _: ft.ControlEvent) -> None:
+        self.state.no_part = bool(self.no_part_checkbox.value)
+        self._refresh_view()
+        self._save_settings()
+
+    def _on_reset_settings(self, _: ft.ControlEvent) -> None:
+        """Reset all settings to defaults and persist."""
+        self.state.subtitles_enabled = False
+        self.state.embed_subtitles = False
+        self.state.subtitles_langs = ""
+        self.state.convert_subs = ""
+        self.state.cookies_from_browser = ""
+        self.state.cookies_file = ""
+        self.state.proxy = ""
+        self.state.thumbnails_enabled = False
+        self.state.embed_thumbnail = False
+        self.state.convert_thumbnails = ""
+        self.state.playlist_start = None
+        self.state.playlist_end = None
+        self.state.skip_unavailable = False
+        self.state.no_abort_on_error = False
+        self.state.rate_limit = ""
+        self.state.sleep_interval = None
+        self.state.sleep_requests = None
+        self.state.download_archive = ""
+        self.state.format_sort = ""
+        self.state.yt_dlp_version = ""
+        self.state.verbose = False
+        self.state.no_warnings = False
+        self.state.geobypass = False
+        self.state.max_downloads = None
+        self.state.playlist_reverse = False
+        self.state.embed_chapters = False
+        self.state.split_chapters = False
+        self.state.write_info_json = False
+        self.state.write_description = False
+        self.state.write_annotations = False
+        self.state.add_metadata = False
+        self.state.playlist_random = False
+        self.state.user_agent = ""
+        self.state.referer = ""
+        self.state.socket_timeout = None
+        self.state.no_overwrites = False
+        self.state.force_overwrites = False
+        self.state.no_part = False
+
+        # Reflect defaults back into UI controls where available
+        self.subtitles_checkbox.value = False
+        self.embed_subtitles_checkbox.value = False
+        self.subtitles_langs_field.value = ""
+        self.convert_subs_dropdown.value = ""
+        self.cookies_browser_dropdown.value = ""
+        self.cookies_file_field.value = ""
+        self.proxy_field.value = ""
+        self.thumbnails_checkbox.value = False
+        self.embed_thumbnail_checkbox.value = False
+        self.convert_thumbnails_dropdown.value = ""
+        self.playlist_start_field.value = ""
+        self.playlist_end_field.value = ""
+        self.skip_unavailable_checkbox.value = False
+        self.no_abort_on_error_checkbox.value = False
+        self.rate_limit_field.value = ""
+        self.sleep_interval_field.value = ""
+        self.sleep_requests_field.value = ""
+        self.download_archive_field.value = ""
+        self.format_sort_field.value = ""
+        self.verbose_checkbox.value = False
+        self.no_warnings_checkbox.value = False
+        self.geobypass_checkbox.value = False
+        self.max_downloads_field.value = ""
+        self.playlist_reverse_checkbox.value = False
+        self.playlist_random_checkbox.value = False
+        self.embed_chapters_checkbox.value = False
+        self.split_chapters_checkbox.value = False
+        self.write_info_json_checkbox.value = False
+        self.write_description_checkbox.value = False
+        self.write_annotations_checkbox.value = False
+        self.add_metadata_checkbox.value = False
+        self.user_agent_field.value = ""
+        self.referer_field.value = ""
+        self.socket_timeout_field.value = ""
+        self.no_overwrites_checkbox.value = False
+        self.force_overwrites_checkbox.value = False
+        self.no_part_checkbox.value = False
+
+        self._save_settings()
+        self._refresh_view()
+        self._set_status("Settings reset to defaults.")
+
+    def _on_update_yt_dlp(self, _: ft.ControlEvent) -> None:
+        success, message = self.downloader.update_yt_dlp()
+        self.state.yt_dlp_version = self.downloader.get_yt_dlp_version() or ""
+        self._set_status("yt-dlp updated successfully." if success else message)
+        self._refresh_view()
+        self._save_settings()
 
     @staticmethod
     def _parse_optional_float(value: str | None) -> float | None:

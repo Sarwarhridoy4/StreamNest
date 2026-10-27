@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import traceback
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -118,10 +119,8 @@ def main(page: ft.Page) -> None:
     page.padding = 0
 
     # Set window icon for desktop builds
-    try:
+    with contextlib.suppress(Exception):
         page.window_icon = ICON_PATH
-    except Exception:
-        pass
 
     platform_name = str(getattr(page, "platform", "")).lower()
     is_desktop = any(name in platform_name for name in ("windows", "linux", "macos"))

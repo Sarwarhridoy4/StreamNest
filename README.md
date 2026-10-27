@@ -206,6 +206,54 @@ python main.py
 6. Choose quality and save folder.
 7. Click **Download Selected**.
 
+### Advanced yt-dlp Engine Options
+
+StreamNest exposes advanced yt-dlp options in the **yt-dlp engine** section of the left panel. These give fine-grained control over download behavior, output files, metadata, and network requests. They apply to both single and playlist downloads.
+
+#### Playlist Controls
+
+- **Reverse playlist order** — Download playlist items in reverse order (`--playlist-reverse`).
+- **Random playlist order** — Download playlist items in random order (`--playlist-random`).
+
+#### Output Control
+
+- **No overwrites** — Skip files that already exist (`--no-overwrites`).
+- **Force overwrites** — Replace existing files (`--force-overwrites`).
+- **No `.part` files** — Write directly to the final filename instead of using `.part` temp files (`--no-part`).
+
+#### Download Management
+
+- **Max downloads** — Limit the number of items downloaded (`--max-downloads`). Enter a positive integer.
+- **Socket timeout** — Fail fast on unresponsive hosts by setting a socket timeout in seconds (`--socket-timeout`). Enter a number (e.g. `30`).
+
+#### Metadata & Sidecar Files
+
+- **Write info JSON** — Save video metadata to a `.info.json` sidecar file (`--write-info-json`).
+- **Write description** — Save the video description to a `.description` sidecar file (`--write-description`).
+- **Write annotations** — Save annotations to a sidecar file (`--write-annotations`).
+- **Add metadata** — Embed metadata into the downloaded media file (`--add-metadata`).
+
+#### Subtitles & Chapters
+
+- **Embed chapters** — Embed chapter markers into the output file (`--embed-chapters`).
+- **Split by chapters** — Split the media into separate files at chapter boundaries (`--split-chapters`).
+
+#### Network & Auth
+
+- **User-Agent** — Send a custom User-Agent string (`--user-agent`). Enter a custom UA string.
+- **Referer** — Send a custom Referer header (`--referer`). Enter a URL.
+
+#### Engine Output
+
+- **Verbose output** — Show detailed yt-dlp debug output in the yt-dlp log (`--verbose`).
+- **No warnings** — Suppress yt-dlp warning messages (`--no-warnings`).
+
+#### Geo
+
+- **Geo bypass** — Bypass geographic restrictions (`--geo-bypass`).
+
+> **Note:** Chapter-related options (embed-chapters, split-chapters) and metadata embedding require FFmpeg to be installed. See [FFmpeg Setup](#ffmpeg-setup).
+
 ### Welcome and Theme Behavior
 
 1. App starts on the **Welcome** screen.
