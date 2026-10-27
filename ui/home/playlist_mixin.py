@@ -161,6 +161,7 @@ class PlaylistMixin:
             playlist_random=self.state.playlist_random,
             user_agent=self.state.user_agent or None,
             referer=self.state.referer or None,
+            socket_timeout=self.state.socket_timeout,
         )
 
         started = self.downloader.start_download(

@@ -191,6 +191,7 @@ class ViewLayoutMixin:
                             self.add_metadata_checkbox,
                             self.user_agent_field,
                             self.referer_field,
+                            self.socket_timeout_field,
                         ],
                         spacing=8,
                         run_spacing=8,

@@ -83,6 +83,7 @@ class DownloadMixin:
             playlist_random=self.state.playlist_random,
             user_agent=self.state.user_agent or None,
             referer=self.state.referer or None,
+            socket_timeout=self.state.socket_timeout,
         )
 
         started = self.downloader.start_download(
@@ -198,6 +199,10 @@ class DownloadMixin:
     def _on_user_agent_referer_change(self, _: ft.ControlEvent) -> None:
         self.state.user_agent = (self.user_agent_field.value or "").strip()
         self.state.referer = (self.referer_field.value or "").strip()
+        self._refresh_view()
+
+    def _on_socket_timeout_change(self, _: ft.ControlEvent) -> None:
+        self.state.socket_timeout = self._parse_optional_float(self.socket_timeout_field.value)
         self._refresh_view()
 
     def _on_update_yt_dlp(self, _: ft.ControlEvent) -> None:

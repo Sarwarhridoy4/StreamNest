@@ -67,7 +67,7 @@ controls.
 | 4.4 | Geo-bypass | ✅ Implemented | `--geo-bypass` | `geobypass: true` checkbox |
 | 4.5 | Geo verification proxy | ⬜ Pending | `--geo-verification-proxy` | `geoverificationproxy` |
 | 4.6 | User-Agent / Referer | ✅ Implemented | `--user-agent`, `--referer` | Text fields; `useragent`, `referer` |
-| 4.7 | Socket timeout | ⬜ Pending | `--socket-timeout` | Fail fast on unresponsive hosts |
+| 4.7 | Socket timeout | ✅ Implemented | `--socket-timeout` | Fail fast on unresponsive hosts |
 | 4.8 | Rate limit | ✅ Implemented | `--limit-rate` | Cap download speed (bandwidth) |
 | 4.9 | Sleep interval | ✅ Implemented | `--sleep-interval`, `--sleep-requests` | Sleep interval / sleep requests text fields |
 | 4.10 | Concurrent fragments | ⬜ Pending | `--concurrent-fragment-downloads` | Faster HLS/DASH fragment fetch |

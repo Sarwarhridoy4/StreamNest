@@ -103,6 +103,7 @@ class AppState:
     playlist_random: bool = False
     user_agent: str = ""
     referer: str = ""
+    socket_timeout: float | None = None
     history: list[HistoryEntry] = field(default_factory=list)
 
     _lock: Lock = field(default_factory=Lock, init=False, repr=False)

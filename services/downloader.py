@@ -60,6 +60,7 @@ class DownloadRequest:
     playlist_random: bool = False
     user_agent: str | None = None
     referer: str | None = None
+    socket_timeout: float | None = None
 
 
 @dataclass
@@ -264,6 +265,8 @@ class DownloaderService:
             opts["useragent"] = request.user_agent
         if request.referer:
             opts["referer"] = request.referer
+        if request.socket_timeout is not None:
+            opts["socket_timeout"] = request.socket_timeout
         if request.verbose:
             opts["verbose"] = True
         if request.no_warnings:
