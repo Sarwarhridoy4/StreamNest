@@ -56,6 +56,7 @@ class DownloadRequest:
     write_info_json: bool = False
     write_description: bool = False
     write_annotations: bool = False
+    add_metadata: bool = False
 
 
 @dataclass
@@ -303,6 +304,8 @@ class DownloaderService:
                 opts["writedescription"] = True
             if request.write_annotations:
                 opts["writeannotations"] = True
+            if request.add_metadata:
+                opts["addmetadata"] = True
             opts.update(
                 {
                     "format": FormatExtractor.resolve_format_selector(

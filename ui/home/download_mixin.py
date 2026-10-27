@@ -79,6 +79,7 @@ class DownloadMixin:
             write_info_json=self.state.write_info_json,
             write_description=self.state.write_description,
             write_annotations=self.state.write_annotations,
+            add_metadata=self.state.add_metadata,
         )
 
         started = self.downloader.start_download(
@@ -181,6 +182,10 @@ class DownloadMixin:
 
     def _on_write_annotations_change(self, _: ft.ControlEvent) -> None:
         self.state.write_annotations = bool(self.write_annotations_checkbox.value)
+        self._refresh_view()
+
+    def _on_add_metadata_change(self, _: ft.ControlEvent) -> None:
+        self.state.add_metadata = bool(self.add_metadata_checkbox.value)
         self._refresh_view()
 
     def _on_update_yt_dlp(self, _: ft.ControlEvent) -> None:

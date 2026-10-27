@@ -157,6 +157,7 @@ class PlaylistMixin:
             write_info_json=self.state.write_info_json,
             write_description=self.state.write_description,
             write_annotations=self.state.write_annotations,
+            add_metadata=self.state.add_metadata,
         )
 
         started = self.downloader.start_download(

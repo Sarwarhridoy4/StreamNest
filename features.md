@@ -35,7 +35,7 @@ feature for media archival.
 | 2.3 | Write info JSON | ✅ Implemented | `--write-info-json` | `writeinfojson: true` |
 | 2.4 | Write description | ✅ Implemented | `--write-description` | `writedescription: true` |
 | 2.5 | Write annotations | ✅ Implemented | `--write-annotations` | `writeannotations: true` |
-| 2.6 | Add metadata (already partial) | ⬜ Pending | `--add-metadata` | FFmpegMetadata already used; extend with `metadatafromtitle` parsing options |
+| 2.6 | Add metadata (already partial) | ✅ Implemented | `--add-metadata` | `addmetadata: true` |
 
 ---
 

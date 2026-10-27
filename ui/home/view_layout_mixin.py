@@ -188,6 +188,7 @@ class ViewLayoutMixin:
                             self.write_info_json_checkbox,
                             self.write_description_checkbox,
                             self.write_annotations_checkbox,
+                            self.add_metadata_checkbox,
                         ],
                         spacing=8,
                         run_spacing=8,
