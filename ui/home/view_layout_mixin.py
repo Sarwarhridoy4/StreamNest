@@ -194,6 +194,7 @@ class ViewLayoutMixin:
                             self.socket_timeout_field,
                             self.no_overwrites_checkbox,
                             self.force_overwrites_checkbox,
+                            self.no_part_checkbox,
                         ],
                         spacing=8,
                         run_spacing=8,

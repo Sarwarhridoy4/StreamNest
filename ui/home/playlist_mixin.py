@@ -164,6 +164,7 @@ class PlaylistMixin:
             socket_timeout=self.state.socket_timeout,
             no_overwrites=self.state.no_overwrites,
             force_overwrites=self.state.force_overwrites,
+            no_part=self.state.no_part,
         )
 
         started = self.downloader.start_download(

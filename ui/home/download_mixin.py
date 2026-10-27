@@ -86,6 +86,7 @@ class DownloadMixin:
             socket_timeout=self.state.socket_timeout,
             no_overwrites=self.state.no_overwrites,
             force_overwrites=self.state.force_overwrites,
+            no_part=self.state.no_part,
         )
 
         started = self.downloader.start_download(
@@ -213,6 +214,10 @@ class DownloadMixin:
 
     def _on_force_overwrites_change(self, _: ft.ControlEvent) -> None:
         self.state.force_overwrites = bool(self.force_overwrites_checkbox.value)
+        self._refresh_view()
+
+    def _on_no_part_change(self, _: ft.ControlEvent) -> None:
+        self.state.no_part = bool(self.no_part_checkbox.value)
         self._refresh_view()
 
     def _on_update_yt_dlp(self, _: ft.ControlEvent) -> None:
