@@ -5,10 +5,41 @@ All notable changes to this project are documented in this file.
 ## [Unreleased]
 
 ### Added
+- Settings tab with organized yt-dlp engine options panel (Subtitles, Cookies/Proxy, Thumbnails, Rate limit/Sleep, Download archive, yt-dlp engine)
+- Redesigned modern professional About tab with version badge, feature chips, and links grid
+- Socket timeout option (`--socket-timeout`)
+- No overwrites option (`--no-overwrites`)
+- Force overwrites option (`--force-overwrites`)
+- No `.part` files option (`--no-part`)
+
+## [2.1.0] - 2026-10-27
+
+### Added
 - Subtitle download and embed support (`writesubtitles`, `subtitleslangs`, `convertsubs`, `FFmpegEmbedSubtitle`)
 - Subtitle UI controls: download/embed checkboxes, languages field, convert format dropdown
 - Cookies from browser/file and proxy support (`cookiesfrombrowser`, `cookies`, `proxy`)
 - Cookies/proxy UI controls: browser dropdown, cookies file field, proxy field
+- Rate limit and sleep interval support (`limit_rate`, `sleep_interval`, `sleep_requests`)
+- Rate limit/sleep UI controls: rate limit, sleep interval, sleep requests fields
+- Download archive support (`downloadarchive`) with sequential download queue
+- Download archive UI control: archive file field
+- yt-dlp self-update and version display (`get_yt_dlp_version()`, `update_yt_dlp()`)
+- Format sort option (`format_sort`) with UI field and Update yt-dlp button
+- Verbose output toggle (`verbose`)
+- No warnings toggle (`nowarnings`)
+- Geo bypass toggle (`geobypass`)
+- Max downloads field (`maxdownloads`)
+- Reverse playlist order toggle (`playlistreverse`)
+- Random playlist order toggle (`playlistrandom`)
+- Embed chapters postprocessor (`FFmpegEmbedChapter`)
+- Split by chapters postprocessor (`SplitChaptersFFmpeg`)
+- Write info JSON sidecar (`writeinfojson`)
+- Write description sidecar (`writedescription`)
+- Write annotations sidecar (`writeannotations`)
+- Add metadata option (`addmetadata`)
+- User-Agent field (`useragent`)
+- Referer field (`referer`)
+- User-Agent / Referer UI controls
 
 ### Fixed
 - History feature breaks in packaged/installed builds due to read-only application directory.
@@ -21,7 +52,7 @@ All notable changes to this project are documented in this file.
 - Robust `ffmpeg -version` detection with timeout, error classification, and minimum version check.
 - FFmpeg minimum version threshold (`4.0.0`) enforced during detection.
 - FFmpeg diagnostic API exposing human-readable failure reasons (not in PATH, crash, timeout, old version).
-- `is_ffmpeg_version_sufficient()` and `get_ffmpeg_version()` helpers in `FFmpegUtils`.
+- `is_ffmpeg_version_sufficient()` and `get_yt_dlp_version()` helpers.
 
 ### Changed
 - FFmpeg warning text is always visible; uses green text when detected and red text when missing.
@@ -29,6 +60,8 @@ All notable changes to this project are documented in this file.
 - `FFmpeg::is_ffmpeg_missing()` now validates actual `ffmpeg -version` execution instead of only `shutil.which`.
 - `DownloaderService._detect_ffmpeg_dir()` now runs `ffmpeg -version` before accepting a binary directory.
 - FFmpeg re-check flow prefers version display over generic install hint when FFmpeg is found.
+- All yt-dlp engine options moved from Single screen left panel to dedicated Settings tab.
+- About tab redesigned with professional hero header, feature chips, and links grid.
 
 ### Fixed
 - Flet splash-screen `RuntimeError` caused by updating a control before it was attached to the page.

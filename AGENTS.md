@@ -6,7 +6,7 @@
 
 **Author:** Sarwar Hossain (Sarwarhridoy4)
 **Repo:** https://github.com/Sarwarhridoy4/StreamNest
-**Current version:** 2.0.3
+**Current version:** 2.1.0
 **Python:** 3.11+
 
 ---

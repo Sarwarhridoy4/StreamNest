@@ -448,7 +448,7 @@ class ViewLayoutMixin:
                                     text_align=ft.TextAlign.CENTER,
                                 ),
                                 ft.Text(
-                                    "v2.0.3",
+                                    "v2.1.0",
                                     color=ft.Colors.ON_SURFACE_VARIANT,
                                     text_align=ft.TextAlign.CENTER,
                                 ),

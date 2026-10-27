@@ -7,7 +7,7 @@ PACKAGE_NAME="streamnest"
 EXECUTABLE="streamnest"
 DESCRIPTION="Desktop media downloader built with Flet and yt-dlp"
 MAINTAINER="${MAINTAINER:-StreamNest Team <support@streamnest.app>}"
-VERSION="2.0.3"
+VERSION="2.1.0"
 ARCH="amd64"
 VERBOSE=0
 
