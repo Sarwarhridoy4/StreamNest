@@ -141,6 +141,7 @@ class HomeView(
         self.referer = ""
         self.socket_timeout = None
         self.no_overwrites = False
+        self.force_overwrites = False
         # Playlist progress tracking
         self.playlist_progress = 0.0
         self.playlist_speed = ""

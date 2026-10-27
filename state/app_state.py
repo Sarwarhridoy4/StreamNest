@@ -105,6 +105,7 @@ class AppState:
     referer: str = ""
     socket_timeout: float | None = None
     no_overwrites: bool = False
+    force_overwrites: bool = False
     history: list[HistoryEntry] = field(default_factory=list)
 
     _lock: Lock = field(default_factory=Lock, init=False, repr=False)

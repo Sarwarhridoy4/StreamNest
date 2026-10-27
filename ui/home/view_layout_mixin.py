@@ -193,6 +193,7 @@ class ViewLayoutMixin:
                             self.referer_field,
                             self.socket_timeout_field,
                             self.no_overwrites_checkbox,
+                            self.force_overwrites_checkbox,
                         ],
                         spacing=8,
                         run_spacing=8,

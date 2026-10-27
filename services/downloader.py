@@ -62,6 +62,7 @@ class DownloadRequest:
     referer: str | None = None
     socket_timeout: float | None = None
     no_overwrites: bool = False
+    force_overwrites: bool = False
 
 
 @dataclass
@@ -282,6 +283,8 @@ class DownloaderService:
             opts["socket_timeout"] = request.socket_timeout
         if request.no_overwrites:
             opts["nooverwrites"] = True
+        if request.force_overwrites:
+            opts["forceoverwrites"] = True
 
         if request.mode == "audio":
             postprocessors: list[dict[str, Any]] = [
