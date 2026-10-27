@@ -370,6 +370,7 @@ class ViewLayoutMixin:
                     ft.Row(
                         controls=[
                             self.playlist_reverse_checkbox,
+                            self.playlist_random_checkbox,
                         ],
                         spacing=8,
                         run_spacing=8,

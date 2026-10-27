@@ -80,6 +80,7 @@ class DownloadMixin:
             write_description=self.state.write_description,
             write_annotations=self.state.write_annotations,
             add_metadata=self.state.add_metadata,
+            playlist_random=self.state.playlist_random,
         )
 
         started = self.downloader.start_download(
@@ -186,6 +187,10 @@ class DownloadMixin:
 
     def _on_add_metadata_change(self, _: ft.ControlEvent) -> None:
         self.state.add_metadata = bool(self.add_metadata_checkbox.value)
+        self._refresh_view()
+
+    def _on_playlist_random_change(self, _: ft.ControlEvent) -> None:
+        self.state.playlist_random = bool(self.playlist_random_checkbox.value)
         self._refresh_view()
 
     def _on_update_yt_dlp(self, _: ft.ControlEvent) -> None:

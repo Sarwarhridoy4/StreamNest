@@ -57,6 +57,7 @@ class DownloadRequest:
     write_description: bool = False
     write_annotations: bool = False
     add_metadata: bool = False
+    playlist_random: bool = False
 
 
 @dataclass
@@ -244,6 +245,8 @@ class DownloaderService:
                 opts["skipunavailable"] = True
             if request.no_abort_on_error:
                 opts["noabortonerror"] = True
+            if request.playlist_random:
+                opts["playlistrandom"] = True
 
         if request.rate_limit:
             opts["limit_rate"] = request.rate_limit

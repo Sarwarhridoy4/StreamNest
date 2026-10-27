@@ -136,6 +136,7 @@ class HomeView(
         self.write_description = False
         self.write_annotations = False
         self.add_metadata = False
+        self.playlist_random = False
         # Playlist progress tracking
         self.playlist_progress = 0.0
         self.playlist_speed = ""

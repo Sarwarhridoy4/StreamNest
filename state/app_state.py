@@ -100,6 +100,7 @@ class AppState:
     write_description: bool = False
     write_annotations: bool = False
     add_metadata: bool = False
+    playlist_random: bool = False
     history: list[HistoryEntry] = field(default_factory=list)
 
     _lock: Lock = field(default_factory=Lock, init=False, repr=False)
