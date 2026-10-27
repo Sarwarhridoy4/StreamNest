@@ -178,20 +178,57 @@ class ViewLayoutMixin:
                         controls=[
                             labeled_control("Format sort", self.format_sort_field),
                             self.update_yt_dlp_btn,
+                        ],
+                        spacing=8,
+                        run_spacing=8,
+                    ),
+                    ft.Row(
+                        controls=[
                             self.verbose_checkbox,
                             self.no_warnings_checkbox,
                             self.geobypass_checkbox,
-                            self.max_downloads_field,
+                        ],
+                        spacing=8,
+                        run_spacing=8,
+                    ),
+                    ft.Row(
+                        controls=[
+                            labeled_control("Max downloads", self.max_downloads_field),
+                        ],
+                        spacing=8,
+                        run_spacing=8,
+                    ),
+                    ft.Row(
+                        controls=[
                             self.playlist_reverse_checkbox,
+                            self.playlist_random_checkbox,
+                        ],
+                        spacing=8,
+                        run_spacing=8,
+                    ),
+                    ft.Row(
+                        controls=[
                             self.embed_chapters_checkbox,
                             self.split_chapters_checkbox,
                             self.write_info_json_checkbox,
                             self.write_description_checkbox,
                             self.write_annotations_checkbox,
                             self.add_metadata_checkbox,
-                            self.user_agent_field,
-                            self.referer_field,
-                            self.socket_timeout_field,
+                        ],
+                        spacing=8,
+                        run_spacing=8,
+                    ),
+                    ft.Row(
+                        controls=[
+                            labeled_control("User-Agent", self.user_agent_field),
+                            labeled_control("Referer", self.referer_field),
+                            labeled_control("Socket timeout", self.socket_timeout_field),
+                        ],
+                        spacing=8,
+                        run_spacing=8,
+                    ),
+                    ft.Row(
+                        controls=[
                             self.no_overwrites_checkbox,
                             self.force_overwrites_checkbox,
                             self.no_part_checkbox,
