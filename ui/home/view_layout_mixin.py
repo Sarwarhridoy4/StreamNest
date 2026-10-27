@@ -181,6 +181,7 @@ class ViewLayoutMixin:
                             self.verbose_checkbox,
                             self.no_warnings_checkbox,
                             self.geobypass_checkbox,
+                            self.max_downloads_field,
                         ],
                         spacing=8,
                         run_spacing=8,

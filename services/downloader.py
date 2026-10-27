@@ -49,6 +49,7 @@ class DownloadRequest:
     verbose: bool = False
     no_warnings: bool = False
     geobypass: bool = False
+    max_downloads: int | None = None
 
 
 @dataclass
@@ -253,6 +254,8 @@ class DownloaderService:
             opts["nowarnings"] = True
         if request.geobypass:
             opts["geobypass"] = True
+        if request.max_downloads:
+            opts["maxdownloads"] = request.max_downloads
 
         if request.mode == "audio":
             postprocessors: list[dict[str, Any]] = [

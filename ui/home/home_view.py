@@ -127,6 +127,7 @@ class HomeView(
         self.verbose = False
         self.no_warnings = False
         self.geobypass = False
+        self.max_downloads = None
         # Playlist progress tracking
         self.playlist_progress = 0.0
         self.playlist_speed = ""

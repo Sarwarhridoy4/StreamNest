@@ -52,7 +52,7 @@ controls.
 | 3.4 | Random playlist order | ⬜ Pending | `--playlist-random` | `playlistrandom: true` checkbox |
 | 3.5 | Skip unavailable items | ✅ Implemented | `--skip-unavailable` | `skipunavailable: true` (pair with `ignoreerrors`) |
 | 3.6 | No abort on error | ✅ Implemented | `--no-abort-on-error` | `noabortonerror: true` |
-| 3.7 | Max downloads | ⬜ Pending | `--max-downloads` | `maxdownloads` int field |
+| 3.7 | Max downloads | ✅ Implemented | `--max-downloads` | `maxdownloads` int field |
 | 3.8 | Download archive | ✅ Implemented | `--download-archive` | `downloadarchive` path field |
 
 ---

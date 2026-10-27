@@ -72,6 +72,7 @@ class DownloadMixin:
             verbose=self.state.verbose,
             no_warnings=self.state.no_warnings,
             geobypass=self.state.geobypass,
+            max_downloads=self.state.max_downloads,
         )
 
         started = self.downloader.start_download(
@@ -146,6 +147,10 @@ class DownloadMixin:
 
     def _on_geo_bypass_change(self, _: ft.ControlEvent) -> None:
         self.state.geobypass = bool(self.geobypass_checkbox.value)
+        self._refresh_view()
+
+    def _on_max_downloads_change(self, _: ft.ControlEvent) -> None:
+        self.state.max_downloads = self._parse_positive_int(self.max_downloads_field.value)
         self._refresh_view()
 
     def _on_update_yt_dlp(self, _: ft.ControlEvent) -> None:

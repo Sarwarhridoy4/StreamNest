@@ -150,6 +150,7 @@ class PlaylistMixin:
             verbose=self.state.verbose,
             no_warnings=self.state.no_warnings,
             geobypass=self.state.geobypass,
+            max_downloads=self.state.max_downloads,
         )
 
         started = self.downloader.start_download(

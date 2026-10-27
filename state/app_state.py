@@ -92,6 +92,7 @@ class AppState:
     verbose: bool = False
     no_warnings: bool = False
     geobypass: bool = False
+    max_downloads: int | None = None
     history: list[HistoryEntry] = field(default_factory=list)
 
     _lock: Lock = field(default_factory=Lock, init=False, repr=False)
