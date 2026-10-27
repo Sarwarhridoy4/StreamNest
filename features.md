@@ -64,7 +64,7 @@ controls.
 | 4.1 | Cookies from browser | ✅ Implemented | `--cookies-from-browser` | `cookiesfrombrowser` dropdown |
 | 4.2 | Cookies file | ✅ Implemented | `--cookies` | `cookies` text field |
 | 4.3 | Proxy | ✅ Implemented | `--proxy` | `proxy` text field |
-| 4.4 | Geo-bypass | ⬜ Pending | `--geo-bypass` | `geobypass: true` checkbox |
+| 4.4 | Geo-bypass | ✅ Implemented | `--geo-bypass` | `geobypass: true` checkbox |
 | 4.5 | Geo verification proxy | ⬜ Pending | `--geo-verification-proxy` | `geoverificationproxy` |
 | 4.6 | User-Agent / Referer | ⬜ Pending | `--user-agent`, `--referer` | Text fields; `useragent`, `referer` |
 | 4.7 | Socket timeout | ⬜ Pending | `--socket-timeout` | Fail fast on unresponsive hosts |

@@ -149,6 +149,7 @@ class PlaylistMixin:
             format_sort=self.state.format_sort or None,
             verbose=self.state.verbose,
             no_warnings=self.state.no_warnings,
+            geobypass=self.state.geobypass,
         )
 
         started = self.downloader.start_download(

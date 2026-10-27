@@ -91,6 +91,7 @@ class AppState:
     yt_dlp_version: str = ""
     verbose: bool = False
     no_warnings: bool = False
+    geobypass: bool = False
     history: list[HistoryEntry] = field(default_factory=list)
 
     _lock: Lock = field(default_factory=Lock, init=False, repr=False)

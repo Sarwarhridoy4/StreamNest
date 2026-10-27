@@ -48,6 +48,7 @@ class DownloadRequest:
     format_sort: str | None = None
     verbose: bool = False
     no_warnings: bool = False
+    geobypass: bool = False
 
 
 @dataclass
@@ -250,6 +251,8 @@ class DownloaderService:
             opts["verbose"] = True
         if request.no_warnings:
             opts["nowarnings"] = True
+        if request.geobypass:
+            opts["geobypass"] = True
 
         if request.mode == "audio":
             postprocessors: list[dict[str, Any]] = [

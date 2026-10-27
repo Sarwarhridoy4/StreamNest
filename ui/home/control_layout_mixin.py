@@ -203,6 +203,11 @@ class ControlLayoutMixin:
             value=False,
             on_change=self._on_no_warnings_change,
         )
+        self.geobypass_checkbox = ft.Checkbox(
+            label="Geo bypass",
+            value=False,
+            on_change=self._on_geo_bypass_change,
+        )
         self.update_yt_dlp_btn = secondary_button("Update yt-dlp", self._on_update_yt_dlp, icon=ft.Icons.UPDATE)
         self.developer_info_btn = secondary_button("About Developer", self._on_open_developer_dialog, icon=ft.Icons.INFO)
         self.back_to_welcome_btn = ft.TextButton(
