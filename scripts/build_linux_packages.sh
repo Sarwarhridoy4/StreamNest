@@ -80,6 +80,15 @@ have_command() {
   command -v "$1" >/dev/null 2>&1
 }
 
+# Resolve the home directory of the user who invoked sudo (or the current
+# user when not under sudo). Under sudo, HOME is reset to the target user's
+# home (typically /root), so we look up SUDO_USER to find the real user's
+# home where tools like uv/flet are installed via pipx (~/.local/bin).
+real_user_home() {
+  local user="${SUDO_USER:-$USER}"
+  getent passwd "$user" 2>/dev/null | cut -d: -f6
+}
+
 setup_colors() {
   if [[ -t 1 ]] && have_command tput && [[ "$(tput colors 2>/dev/null || echo 0)" -ge 8 ]]; then
     C_RESET="$(tput sgr0)"
@@ -240,8 +249,14 @@ ensure_python_tools() {
     exit 1
   fi
 
+  local user_home
+  user_home="$(real_user_home)"
+  [[ -z "$user_home" ]] && user_home="${HOME:-}"
+
   if [[ -x "$ROOT_DIR/.venv/bin/uv" ]]; then
     UV_BIN="$ROOT_DIR/.venv/bin/uv"
+  elif [[ -x "$user_home/.local/bin/uv" ]]; then
+    UV_BIN="$user_home/.local/bin/uv"
   elif have_command uv; then
     UV_BIN="uv"
   else
@@ -448,8 +463,15 @@ if command -v flet >/dev/null 2>&1; then
 elif [[ -x "$ROOT_DIR/.venv/bin/flet" ]]; then
   FLET_BIN="$ROOT_DIR/.venv/bin/flet"
 else
-  log_error "'flet' not found in PATH and '$ROOT_DIR/.venv/bin/flet' does not exist."
-  exit 1
+  local flet_user_home
+  flet_user_home="$(real_user_home)"
+  [[ -z "$flet_user_home" ]] && flet_user_home="${HOME:-}"
+  if [[ -x "$flet_user_home/.local/bin/flet" ]]; then
+    FLET_BIN="$flet_user_home/.local/bin/flet"
+  else
+    log_error "'flet' not found in PATH and '$ROOT_DIR/.venv/bin/flet' does not exist."
+    exit 1
+  fi
 fi
 
 log_ok "Using Flet binary: $FLET_BIN"
