@@ -61,12 +61,12 @@ class HomeView(
         self._initialize_core_state()
         self._initialize_services()
 
-        # Check yt-dlp version and log
-        self._check_ytdlp_version()
-
         # Initialize UI state and platform-specific properties
         self._initialize_ui_state()
         self._initialize_ffmpeg_state()
+
+        # Check yt-dlp version and log (requires self.ytdlp_logs from ffmpeg state init)
+        self._check_ytdlp_version()
 
         # Setup platform theme listener and initial UI
         self.theme_manager.setup_theme_listener()
