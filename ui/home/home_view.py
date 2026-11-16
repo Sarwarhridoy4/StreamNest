@@ -61,6 +61,9 @@ class HomeView(
         self._initialize_core_state()
         self._initialize_services()
 
+        # Check yt-dlp version and log
+        self._check_ytdlp_version()
+
         # Initialize UI state and platform-specific properties
         self._initialize_ui_state()
         self._initialize_ffmpeg_state()
@@ -171,7 +174,17 @@ class HomeView(
         self.ffmpeg_install_logs: list[str] = []
         self.ytdlp_logs: list[str] = []
 
-    # Theme listener setup is now handled by ThemeManager
+    def _check_ytdlp_version(self) -> None:
+        """Check yt-dlp version and store it in state."""
+        try:
+            import yt_dlp
+            version = yt_dlp.version.__version__
+            self.state.yt_dlp_version = version
+            self.ytdlp_logs.append(f"yt-dlp version {version} loaded successfully.")
+            self._page_update()
+        except Exception as exc:
+            self.ytdlp_logs.append(f"Failed to load yt-dlp: {exc}")
+            self._page_update()
 
     def _initialize_ui_components(self) -> None:
         """Initialize and configure all UI components and apply initial theming."""
@@ -319,7 +332,7 @@ class HomeView(
                 # Try xdg-open first (most standard approach)
                 try:
                     result = subprocess.run(  # noqa: S603
-                        ["xdg-open", folder],  # noqa: S607
+                        ["xdg-open", folder],  # nargs: S607
                         capture_output=True,
                         text=True,
                         timeout=5,
@@ -582,6 +595,10 @@ class HomeView(
         self.playlist_current_file_text.value = self.playlist_current_file or "-"
         self.playlist_speed_text.value = self.playlist_speed or "-"
         self.playlist_eta_text.value = self.playlist_eta or "-"
+
+        # Show yt-dlp version in settings or status
+        if hasattr(self, "ytdlp_version_text"):
+            self.ytdlp_version_text.value = f"yt-dlp v{self.state.yt_dlp_version}" if self.state.yt_dlp_version else "yt-dlp version unknown"
 
         self._render_history()
         self._page_update()
